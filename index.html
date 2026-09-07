@@ -359,6 +359,33 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
   100%{opacity:0;transform:translateX(130%) skewX(-12deg)}
 }
 
+/* ================= 更多瞬间（上传图片） ================= */
+.g-card.custom .art{background-size:cover;background-position:center}
+.g-card .del{position:absolute;top:12px;right:12px;z-index:3;width:32px;height:32px;border-radius:50%;
+  background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.3);font-size:14px;line-height:1;
+  display:grid;place-items:center;opacity:0;transition:.3s;cursor:pointer;backdrop-filter:blur(4px)}
+.g-card.custom:hover .del{opacity:1}
+.g-card .del:hover{background:rgba(220,60,60,.8);transform:rotate(90deg)}
+#momentModal{position:fixed;inset:0;z-index:97;background:color-mix(in srgb,var(--bg) 60%,transparent);backdrop-filter:blur(6px);
+  display:grid;place-items:center;opacity:0;visibility:hidden;transition:.3s}
+#momentModal.open{opacity:1;visibility:visible}
+.moment-box{width:min(420px,92vw);background:var(--surface);border:1px solid var(--line2);border-radius:18px;
+  box-shadow:var(--shadow);padding:22px;transform:translateY(14px);transition:transform .3s var(--ease)}
+#momentModal.open .moment-box{transform:none}
+.moment-box h3{font-size:17px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.moment-preview{width:100%;height:170px;border-radius:12px;border:1px solid var(--line);background-size:cover;background-position:center;margin-bottom:14px}
+.moment-box label{display:block;font-size:12px;color:var(--text3);margin:10px 0 6px;letter-spacing:.08em}
+.moment-box input[type=text]{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:10px;
+  padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:.3s}
+.moment-box input[type=text]:focus{border-color:var(--a1)}
+.moment-btns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.moment-btns button{padding:10px 22px;border-radius:100px;font-size:13.5px;cursor:pointer;transition:.3s;font-family:inherit}
+.mb-cancel{background:none;border:1px solid var(--line2);color:var(--text2)}
+.mb-cancel:hover{color:var(--text);border-color:var(--text3)}
+.mb-ok{background:var(--grad);border:none;color:#fff;font-weight:700}
+.mb-ok:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.moment-count-tip{font-size:12px;color:var(--text3);margin-top:12px}
+
 /* ================= 文章阅读器 ================= */
 #reader{position:fixed;inset:0;z-index:95;background:var(--bg);opacity:0;visibility:hidden;transition:opacity .45s var(--ease),visibility .45s}
 #reader.open{opacity:1;visibility:visible}
@@ -774,7 +801,7 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
   </div>
   <div class="copy-foot" data-page-node-id="4FAXlfMgDGfJNaYioVcXPB">
     <span data-page-node-id="y3vs49MTr1jMs1tCdP115w">© 2026 Breeze. 手写于某个有风的夜晚。</span>
-    <span data-page-node-id="jACFhVWYziXl2Fp2DGBwty">小彩蛋：试着连续输入 "breeze" 🍃</span>
+    <span data-page-node-id="jACFhVWYziXl2Fp2DGBwty">小彩蛋：试着连续输入 "breeze" 🍃 · <a href="/admin.html" style="color:var(--text3);text-decoration:none;border-bottom:1px dashed var(--line2)">站点管理</a></span>
   </div>
 </footer>
 
@@ -803,6 +830,24 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 更多瞬间：文件选择 + 添加弹窗 -->
+<input type="file" id="momentFile" accept="image/*" multiple hidden>
+<div id="momentModal" aria-hidden="true">
+  <div class="moment-box">
+    <h3>📸 收藏这个瞬间</h3>
+    <div class="moment-preview" id="momentPreview"></div>
+    <label for="momentTag">小标签（如 MORNING / RAIN）</label>
+    <input type="text" id="momentTag" maxlength="16" placeholder="MOMENT" value="MOMENT">
+    <label for="momentTitle">写几个字，记下这一刻</label>
+    <input type="text" id="momentTitle" maxlength="30" placeholder="比如：下班路上看到的粉色晚霞">
+    <div class="moment-btns">
+      <button class="mb-cancel" id="momentCancel">取消</button>
+      <button class="mb-ok" id="momentOk">添加 ✦</button>
+    </div>
+    <div class="moment-count-tip" id="momentTip"></div>
   </div>
 </div>
 
@@ -873,7 +918,7 @@ measure(); window.addEventListener("resize", measure);
 if(finePointer && !reduced){
   window.addEventListener("wheel", function(e){
     /* 阅读器 / 搜索面板打开时，滚轮交给它们自己 */
-    if(e.target.closest && e.target.closest("#reader, #searchPanel")) return;
+    if(e.target.closest && e.target.closest("#reader, #searchPanel, #momentModal")) return;
     e.preventDefault();
     var d = e.deltaY;
     if(e.deltaMode === 1) d *= 33;
@@ -1027,7 +1072,7 @@ function render(){
     var dist = gTrack.scrollWidth - innerWidth + 60;
     if(dist > 0) gTrack.style.transform = "translate3d(" + (-gp * dist).toFixed(1) + "px,0,0) skewX(" + (skew * .4).toFixed(2) + "deg)";
     gBar.style.width = (gp * 100) + "%";
-    gPct.textContent = "0" + Math.max(1, Math.round(1 + gp * 6)) + " / 07";
+    gPct.textContent = ("0" + Math.max(1, Math.round(1 + gp * (gTotal - 1)))).slice(-2) + " / " + ("0" + gTotal).slice(-2);
   }
 
   /* 时间线填充 */
@@ -1205,6 +1250,7 @@ document.getElementById("copyEmail").addEventListener("click", function(){
   else{ toast("邮箱：" + email); }
 });
 document.querySelectorAll(".g-card").forEach(function(c){
+  if(c.classList.contains("art-more") || c.classList.contains("custom")) return; /* 有自己的交互 */
   c.addEventListener("click", function(){ toast("📷 每一张切片背后都有一个小故事"); });
 });
 var badge = document.getElementById("badge");
@@ -1355,6 +1401,7 @@ document.addEventListener("keydown", function(e){
   }
   if(e.key === "Escape"){
     if(searchPanel.classList.contains("open")) closeSearch();
+    else if(momModal.classList.contains("open")) closeMomentModal();
     else if(readerOpen) closeReader();
     return;
   }
@@ -1373,6 +1420,147 @@ document.addEventListener("keydown", function(e){
     }
   }
 });
+
+/* ================= 更多瞬间：上传图片 + 自定义文字 ================= */
+var MOM_KEY = "breeze-moments";
+var momModal = document.getElementById("momentModal");
+var momFile = document.getElementById("momentFile");
+var momPreview = document.getElementById("momentPreview");
+var momTag = document.getElementById("momentTag");
+var momTitle = document.getElementById("momentTitle");
+var momTip = document.getElementById("momentTip");
+var moreCard = document.querySelector(".g-card.art-more");
+var gTotal = gTrack.querySelectorAll(".g-card").length;
+var momQueue = [], momCurrent = null;
+
+function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function pad2(n){ return ("0" + n).slice(-2); }
+function loadMoments(){ try{ return JSON.parse(localStorage.getItem(MOM_KEY)) || []; }catch(e){ return []; } }
+function saveMoments(arr){
+  try{ localStorage.setItem(MOM_KEY, JSON.stringify(arr)); return true; }
+  catch(e){ toast("⚠️ 浏览器本地空间不够了，这张图只在本次浏览有效"); return false; }
+}
+function refreshGCount(){
+  gTotal = gTrack.querySelectorAll(".g-card").length;
+  measureMq();
+}
+/* 图片压缩：长边压到 1280、JPEG 82%，省 localStorage 空间 */
+function compressImage(file, cb){
+  var img = new Image(), url = URL.createObjectURL(file);
+  img.onload = function(){
+    var max = 1280, sc = Math.min(1, max / Math.max(img.width, img.height));
+    var cv = document.createElement("canvas");
+    cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(url);
+    cb(cv.toDataURL("image/jpeg", .82));
+  };
+  img.onerror = function(){ URL.revokeObjectURL(url); toast("这张图读不出来，已跳过"); cb(null); };
+  img.src = url;
+}
+function makeMomentCard(m){
+  var card = document.createElement("div");
+  card.className = "g-card custom";
+  card.innerHTML = '<div class="art" style="background-image:url(' + m.img + ')"></div>'
+    + '<span class="idx">--</span><div class="cap"><em>' + escHtml(m.tag) + '</em><h4>' + escHtml(m.title) + '</h4></div>'
+    + '<button class="del" title="删除这张瞬间">✕</button>';
+  card.addEventListener("click", function(){ toast("📷 一张值得收藏的瞬间"); });
+  card.querySelector(".del").addEventListener("click", function(e){
+    e.stopPropagation();
+    var arr = loadMoments();
+    var i = arr.indexOf(m);
+    if(i > -1){ arr.splice(i, 1); saveMoments(arr); }
+    card.remove(); renumberMoments(); refreshGCount(); toast("瞬间已删除 🍂");
+  });
+  return card;
+}
+function renumberMoments(){
+  var base = gTrack.querySelectorAll(".g-card:not(.custom):not(.art-more)").length;
+  gTrack.querySelectorAll(".g-card.custom").forEach(function(c, i){
+    c.querySelector(".idx").textContent = pad2(base + i + 1);
+  });
+}
+function renderMoments(){
+  var base = gTrack.querySelectorAll(".g-card:not(.custom):not(.art-more)").length;
+  loadMoments().forEach(function(m, i){
+    var card = makeMomentCard(m);
+    card.querySelector(".idx").textContent = pad2(base + i + 1);
+    gTrack.insertBefore(card, moreCard);
+  });
+  refreshGCount();
+}
+function openMomentModal(){
+  momModal.classList.add("open");
+  momModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  target = window.scrollY;
+  momTag.focus();
+}
+function closeMomentModal(){
+  momModal.classList.remove("open");
+  momModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  momQueue = []; momCurrent = null;
+}
+function nextInQueue(){
+  if(!momQueue.length){ closeMomentModal(); return; }
+  momCurrent = momQueue.shift();
+  momPreview.style.backgroundImage = "url(" + momCurrent.img + ")";
+  momTag.value = "MOMENT";
+  momTitle.value = "";
+  momTip.textContent = momQueue.length ? "还有 " + momQueue.length + " 张排队中，保存后继续下一张" : "";
+  openMomentModal();
+}
+moreCard.addEventListener("click", function(){ momFile.click(); });
+momFile.addEventListener("change", function(){
+  var files = Array.prototype.slice.call(momFile.files || []);
+  momFile.value = "";
+  if(!files.length) return;
+  var remaining = files.length;
+  files.forEach(function(f){
+    compressImage(f, function(dataUrl){
+      if(dataUrl) momQueue.push({ img: dataUrl, tag: "MOMENT", title: "" });
+      remaining--;
+      if(remaining === 0 && momQueue.length) nextInQueue();
+      else if(remaining === 0) toast("没有可用的图片");
+    });
+  });
+});
+document.getElementById("momentOk").addEventListener("click", function(){
+  if(!momCurrent) return;
+  var title = momTitle.value.trim() || "未命名瞬间";
+  var tag = (momTag.value.trim() || "MOMENT").toUpperCase();
+  var m = { img: momCurrent.img, tag: tag, title: title };
+  var arr = loadMoments();
+  arr.push(m);
+  if(saveMoments(arr)){
+    var card = makeMomentCard(m);
+    gTrack.insertBefore(card, moreCard);
+    renumberMoments(); refreshGCount();
+    toast("已收进生活切片 🌿");
+  }
+  nextInQueue();
+});
+document.getElementById("momentCancel").addEventListener("click", closeMomentModal);
+momModal.addEventListener("click", function(e){ if(e.target === momModal) closeMomentModal(); });
+momTitle.addEventListener("keydown", function(e){ if(e.key === "Enter") document.getElementById("momentOk").click(); });
+renderMoments();
+
+/* ================= 本机访问记录（后台管理页数据源） ================= */
+try{
+  if(!sessionStorage.getItem("breeze-visited")){
+    sessionStorage.setItem("breeze-visited", "1");
+    var vlog = JSON.parse(localStorage.getItem("breeze-visits") || "[]");
+    vlog.push({
+      d: new Date().toISOString().slice(0, 10),
+      t: Date.now(),
+      ref: document.referrer || "直达",
+      vp: location.pathname
+    });
+    if(vlog.length > 500) vlog = vlog.slice(-500);
+    localStorage.setItem("breeze-visits", JSON.stringify(vlog));
+  }
+}catch(e){}
 
 /* ================= 运行天数 / 时段问候 / 标签页彩蛋 ================= */
 var SITE_BIRTH = new Date(2023, 5, 1); /* 建站日：2023.06.01 */
