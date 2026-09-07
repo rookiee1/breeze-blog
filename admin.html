@@ -292,7 +292,7 @@ function renderAll(){
 function tryGate(){
   var k = $("gatePwd").value.trim();
   if(!k){ $("gateErr").textContent = "密钥不能为空"; return; }
-  if(!API_BASE){ $("gateErr").textContent = "云端后端尚未接入，稍后再试"; return; }
+  if(!API_BASE){ $("gateErr").textContent = "正在连接云端，1 秒后再试"; return; }
   saveKey(k);
   fetch(API_BASE + "/api/stats", { headers: { "X-Admin-Key": k } })
     .then(function(r){ return r.json(); })
@@ -323,17 +323,34 @@ $("btnExport").addEventListener("click", function(){
   });
 });
 
-/* ---------- 启动 ---------- */
-if(!API_BASE){
-  setPill("off", "⚠️ 云端后端尚未接入（等待 Worker 部署）");
-  document.querySelector("#gate p").textContent = "云端后端尚未接入，暂时无法登录。";
+/* ---------- 启动：智能探测（同源优先，workers.dev 兜底） ---------- */
+var WORKER_URL = "https://breeze-api.breeze-96424a.workers.dev";
+function onAPIReady(){
+  setPill("on", "云端已连接");
+  document.querySelector("#gate p").innerHTML = "输入管理密钥，查看全网真实访问数据和云端瞬间。<br>密钥只保存在本机浏览器里。";
+  if(getKey()){
+    fetch(API_BASE + "/api/stats", { headers: { "X-Admin-Key": getKey() } })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(j && j.ok){ unlock(); } else { saveKey(""); } })
+      .catch(function(){});
+  }
 }
-if(getKey() && API_BASE){
-  fetch(API_BASE + "/api/stats", { headers: { "X-Admin-Key": getKey() } })
-    .then(function(r){ return r.json(); })
-    .then(function(j){ if(j && j.ok){ unlock(); } else { saveKey(""); } })
-    .catch(function(){});
-}
+(function probeAPI(){
+  var candidates = ["", WORKER_URL];
+  var i = 0;
+  function next(){
+    if(i >= candidates.length){
+      setPill("off", "⚠️ 云端后端连接失败");
+      document.querySelector("#gate p").textContent = "暂时连不上云端后端，请稍后刷新重试。";
+      return;
+    }
+    var base = candidates[i++];
+    fetch(base + "/api/health", { method: "POST" }).then(function(r){ return r.json(); }).then(function(j){
+      if(j && j.ok){ API_BASE = base; onAPIReady(); } else next();
+    }).catch(next);
+  }
+  next();
+})();
 $("gatePwd").focus();
 })();
 </script>
