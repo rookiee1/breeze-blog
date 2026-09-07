@@ -54,6 +54,8 @@ body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
   border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);transition:.3s var(--ease)}
 .quick a:hover{opacity:1;transform:translateY(-3px)}
 body.sky-day .quick a{border-color:rgba(20,40,70,.2)}
+.quick a.frenemy{border-style:dashed;transform:rotate(-1.6deg)}
+.quick a.frenemy:hover{transform:translateY(-3px) rotate(1.6deg);border-color:#c9a7ff}
 .wx{position:fixed;top:22px;right:26px;font-size:12.5px;opacity:.7;display:flex;align-items:center;gap:8px}
 .credit{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:11.5px;opacity:.5}
 .credit a{color:inherit}
@@ -89,6 +91,7 @@ body.sky-day .quick a{border-color:rgba(20,40,70,.2)}
   <a href="/">🍃 博客</a>
   <a href="/admin.html">📊 后台</a>
   <a href="/tools/wuwa-gacha.html">🎯 抽卡分析</a>
+  <a class="frenemy" id="doveLink" href="https://dove.best" target="_blank" rel="noopener noreferrer"></a>
 </div>
 <div class="credit">会呼吸的导航页 · 来自 <a href="/">Breeze</a> · 浏览器设置里把启动页/主页设为本链接即可每日使用</div>
 
@@ -205,6 +208,34 @@ document.getElementById("sForm").addEventListener("submit", function(e){
   var q = document.getElementById("sInput").value.trim();
   if(q) location.href = ENG_URL[ENG] + encodeURIComponent(q);
 });
+
+/* ============ 死党链接（每次随机整活） ============ */
+var DOVE_LABELS = [
+  "🕊️ 不友情链接",
+  "🕊️ 隔壁鸽子窝",
+  "🕊️ 友情链接（不友好的那种）",
+  "🕊️ 亦敌亦友 · 咕咕咕",
+  "🕊️ 今日赶超目标",
+  "🕊️ 竞争对手 · 请轻踩",
+  "🕊️ 查看敌方动态",
+  "🕊️ 风吹不到的那家",
+  "🕊️ 对面那位 · 蹲一个更新",
+  "🕊️ 死党老巢 · 侵入提醒"
+];
+var DOVE_TIPS = [
+  "点进去给他个浏览量，回来我们继续卷",
+  "友情提示：他的风没有我们的大",
+  "本链接不消耗友情值，放心点",
+  "据说他也在做导航页……有点慌",
+  "嘘——我们正在偷偷超越他",
+  "每日一比 · 今日胜负未出",
+  "咕咕咕是鸽子发来的求和信号"
+];
+(function(){
+  var a = document.getElementById("doveLink");
+  a.textContent = DOVE_LABELS[Math.floor(Math.random() * DOVE_LABELS.length)];
+  a.title = DOVE_TIPS[Math.floor(Math.random() * DOVE_TIPS.length)];
+})();
 
 /* ============ 呼吸粒子（按天气+时段） ============ */
 var cv = document.getElementById("wind"), x = cv.getContext("2d");
