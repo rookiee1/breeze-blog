@@ -165,17 +165,28 @@ function syncChips(sel, val){
     c.classList.toggle("on", c.getAttribute("data-" + (sel === "#wxMan" ? "wx" : "eng")) === val);
   });
 }
+function applyModeUI(){
+  var mode = effMode();
+  document.body.classList.toggle("rainy", mode === "rain");
+  document.body.classList.toggle("cloudy", mode === "cloud");
+}
+var WX_ICON = {clear:"☀️", cloud:"⛅", rain:"🌧️", snow:"❄️"};
 document.querySelectorAll("#wxMan .chip").forEach(function(c){
   c.addEventListener("click", function(){
     WX_MODE = c.getAttribute("data-wx");
     try{ localStorage.setItem("breath-wx", WX_MODE); }catch(e){}
     syncChips("#wxMan", WX_MODE);
-    var txt = WX_MODE === "auto" ? "已恢复自动感知" : "已切换：" + WX_NAME[WX_MODE];
-    document.getElementById("wx").textContent = (WX_MODE === "auto" ? document.getElementById("wx").textContent.split("（")[0] : icon + " " + txt);
-    if(WX_MODE !== "auto") document.getElementById("wx").textContent = {clear:"☀️",cloud:"⛅",rain:"🌧️",snow:"❄️"}[WX_MODE] + " " + WX_NAME[WX_MODE] + "（手动）";
+    if(WX_MODE === "auto"){
+      document.getElementById("wx").textContent = "🔄 自动感知中…";
+      tryGeo();
+    } else {
+      document.getElementById("wx").textContent = WX_ICON[WX_MODE] + " " + WX_NAME[WX_MODE] + "（手动）";
+    }
+    applyModeUI();
     rebuild();
   });
 });
+applyModeUI();
 tryGeo();
 
 /* ============ 搜索 ============ */
