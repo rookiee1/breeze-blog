@@ -19,12 +19,10 @@ body.sky-dusk{background:linear-gradient(180deg,#241d3e 0%,#4a3060 30%,#5c3a5e 5
 body.cloudy{filter:saturate(.62) brightness(.92)}
 body.rainy{filter:saturate(.58) brightness(.84)}
 #wind{position:fixed;inset:0;pointer-events:none}
-/* ---- 视差光晕 ---- */
 .halo{position:fixed;border-radius:50%;pointer-events:none;filter:blur(56px);opacity:.2;
   will-change:transform;transition:opacity 2s}
 .halo.h1{width:46vw;height:46vw;left:-12vw;top:-16vw;background:radial-gradient(circle,#7aa2ff,transparent 60%)}
 .halo.h2{width:38vw;height:38vw;right:-10vw;bottom:-14vw;background:radial-gradient(circle,#6ee7d8,transparent 60%)}
-/* ---- 玻璃拟态 ---- */
 .glass{background:var(--glass-bg);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
   border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 12px 34px rgba(0,0,0,.16)}
 .clock{font-size:clamp(64px,13vw,124px);font-weight:200;letter-spacing:.04em;line-height:1;
@@ -32,7 +30,6 @@ body.rainy{filter:saturate(.58) brightness(.84)}
 body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
 .dateline{font-size:14.5px;opacity:.82;letter-spacing:.14em}
 .greet{font-size:16px;margin-top:6px;opacity:.92}
-/* ---- 搜索 ---- */
 .search{margin-top:34px;width:min(600px,88vw);display:flex;align-items:center;gap:6px;border-radius:100px;
   padding:6px 6px 6px 22px;transition:.35s var(--ease)}
 .search:focus-within{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 18px 48px rgba(0,0,0,.24)}
@@ -41,7 +38,6 @@ body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
 .search button{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
   background:linear-gradient(135deg,#6ee7d8,#7aa2ff 55%,#c9a7ff);color:#08101f;font-size:16px;transition:.3s}
 .search button:hover{filter:brightness(1.12);transform:scale(1.06)}
-/* ---- 引擎 / 天气切换 ---- */
 .chips{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center}
 .chip{font-size:12px;padding:6px 15px;border-radius:100px;color:inherit;opacity:.78;cursor:pointer;
   background:var(--glass-bg);border:1px solid var(--glass-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -49,7 +45,6 @@ body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
 .chip:hover{opacity:1;transform:translateY(-2px)}
 .chip.on{opacity:1;border-color:#6ee7d8;color:#6ee7d8}
 body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
-/* ---- 快捷 dock ---- */
 .dock{display:flex;gap:6px;margin-top:26px;padding:7px;border-radius:100px;flex-wrap:wrap;justify-content:center}
 .dock a{font-size:13px;color:inherit;opacity:.75;text-decoration:none;padding:9px 20px;border-radius:100px;transition:.3s var(--ease)}
 .dock a:hover{opacity:1;background:rgba(255,255,255,.1);transform:translateY(-3px)}
@@ -125,10 +120,7 @@ function tick(){
   document.getElementById("dateline").textContent = (d.getMonth()+1) + " 月 " + d.getDate() + " 日 · " + WEEK[d.getDay()];
   document.getElementById("greet").textContent = greetOf(d.getHours());
   var sky = skyOf(d.getHours());
-  if(sky !== curSky){
-    curSky = sky;
-    applySky(); rebuild();
-  }
+  if(sky !== curSky){ curSky = sky; applySky(); rebuild(); }
 }
 function applySky(){
   var mode = effMode();
@@ -139,7 +131,7 @@ function applySky(){
 }
 tick(); setInterval(tick, 1000);
 
-/* ============ 天气（Open-Meteo 免费无 key，失败则仅按时段） ============ */
+/* ============ 天气 ============ */
 var WX_MODE = "auto", WX_REAL = "clear";
 try{ var savedWx = localStorage.getItem("breath-wx"); if(savedWx){ WX_MODE = savedWx; syncChips("#wxMan", savedWx); } }catch(e){}
 function effMode(){ return WX_MODE === "auto" ? WX_REAL : WX_MODE; }
@@ -249,7 +241,7 @@ var doveNeed = 3 + Math.floor(Math.random() * 2);
 })();
 
 /* ============================================================
-   呼吸粒子引擎 v2 —— 分层视差 + 精灵缓存 + dt 驱动 + 挂起恢复
+   呼吸粒子引擎 v3 —— 场景（极光/篝火/绿植） + 分层视差
    ============================================================ */
 var cv = document.getElementById("wind"), x = cv.getContext("2d");
 var W, H, parts = [], effects = [];
@@ -276,49 +268,68 @@ function initSprites(){
   SPRITES = {
     blue: makeGlow("122,162,255", 64), teal: makeGlow("110,231,216", 64),
     violet: makeGlow("201,167,255", 64), warm: makeGlow("255,205,150", 64),
-    white: makeGlow("255,255,255", 64), cloud: makeGlow("235,242,252", 64)
+    white: makeGlow("255,255,255", 64), cloud: makeGlow("235,242,252", 64),
+    aur1: makeGlow("96,235,185", 64), aur2: makeGlow("150,120,255", 64), aur3: makeGlow("90,200,255", 64),
+    flame: makeGlow("255,140,50", 64), fire: makeGlow("255,205,95", 64)
   };
 }
 initSprites();
 
 function rs(){ W = cv.width = innerWidth; H = cv.height = innerHeight; rebuild(); }
 
+/* 场景开关：极光 / 篝火 / 绿植 */
+var SCN = {aurora:false, fire:false, plant:false};
+function updateScene(){
+  var mode = effMode(), sky = curSky || "night";
+  var nightish = sky === "night" || sky === "late" || sky === "dusk";
+  SCN.aurora = nightish && mode !== "rain";
+  SCN.fire = nightish && mode !== "rain";
+  SCN.plant = sky === "day" || sky === "dawn" || sky === "dusk" || mode === "rain" || mode === "snow";
+}
+
 function rebuild(){
   parts = []; effects = [];
+  updateScene();
   var mode = effMode(), sky = curSky || "night";
   var i;
   if(mode === "clear"){
-    var nb = sky === "day" ? 14 : 10;
+    var nb = sky === "day" ? 16 : 12;
     for(i = 0; i < nb; i++) parts.push({t:"bokeh", x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*60+30, vx:(Math.random()-.5)*.24, vy:-Math.random()*.14-.03,
-      a:Math.random()*.5+.3, ph:Math.random()*7, d:Math.random()*.9+.1,
+      r:Math.random()*70+40, vx:(Math.random()-.5)*.26, vy:-Math.random()*.16-.03,
+      a:Math.random()*.5+.4, ph:Math.random()*7, d:Math.random()*.9+.1,
       spr: (sky === "dawn" || sky === "dusk") ? "warm" : (Math.random() < .5 ? "blue" : "teal")});
-    for(i = 0; i < 5; i++) parts.push({t:"sparkle", x:Math.random()*W, y:Math.random()*H,
-      life:Math.random()*6, max:Math.random()*5+3, r:Math.random()*3+2.2, d:Math.random()});
+    for(i = 0; i < 8; i++) parts.push({t:"sparkle", x:Math.random()*W, y:Math.random()*H,
+      life:Math.random()*6, max:Math.random()*5+3, r:Math.random()*3+2.6, d:Math.random()});
     if(sky === "night" || sky === "late"){
-      for(i = 0; i < (sky === "late" ? 150 : 110); i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.85,
-        r:Math.random()*1.4+.4, ph:Math.random()*7, sp:Math.random()*.9+.4, a:Math.random()*.6+.25, d:Math.random()});
+      for(i = 0; i < (sky === "late" ? 170 : 130); i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.85,
+        r:Math.random()*1.5+.4, ph:Math.random()*7, sp:Math.random()*.9+.4, a:Math.random()*.6+.3, d:Math.random()});
     } else if(sky === "dawn" || sky === "dusk"){
-      for(i = 0; i < 7; i++) parts.push({t:"fly", x:Math.random()*W, y:H*.45+Math.random()*H*.45,
+      for(i = 0; i < 8; i++) parts.push({t:"fly", x:Math.random()*W, y:H*.45+Math.random()*H*.45,
         ph:Math.random()*7, sp:Math.random()*.7+.5, d:Math.random()});
     }
   } else if(mode === "cloud"){
     for(i = 0; i < 8; i++) parts.push({t:"puff", x:Math.random()*(W+500)-250, y:Math.random()*H*.75+H*.04,
       s:Math.random()*1.6+.7, v:Math.random()*.32+.1, d:Math.random()*.9+.1, ph:Math.random()*7});
     if(sky === "night" || sky === "late")
-      for(i = 0; i < 60; i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.6,
-        r:Math.random()*1.2+.4, ph:Math.random()*7, sp:Math.random()*.8+.4, a:Math.random()*.4+.2, d:Math.random()});
+      for(i = 0; i < 70; i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.6,
+        r:Math.random()*1.3+.4, ph:Math.random()*7, sp:Math.random()*.8+.4, a:Math.random()*.45+.25, d:Math.random()});
   } else if(mode === "rain"){
-    for(i = 0; i < (reduced?60:150); i++) parts.push({t:"drop", x:Math.random()*W, y:Math.random()*H,
-      l:Math.random()*16+8, v:Math.random()*5.5+6.5, a:Math.random()*.28+.12, d:Math.random()});
+    for(i = 0; i < (reduced?80:180); i++) parts.push({t:"drop", x:Math.random()*W, y:Math.random()*H,
+      l:Math.random()*18+9, v:Math.random()*5.5+6.5, a:Math.random()*.3+.2, d:Math.random()});
     for(i = 0; i < 4; i++) parts.push({t:"puff", x:Math.random()*(W+500)-250, y:Math.random()*H*.4,
       s:Math.random()*1.4+.8, v:Math.random()*.2+.06, d:Math.random()*.6+.1, ph:Math.random()*7, dark:true});
   } else if(mode === "snow"){
-    for(i = 0; i < 120; i++) parts.push({t:"flake", x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*2.6+1, v:Math.random()*.8+.35, ph:Math.random()*7, a:Math.random()*.55+.25, d:Math.random()});
+    for(i = 0; i < 140; i++) parts.push({t:"flake", x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*2.6+1, v:Math.random()*.8+.35, ph:Math.random()*7, a:Math.random()*.5+.3, d:Math.random()});
   } else {
     for(i = 0; i < 40; i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*1.1+.3, ph:Math.random()*7, sp:.5, a:.3, d:Math.random()});
+      r:Math.random()*1.1+.3, ph:Math.random()*7, sp:.5, a:.35, d:Math.random()});
+  }
+  /* 篝火火星 */
+  if(SCN.fire){
+    var fx = W * .82, fy = H - 64;
+    for(i = 0; i < 11; i++) parts.push({t:"ember", ph:Math.random()*7, life:Math.random()*3,
+      sp:Math.random()*.7+.6, a:Math.random()*.5+.4, d:.5 + Math.random()*.5});
   }
 }
 
@@ -327,11 +338,81 @@ function spawnMeteor(){
     vx:(Math.random()*4+5) * (Math.random()<.5?-1:1), vy:Math.random()*2.4+2.4, life:1});
 }
 function spawnSplash(px, py){
-  effects.push({t:"splash", x:px, y:py, r:0, a:.4});
-  if(Math.random() < .6) effects.push({t:"splash", x:px + Math.random()*14-7, y:py, r:0, a:.3});
+  effects.push({t:"splash", x:px, y:py, r:0, a:.45});
+  if(Math.random() < .6) effects.push({t:"splash", x:px + Math.random()*14-7, y:py, r:0, a:.35});
 }
 
-var meteorCd = 5;
+var meteorCd = 4;
+function firePos(){ return {x: W * .82, y: H - 64}; }
+
+/* ---- 极光（低存在感垂帘，lighter 叠加） ---- */
+function drawAurora(now){
+  x.globalCompositeOperation = "lighter";
+  var sprs = [SPRITES.aur1, SPRITES.aur2, SPRITES.aur3];
+  for(var k = 0; k < 3; k++){
+    var spr = sprs[k];
+    for(var i = 0; i < 9; i++){
+      var wx = (W / 8) * i - W * .05 + mouse.x * 18;
+      var y = H * .15 + Math.sin(now*.00042 + i*.5 + k*2.1) * 30 + Math.sin(now*.0011 + i*1.31) * 14;
+      var s = 130 + Math.sin(now*.0007 + i*.8 + k) * 36;
+      x.globalAlpha = .07 + .05 * Math.sin(now*.0006 + i*.7 + k*1.4) + .05;
+      x.drawImage(spr, wx - s, y - s*1.5, s*2, s*2.8);
+    }
+  }
+  x.globalCompositeOperation = "source-over";
+  x.globalAlpha = 1;
+}
+
+/* ---- 篝火（极简：三层火苗 + 柴 + 石头 + 地面光） ---- */
+function drawCampfire(now){
+  var fp = firePos(), fx = fp.x, fy = fp.y;
+  var fl = 1 + Math.sin(now*.012)*.12 + Math.sin(now*.031)*.06;
+  var par = mouse.x * 10;
+  fx += par; fy += mouse.y * 7;
+  x.globalAlpha = .55;
+  x.drawImage(SPRITES.flame, fx - 90*fl, fy - 45*fl, 180*fl, 90*fl);
+  x.globalAlpha = .85;
+  x.drawImage(SPRITES.flame, fx - 30*fl, fy - 76*fl, 60*fl, 104*fl);
+  x.globalAlpha = .95;
+  x.drawImage(SPRITES.fire, fx - 16*fl, fy - 50*fl, 32*fl, 66*fl);
+  x.globalAlpha = .9;
+  x.drawImage(SPRITES.white, fx - 7, fy - 24*fl, 14, 30*fl);
+  x.globalAlpha = .85;
+  x.strokeStyle = "rgba(32,24,18,.85)"; x.lineWidth = 7; x.lineCap = "round";
+  x.beginPath(); x.moveTo(fx - 26, fy + 7); x.lineTo(fx + 22, fy - 3);
+  x.moveTo(fx - 22, fy - 3); x.lineTo(fx + 26, fy + 7); x.stroke();
+  x.fillStyle = "rgba(30,26,22,.55)";
+  [[-46,9,9],[46,11,8],[-35,13,6],[37,15,6]].forEach(function(s){
+    x.beginPath(); x.ellipse(fx + s[0], fy + s[1], s[2], s[2]*.7, 0, 0, 6.2832); x.fill();
+  });
+  x.globalAlpha = 1;
+}
+
+/* ---- 窗台绿植（极简线稿，叶子轻摆） ---- */
+function drawPlant(now){
+  var bx = Math.max(96, W * .13), by = H - 30;
+  var sway = Math.sin(now*.0009) * 3, sway2 = Math.sin(now*.0011 + 1.2) * 4;
+  bx += mouse.x * 12; by += mouse.y * 8;
+  x.globalAlpha = .75;
+  x.strokeStyle = "rgba(70,90,80,.4)"; x.lineWidth = 2; x.lineCap = "round";
+  x.beginPath(); x.moveTo(bx - 92, by); x.lineTo(bx + 92, by); x.stroke();
+  x.fillStyle = "rgba(74,62,52,.5)";
+  x.beginPath(); x.moveTo(bx - 19, by); x.lineTo(bx + 19, by); x.lineTo(bx + 13, by + 20); x.lineTo(bx - 13, by + 20); x.closePath(); x.fill();
+  x.strokeStyle = "rgba(52,128,92,.6)"; x.lineWidth = 3;
+  var leaves = [[-14,-44,-20,-52],[ -6,-52,-14,-64],[0,-48,6,-62],[8,-42,20,-50],[14,-36,24,-40]];
+  leaves.forEach(function(L, i){
+    var s = i % 2 === 0 ? sway : sway2;
+    x.beginPath();
+    x.moveTo(bx, by);
+    x.quadraticCurveTo(bx + L[0]*.5 + s, by + L[1]*.6, bx + L[2] + s, by + L[3]);
+    x.stroke();
+    x.beginPath(); x.arc(bx + L[2] + s, by + L[3], 2.4, 0, 6.2832);
+    x.fillStyle = "rgba(52,128,92,.55)"; x.fill();
+  });
+  x.globalAlpha = 1;
+}
+
+var meteorCd = 4;
 function frame(now){
   if(!lastT) lastT = now;
   var dt = clamp((now - lastT) / 16.666, 0, 3); lastT = now;
@@ -344,6 +425,9 @@ function frame(now){
   x.clearRect(0, 0, W, H);
   var mode = effMode(), sky = curSky || "night";
   var i, p;
+
+  if(SCN.aurora) drawAurora(now);
+
   for(i = 0; i < parts.length; i++){
     p = parts[i];
     var px = p.x + mouse.x * 46 * (p.d || .4);
@@ -353,41 +437,41 @@ function frame(now){
       if(p.y < -p.r){ p.y = H + p.r; p.x = Math.random()*W; }
       if(p.x < -p.r) p.x = W + p.r; else if(p.x > W + p.r) p.x = -p.r;
       var twb = .65 + Math.sin(now*.0009 + p.ph)*.35;
-      x.globalAlpha = p.a * twb;
+      x.globalAlpha = clamp(p.a * twb * 1.35, 0, 1);
       x.drawImage(SPRITES[p.spr], px - p.r, py - p.r, p.r*2, p.r*2);
     } else if(p.t === "sparkle"){
-      p.life += dt / 60;
+      p.life += dt / 50;
       if(p.life > p.max){ p.life = 0; p.x = Math.random()*W; p.y = Math.random()*H; p.max = Math.random()*5+3; }
       var k = Math.sin(Math.PI * clamp(p.life / p.max, 0, 1));
       var r = p.r * k;
       x.globalAlpha = 1;
-      x.strokeStyle = "rgba(255,255,255,.9)"; x.lineWidth = 1;
+      x.strokeStyle = "rgba(255,255,255,.95)"; x.lineWidth = 1.2;
       x.beginPath();
-      x.moveTo(px - r*2, py); x.lineTo(px + r*2, py);
-      x.moveTo(px, py - r*2); x.lineTo(px, py + r*2);
+      x.moveTo(px - r*2.2, py); x.lineTo(px + r*2.2, py);
+      x.moveTo(px, py - r*2.2); x.lineTo(px, py + r*2.2);
       x.stroke();
-      x.beginPath(); x.arc(px, py, r*.5, 0, 6.2832);
-      x.fillStyle = "rgba(255,255,255," + (k*.9) + ")"; x.fill();
+      x.beginPath(); x.arc(px, py, r*.55, 0, 6.2832);
+      x.fillStyle = "rgba(255,255,255," + (k*.95) + ")"; x.fill();
     } else if(p.t === "star"){
       var a = p.a * (.55 + Math.sin(now*.001*p.sp + p.ph)*.45);
       x.globalAlpha = 1;
       x.beginPath(); x.arc(px, py, p.r, 0, 6.2832);
-      x.fillStyle = "rgba(220,232,255," + a + ")"; x.fill();
-      if(p.r > 1.25){
-        x.beginPath(); x.arc(px, py, p.r*3.4, 0, 6.2832);
-        x.fillStyle = "rgba(160,190,255," + a*.1 + ")"; x.fill();
+      x.fillStyle = "rgba(225,236,255," + a + ")"; x.fill();
+      if(p.r > 1.2){
+        x.beginPath(); x.arc(px, py, p.r*3.6, 0, 6.2832);
+        x.fillStyle = "rgba(160,190,255," + a*.13 + ")"; x.fill();
       }
     } else if(p.t === "fly"){
-      p.x += Math.sin(now*.0006*p.sp + p.ph)*.5*dt;
-      p.y += Math.cos(now*.0005*p.sp + p.ph*1.7)*.34*dt;
-      var fa = clamp(.45 + Math.sin(now*.002*p.sp + p.ph)*.4, .05, 1);
+      p.x += Math.sin(now*.0006*p.sp + p.ph)*.55*dt;
+      p.y += Math.cos(now*.0005*p.sp + p.ph*1.7)*.36*dt;
+      var fa = clamp(.5 + Math.sin(now*.002*p.sp + p.ph)*.45, .05, 1);
       x.globalAlpha = fa;
-      x.drawImage(SPRITES.warm, px-9, py-9, 18, 18);
+      x.drawImage(SPRITES.warm, px-11, py-11, 22, 22);
     } else if(p.t === "puff"){
       p.x += p.v * dt;
       if(p.x > W + 260) p.x = -260;
       var bob = Math.sin(now*.0004 + p.ph)*8;
-      x.globalAlpha = p.dark ? .1 : .16;
+      x.globalAlpha = p.dark ? .12 : .18;
       var spr = SPRITES.cloud, sw = 190*p.s, sh = 120*p.s;
       x.drawImage(spr, px-sw/2, py+bob-sh/2, sw, sh);
       x.drawImage(spr, px-sw*.32, py+bob+6-sh*.42, sw*.72, sh*.72);
@@ -395,48 +479,63 @@ function frame(now){
     } else if(p.t === "drop"){
       p.y += p.v * dt; p.x -= p.v * .16 * dt;
       if(p.y > H - 4){
-        if(Math.random() < .35) spawnSplash(px, H - Math.random()*H*.16);
+        if(Math.random() < .5) spawnSplash(px, H - Math.random()*H*.16);
         p.y = -p.l; p.x = Math.random()*W;
       }
       x.globalAlpha = 1;
       x.beginPath(); x.moveTo(px, py); x.lineTo(px + p.l*.16, py - p.l);
-      x.strokeStyle = "rgba(185,215,255," + p.a + ")"; x.lineWidth = p.d > .6 ? 1.4 : 1; x.stroke();
+      x.strokeStyle = "rgba(190,218,255," + p.a + ")"; x.lineWidth = p.d > .6 ? 1.8 : 1.2; x.stroke();
     } else if(p.t === "flake"){
-      p.y += p.v * dt; p.x += Math.sin(now*.0008 + p.ph)*.5*dt;
+      p.y += p.v * dt; p.x += Math.sin(now*.0008 + p.ph)*.55*dt;
       if(p.y > H + 4){ p.y = -4; p.x = Math.random()*W; }
       x.globalAlpha = 1;
       x.beginPath(); x.arc(px, py, p.r, 0, 6.2832);
       x.fillStyle = "rgba(255,255,255," + p.a + ")"; x.fill();
+    } else if(p.t === "ember"){
+      var fp = firePos();
+      p.life += dt / 60;
+      var cyc = p.life % 3;
+      var ey = fp.y - 40 - cyc * 68 * p.sp;
+      var ex = fp.x + Math.sin(now*.002 + p.ph)*16*(cyc*.5+.4) + mouse.x*12;
+      var ea = p.a * (1 - cyc/3);
+      if(ea > .02){
+        x.globalAlpha = ea;
+        x.drawImage(SPRITES.fire, ex-4.5, ey-4.5, 9, 9);
+      }
     }
   }
+
   if(mode === "clear" && (sky === "night" || sky === "late")){
     meteorCd -= dt;
-    if(meteorCd <= 0){ spawnMeteor(); meteorCd = Math.random()*11 + 6; }
+    if(meteorCd <= 0){ spawnMeteor(); meteorCd = Math.random()*9 + 4; }
   }
   for(i = effects.length - 1; i >= 0; i--){
     var e2 = effects[i];
     if(e2.t === "meteor"){
-      e2.x += e2.vx * dt; e2.y += e2.vy * dt; e2.life -= .022 * dt;
+      e2.x += e2.vx * dt; e2.y += e2.vy * dt; e2.life -= .02 * dt;
       if(e2.life <= 0 || e2.x < -80 || e2.x > W + 80){ effects.splice(i, 1); continue; }
-      var grad = x.createLinearGradient(e2.x, e2.y, e2.x - e2.vx*10, e2.y - e2.vy*10);
-      grad.addColorStop(0, "rgba(255,255,255," + (e2.life*.9) + ")");
+      var grad = x.createLinearGradient(e2.x, e2.y, e2.x - e2.vx*12, e2.y - e2.vy*12);
+      grad.addColorStop(0, "rgba(255,255,255," + (e2.life) + ")");
       grad.addColorStop(1, "rgba(160,190,255,0)");
       x.globalAlpha = 1;
-      x.strokeStyle = grad; x.lineWidth = 1.6; x.lineCap = "round";
-      x.beginPath(); x.moveTo(e2.x, e2.y); x.lineTo(e2.x - e2.vx*10, e2.y - e2.vy*10); x.stroke();
+      x.strokeStyle = grad; x.lineWidth = 1.8; x.lineCap = "round";
+      x.beginPath(); x.moveTo(e2.x, e2.y); x.lineTo(e2.x - e2.vx*12, e2.y - e2.vy*12); x.stroke();
     } else if(e2.t === "splash"){
-      e2.r += 1.3 * dt; e2.a *= Math.pow(.94, dt);
+      e2.r += 1.4 * dt; e2.a *= Math.pow(.94, dt);
       if(e2.a < .02){ effects.splice(i, 1); continue; }
       x.globalAlpha = 1;
       x.beginPath(); x.ellipse(e2.x, e2.y, e2.r, e2.r*.3, 0, 0, 6.2832);
       x.strokeStyle = "rgba(185,215,255," + e2.a + ")"; x.lineWidth = 1; x.stroke();
     }
   }
+
+  if(SCN.plant) drawPlant(now);
+  if(SCN.fire) drawCampfire(now);
   x.globalAlpha = 1;
   raf = requestAnimationFrame(frame);
 }
 
-/* 修复"切回来卡半秒"：隐藏时彻底停帧，回来先暖场一帧再继续 */
+/* 切回标签页：停帧 → 暖场一帧 → 恢复，杜绝卡顿 */
 document.addEventListener("visibilitychange", function(){
   if(document.hidden){
     if(raf){ cancelAnimationFrame(raf); raf = null; }
