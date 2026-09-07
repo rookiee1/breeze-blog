@@ -1435,6 +1435,9 @@ var momQueue = [], momCurrent = null;
 
 function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function pad2(n){ return ("0" + n).slice(-2); }
+/* ---- 云端后端（Cloudflare Worker）：部署后把地址填进 API_BASE ---- */
+var API_BASE = "";
+var CLOUD = false;
 function loadMoments(){ try{ return JSON.parse(localStorage.getItem(MOM_KEY)) || []; }catch(e){ return []; } }
 function saveMoments(arr){
   try{ localStorage.setItem(MOM_KEY, JSON.stringify(arr)); return true; }
@@ -1462,16 +1465,20 @@ function makeMomentCard(m){
   var card = document.createElement("div");
   card.className = "g-card custom";
   card.innerHTML = '<div class="art" style="background-image:url(' + m.img + ')"></div>'
-    + '<span class="idx">--</span><div class="cap"><em>' + escHtml(m.tag) + '</em><h4>' + escHtml(m.title) + '</h4></div>'
-    + '<button class="del" title="删除这张瞬间">✕</button>';
+    + '<span class="idx">--</span><div class="cap"><em>' + escHtml(m.tag) + '</em><h4>' + escHtml(m.title) + '</h4></div>';
   card.addEventListener("click", function(){ toast("📷 一张值得收藏的瞬间"); });
-  card.querySelector(".del").addEventListener("click", function(e){
-    e.stopPropagation();
-    var arr = loadMoments();
-    var i = arr.indexOf(m);
-    if(i > -1){ arr.splice(i, 1); saveMoments(arr); }
-    card.remove(); renumberMoments(); refreshGCount(); toast("瞬间已删除 🍂");
-  });
+  if(!m._cloud){
+    var del = document.createElement("button");
+    del.className = "del"; del.title = "删除这张瞬间"; del.textContent = "✕";
+    del.addEventListener("click", function(e){
+      e.stopPropagation();
+      var arr = loadMoments();
+      var i = arr.indexOf(m);
+      if(i > -1){ arr.splice(i, 1); saveMoments(arr); }
+      card.remove(); renumberMoments(); refreshGCount(); toast("瞬间已删除 🍂");
+    });
+    card.appendChild(del);
+  }
   return card;
 }
 function renumberMoments(){
@@ -1526,25 +1533,68 @@ momFile.addEventListener("change", function(){
     });
   });
 });
+function localAddMoment(m){
+  var arr = loadMoments();
+  arr.push(m);
+  if(saveMoments(arr)){
+    gTrack.insertBefore(makeMomentCard(m), moreCard);
+    renumberMoments(); refreshGCount();
+    toast("已收进生活切片 🌿");
+  }
+}
+/* 云端可达时：拉取所有人的瞬间，并缓存到本地作离线兜底 */
+function loadCloudMoments(){
+  fetch(API_BASE + "/api/moments").then(function(r){ return r.json(); }).then(function(j){
+    if(!(j && j.ok)) return;
+    var items = (j.items || []).slice().reverse(); /* 旧→新，新卡片排在后面 */
+    saveMoments(items.map(function(it){ return { img: API_BASE + "/img/" + it.img, tag: it.tag, title: it.title }; }));
+    gTrack.querySelectorAll(".g-card.custom").forEach(function(c){ c.remove(); });
+    items.forEach(function(it){
+      gTrack.insertBefore(makeMomentCard({ img: API_BASE + "/img/" + it.img, tag: it.tag, title: it.title, _id: it.id, _cloud: true }), moreCard);
+    });
+    renumberMoments(); refreshGCount();
+  }).catch(function(){});
+}
 document.getElementById("momentOk").addEventListener("click", function(){
   if(!momCurrent) return;
   var title = momTitle.value.trim() || "未命名瞬间";
   var tag = (momTag.value.trim() || "MOMENT").toUpperCase();
-  var m = { img: momCurrent.img, tag: tag, title: title };
-  var arr = loadMoments();
-  arr.push(m);
-  if(saveMoments(arr)){
-    var card = makeMomentCard(m);
-    gTrack.insertBefore(card, moreCard);
-    renumberMoments(); refreshGCount();
-    toast("已收进生活切片 🌿");
+  if(CLOUD){
+    fetch(API_BASE + "/api/moments", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tag: tag, title: title, img: momCurrent.img }) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(j && j.ok){
+        var it = j.item;
+        gTrack.insertBefore(makeMomentCard({ img: API_BASE + "/img/" + it.img, tag: it.tag, title: it.title, _id: it.id, _cloud: true }), moreCard);
+        renumberMoments(); refreshGCount();
+        toast("已收进生活切片（云端同步）🌿");
+      } else {
+        toast("云端上传失败，先存在本机");
+        localAddMoment({ img: momCurrent.img, tag: tag, title: title });
+      }
+      nextInQueue();
+    })
+    .catch(function(){
+      toast("云端连不上，先存在本机");
+      localAddMoment({ img: momCurrent.img, tag: tag, title: title });
+      nextInQueue();
+    });
+  } else {
+    localAddMoment({ img: momCurrent.img, tag: tag, title: title });
+    nextInQueue();
   }
-  nextInQueue();
 });
 document.getElementById("momentCancel").addEventListener("click", closeMomentModal);
 momModal.addEventListener("click", function(e){ if(e.target === momModal) closeMomentModal(); });
 momTitle.addEventListener("keydown", function(e){ if(e.key === "Enter") document.getElementById("momentOk").click(); });
 renderMoments();
+/* 云端后端：健康检查 → 拉取云端瞬间 */
+if(API_BASE){
+  fetch(API_BASE + "/api/health", { method: "POST" }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.ok){ CLOUD = true; loadCloudMoments(); }
+  }).catch(function(){});
+}
 
 /* ================= 本机访问记录（后台管理页数据源） ================= */
 try{
@@ -1559,6 +1609,11 @@ try{
     });
     if(vlog.length > 500) vlog = vlog.slice(-500);
     localStorage.setItem("breeze-visits", JSON.stringify(vlog));
+    /* 云端统计（全网真实访问数据） */
+    if(API_BASE){
+      fetch(API_BASE + "/api/track", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: document.referrer || "直达" }) }).catch(function(){});
+    }
   }
 }catch(e){}
 
