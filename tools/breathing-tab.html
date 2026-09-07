@@ -209,18 +209,18 @@ document.getElementById("sForm").addEventListener("submit", function(e){
   if(q) location.href = ENG_URL[ENG] + encodeURIComponent(q);
 });
 
-/* ============ 死党链接（每次随机整活） ============ */
+/* ============ 死党链接（随机整活 + 会跑路） ============ */
 var DOVE_LABELS = [
-  "🕊️ 不友情链接",
+  "🕊️ 友尽链接",
   "🕊️ 隔壁鸽子窝",
-  "🕊️ 友情链接（不友好的那种）",
-  "🕊️ 亦敌亦友 · 咕咕咕",
+  "🕊️ 鸽子精收容所",
+  "🕊️ 咕咕咕 · 电台",
   "🕊️ 今日赶超目标",
-  "🕊️ 竞争对手 · 请轻踩",
+  "🕊️ 假想敌总部",
   "🕊️ 查看敌方动态",
-  "🕊️ 风吹不到的那家",
+  "🕊️ 死党老巢 · 侵入提醒",
   "🕊️ 对面那位 · 蹲一个更新",
-  "🕊️ 死党老巢 · 侵入提醒"
+  "🕊️ 慎入 · 有鸽子味"
 ];
 var DOVE_TIPS = [
   "点进去给他个浏览量，回来我们继续卷",
@@ -231,10 +231,42 @@ var DOVE_TIPS = [
   "每日一比 · 今日胜负未出",
   "咕咕咕是鸽子发来的求和信号"
 ];
+var DOVE_TAUNT = [
+  "翅膀一抖，没抓到 🕊️",
+  "又跑了，再试试？",
+  "风在保护我，你再抓抓看",
+  "快了快了，就差一点",
+  "这次我认真的……才怪",
+  "你的手速不行啊，朋友"
+];
+var doveEarned = false, doveTries = 0;
+var doveNeed = 3 + Math.floor(Math.random() * 2); /* 第 3~4 次才放行 */
 (function(){
   var a = document.getElementById("doveLink");
   a.textContent = DOVE_LABELS[Math.floor(Math.random() * DOVE_LABELS.length)];
   a.title = DOVE_TIPS[Math.floor(Math.random() * DOVE_TIPS.length)];
+  function dodge(){
+    if(doveEarned) return;
+    doveTries++;
+    var dx = Math.random() * 240 - 120, dy = Math.random() * 110 - 55;
+    a.style.transition = "transform .2s cubic-bezier(.3,1.4,.5,1)";
+    a.style.transform = "translate(" + dx.toFixed(0) + "px," + dy.toFixed(0) + "px) rotate(" + (Math.random() * 10 - 5).toFixed(1) + "deg)";
+    if(doveTries >= doveNeed){
+      doveEarned = true;
+      setTimeout(function(){
+        a.style.transition = "transform .45s cubic-bezier(.22,.9,.3,1)";
+        a.style.transform = "";
+        a.title = "行吧行吧，这次放行 🕊️ 快点我";
+      }, 380);
+    } else {
+      a.title = DOVE_TAUNT[Math.min(doveTries - 1, DOVE_TAUNT.length - 1)];
+    }
+  }
+  a.addEventListener("pointerenter", dodge);
+  a.addEventListener("click", function(e){
+    if(!doveEarned){ e.preventDefault(); dodge(); return; }
+    a.textContent = "🕊️ ……算你厉害，放行";
+  });
 })();
 
 /* ============ 呼吸粒子（按天气+时段） ============ */
