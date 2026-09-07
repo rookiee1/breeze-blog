@@ -5,73 +5,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Breath · 会呼吸的导航页</title>
 <style>
-:root{--ease:cubic-bezier(.22,.9,.3,1)}
+:root{--ease:cubic-bezier(.22,.9,.3,1);--glass-bg:rgba(255,255,255,.07);--glass-line:rgba(255,255,255,.15)}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#eef2fa;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
   transition:background 2.5s ease}
-/* ---- 时段天空 ---- */
 body.sky-night{background:linear-gradient(180deg,#050914 0%,#0b1226 55%,#141c38 100%)}
 body.sky-late{background:linear-gradient(180deg,#04060f 0%,#080d1d 60%,#0e1530 100%)}
 body.sky-dawn{background:linear-gradient(180deg,#1a2340 0%,#3d3a5e 45%,#8a5d6e 80%,#c98a6b 100%)}
 body.sky-day{background:linear-gradient(180deg,#5b8fc9 0%,#7fb2d9 45%,#a8cfe0 100%);color:#12203a}
 body.sky-dusk{background:linear-gradient(180deg,#241d3e 0%,#4a3060 30%,#5c3a5e 55%,#96575a 80%,#c98a6b 100%)}
-body.cloudy{filter:saturate(.65) brightness(.92)}
-body.rainy{filter:saturate(.6) brightness(.85)}
+body.cloudy{filter:saturate(.62) brightness(.92)}
+body.rainy{filter:saturate(.58) brightness(.84)}
 #wind{position:fixed;inset:0;pointer-events:none}
-.halo{position:fixed;border-radius:50%;pointer-events:none;filter:blur(70px);opacity:.22;transition:opacity 2s}
+/* ---- 视差光晕 ---- */
+.halo{position:fixed;border-radius:50%;pointer-events:none;filter:blur(56px);opacity:.2;
+  will-change:transform;transition:opacity 2s}
 .halo.h1{width:46vw;height:46vw;left:-12vw;top:-16vw;background:radial-gradient(circle,#7aa2ff,transparent 60%)}
 .halo.h2{width:38vw;height:38vw;right:-10vw;bottom:-14vw;background:radial-gradient(circle,#6ee7d8,transparent 60%)}
-/* ---- 中央内容 ---- */
+/* ---- 玻璃拟态 ---- */
+.glass{background:var(--glass-bg);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
+  border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 12px 34px rgba(0,0,0,.16)}
 .clock{font-size:clamp(64px,13vw,124px);font-weight:200;letter-spacing:.04em;line-height:1;
   font-variant-numeric:tabular-nums;text-shadow:0 4px 40px rgba(0,0,0,.25)}
 body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
 .dateline{font-size:14.5px;opacity:.82;letter-spacing:.14em}
 .greet{font-size:16px;margin-top:6px;opacity:.92}
-.greet b{font-weight:700}
 /* ---- 搜索 ---- */
-.search{margin-top:34px;width:min(600px,88vw);display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:100px;
-  padding:6px 6px 6px 22px;backdrop-filter:blur(14px);transition:.3s var(--ease)}
-body.sky-day .search{background:rgba(255,255,255,.4);border-color:rgba(20,40,70,.15)}
-.search:focus-within{transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.22);background:rgba(255,255,255,.14)}
+.search{margin-top:34px;width:min(600px,88vw);display:flex;align-items:center;gap:6px;border-radius:100px;
+  padding:6px 6px 6px 22px;transition:.35s var(--ease)}
+.search:focus-within{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 18px 48px rgba(0,0,0,.24)}
 .search input{flex:1;background:none;border:none;outline:none;color:inherit;font-size:15.5px;font-family:inherit}
 .search input::placeholder{color:currentColor;opacity:.5}
 .search button{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
   background:linear-gradient(135deg,#6ee7d8,#7aa2ff 55%,#c9a7ff);color:#08101f;font-size:16px;transition:.3s}
 .search button:hover{filter:brightness(1.12);transform:scale(1.06)}
-/* ---- 引擎 & 天气 & 快捷 ---- */
+/* ---- 引擎 / 天气切换 ---- */
 .chips{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center}
-.chip{font-size:12px;padding:6px 15px;border-radius:100px;border:1px solid rgba(255,255,255,.22);
-  background:rgba(255,255,255,.06);cursor:pointer;color:inherit;opacity:.75;transition:.3s;font-family:inherit;backdrop-filter:blur(8px)}
+.chip{font-size:12px;padding:6px 15px;border-radius:100px;color:inherit;opacity:.78;cursor:pointer;
+  background:var(--glass-bg);border:1px solid var(--glass-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:.3s var(--ease);font-family:inherit}
 .chip:hover{opacity:1;transform:translateY(-2px)}
 .chip.on{opacity:1;border-color:#6ee7d8;color:#6ee7d8}
-body.sky-day .chip{border-color:rgba(20,40,70,.25);background:rgba(255,255,255,.3)}
 body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
-.quick{display:flex;gap:14px;margin-top:26px;flex-wrap:wrap;justify-content:center}
-.quick a{font-size:13px;color:inherit;opacity:.7;text-decoration:none;padding:9px 20px;border-radius:100px;
-  border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);transition:.3s var(--ease)}
-.quick a:hover{opacity:1;transform:translateY(-3px)}
-body.sky-day .quick a{border-color:rgba(20,40,70,.2)}
-.quick a.frenemy{border-style:dashed;transform:rotate(-1.6deg)}
-.quick a.frenemy:hover{transform:translateY(-3px) rotate(1.6deg);border-color:#c9a7ff}
-.wx{position:fixed;top:22px;right:26px;font-size:12.5px;opacity:.7;display:flex;align-items:center;gap:8px}
+/* ---- 快捷 dock ---- */
+.dock{display:flex;gap:6px;margin-top:26px;padding:7px;border-radius:100px;flex-wrap:wrap;justify-content:center}
+.dock a{font-size:13px;color:inherit;opacity:.75;text-decoration:none;padding:9px 20px;border-radius:100px;transition:.3s var(--ease)}
+.dock a:hover{opacity:1;background:rgba(255,255,255,.1);transform:translateY(-3px)}
+.dock a.frenemy{border:1px dashed rgba(255,255,255,.3);transform:rotate(-1.6deg)}
+.dock a.frenemy:hover{transform:translateY(-3px) rotate(1.6deg);border-color:#c9a7ff;background:rgba(201,167,255,.08)}
+.wx{position:fixed;top:22px;right:26px;font-size:12.5px;opacity:.75;padding:8px 16px;border-radius:100px}
 .credit{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:11.5px;opacity:.5}
 .credit a{color:inherit}
-@media(max-width:560px){.clock{font-size:20vw}.wx{top:14px;right:16px;font-size:11.5px}}
+@media(max-width:560px){.clock{font-size:20vw}.wx{top:14px;right:16px;font-size:11.5px}.search{margin-top:24px}}
 </style>
 </head>
 <body class="sky-night">
 <canvas id="wind"></canvas>
-<div class="halo h1"></div><div class="halo h2"></div>
+<div class="halo h1" id="halo1"></div><div class="halo h2" id="halo2"></div>
 
-<div class="wx" id="wx">正在感知天气…</div>
+<div class="wx glass" id="wx">正在感知天气…</div>
 <div class="clock" id="clock">--:--</div>
 <div class="dateline" id="dateline"></div>
 <div class="greet" id="greet"></div>
 
-<form class="search" id="sForm">
+<form class="search glass" id="sForm">
   <input id="sInput" type="text" placeholder="搜点什么，风会带路…（Enter）" autocomplete="off">
   <button type="submit" title="搜索">➤</button>
 </form>
@@ -87,7 +86,7 @@ body.sky-day .quick a{border-color:rgba(20,40,70,.2)}
   <button class="chip" data-wx="rain">🌧️ 雨</button>
   <button class="chip" data-wx="snow">❄️ 雪</button>
 </div>
-<div class="quick">
+<div class="dock glass">
   <a href="/">🍃 博客</a>
   <a href="/admin.html">📊 后台</a>
   <a href="/tools/wuwa-gacha.html">🎯 抽卡分析</a>
@@ -128,25 +127,31 @@ function tick(){
   var sky = skyOf(d.getHours());
   if(sky !== curSky){
     curSky = sky;
-    document.body.className = "sky-" + sky + " " + (document.body.classList.contains("rainy")?"rainy":document.body.classList.contains("cloudy")?"cloudy":"");
-    rebuild();
+    applySky(); rebuild();
   }
+}
+function applySky(){
+  var mode = effMode();
+  var cls = "sky-" + curSky;
+  if(mode === "rain") cls += " rainy";
+  else if(mode === "cloud") cls += " cloudy";
+  document.body.className = cls;
 }
 tick(); setInterval(tick, 1000);
 
 /* ============ 天气（Open-Meteo 免费无 key，失败则仅按时段） ============ */
-var WX_MODE = "auto";          /* auto | clear | cloud | rain | snow */
-var WX_REAL = "clear";         /* 探测到的真实天气 */
+var WX_MODE = "auto", WX_REAL = "clear";
 try{ var savedWx = localStorage.getItem("breath-wx"); if(savedWx){ WX_MODE = savedWx; syncChips("#wxMan", savedWx); } }catch(e){}
 function effMode(){ return WX_MODE === "auto" ? WX_REAL : WX_MODE; }
 function codeToMode(c){
   if(c === 0 || c === 1) return "clear";
   if(c === 2 || c === 3 || c === 45 || c === 48) return "cloud";
   if((c >= 51 && c <= 67) || (c >= 80 && c <= 82) || (c >= 95 && c <= 99)) return "rain";
-  if((c >= 71 && c <= 77) || (c === 85) || (c === 86)) return "snow";
+  if((c >= 71 && c <= 77) || c === 85 || c === 86) return "snow";
   return "cloud";
 }
 var WX_NAME = {clear:"晴", cloud:"多云", rain:"雨", snow:"雪"};
+var WX_ICON = {clear:"☀️", cloud:"⛅", rain:"🌧️", snow:"❄️"};
 function tryGeo(){
   if(!navigator.geolocation){ document.getElementById("wx").textContent = "🌤️ 天气未知 · 点下方按钮切换"; return; }
   navigator.geolocation.getCurrentPosition(function(pos){
@@ -157,9 +162,9 @@ function tryGeo(){
       if(!cw) throw 0;
       WX_REAL = codeToMode(cw.weathercode);
       var hot = cw.temperature != null ? " · " + Math.round(cw.temperature) + "°C" : "";
-      var icon = {clear:"☀️", cloud:"⛅", rain:"🌧️", snow:"❄️"}[WX_REAL];
-      document.getElementById("wx").textContent = icon + " " + WX_NAME[WX_REAL] + hot + (WX_MODE === "auto" ? "" : "（手动：" + WX_NAME[effMode()] + "）");
-      rebuild();
+      var tag = WX_MODE === "auto" ? "" : "（手动：" + WX_NAME[effMode()] + "）";
+      document.getElementById("wx").textContent = WX_ICON[WX_REAL] + " " + WX_NAME[WX_REAL] + hot + tag;
+      applySky(); rebuild();
     }).catch(function(){ document.getElementById("wx").textContent = "🌤️ 天气服务没连上 · 可手动切换"; });
   }, function(){ document.getElementById("wx").textContent = "🌤️ 未授权定位 · 可手动切换天气"; }, {timeout: 8000});
 }
@@ -168,12 +173,6 @@ function syncChips(sel, val){
     c.classList.toggle("on", c.getAttribute("data-" + (sel === "#wxMan" ? "wx" : "eng")) === val);
   });
 }
-function applyModeUI(){
-  var mode = effMode();
-  document.body.classList.toggle("rainy", mode === "rain");
-  document.body.classList.toggle("cloudy", mode === "cloud");
-}
-var WX_ICON = {clear:"☀️", cloud:"⛅", rain:"🌧️", snow:"❄️"};
 document.querySelectorAll("#wxMan .chip").forEach(function(c){
   c.addEventListener("click", function(){
     WX_MODE = c.getAttribute("data-wx");
@@ -185,11 +184,9 @@ document.querySelectorAll("#wxMan .chip").forEach(function(c){
     } else {
       document.getElementById("wx").textContent = WX_ICON[WX_MODE] + " " + WX_NAME[WX_MODE] + "（手动）";
     }
-    applyModeUI();
-    rebuild();
+    applySky(); rebuild();
   });
 });
-applyModeUI();
 tryGeo();
 
 /* ============ 搜索 ============ */
@@ -211,36 +208,18 @@ document.getElementById("sForm").addEventListener("submit", function(e){
 
 /* ============ 死党链接（随机整活 + 会跑路） ============ */
 var DOVE_LABELS = [
-  "🕊️ 友尽链接",
-  "🕊️ 隔壁鸽子窝",
-  "🕊️ 鸽子精收容所",
-  "🕊️ 咕咕咕 · 电台",
-  "🕊️ 今日赶超目标",
-  "🕊️ 假想敌总部",
-  "🕊️ 查看敌方动态",
-  "🕊️ 死党老巢 · 侵入提醒",
-  "🕊️ 对面那位 · 蹲一个更新",
-  "🕊️ 慎入 · 有鸽子味"
+  "🕊️ 友尽链接","🕊️ 隔壁鸽子窝","🕊️ 鸽子精收容所","🕊️ 咕咕咕 · 电台","🕊️ 今日赶超目标",
+  "🕊️ 假想敌总部","🕊️ 查看敌方动态","🕊️ 死党老巢 · 侵入提醒","🕊️ 对面那位 · 蹲一个更新","🕊️ 慎入 · 有鸽子味"
 ];
 var DOVE_TIPS = [
-  "点进去给他个浏览量，回来我们继续卷",
-  "友情提示：他的风没有我们的大",
-  "本链接不消耗友情值，放心点",
-  "据说他也在做导航页……有点慌",
-  "嘘——我们正在偷偷超越他",
-  "每日一比 · 今日胜负未出",
-  "咕咕咕是鸽子发来的求和信号"
+  "点进去给他个浏览量，回来我们继续卷","友情提示：他的风没有我们的大","本链接不消耗友情值，放心点",
+  "据说他也在做导航页……有点慌","嘘——我们正在偷偷超越他","每日一比 · 今日胜负未出","咕咕咕是鸽子发来的求和信号"
 ];
 var DOVE_TAUNT = [
-  "翅膀一抖，没抓到 🕊️",
-  "又跑了，再试试？",
-  "风在保护我，你再抓抓看",
-  "快了快了，就差一点",
-  "这次我认真的……才怪",
-  "你的手速不行啊，朋友"
+  "翅膀一抖，没抓到 🕊️","又跑了，再试试？","风在保护我，你再抓抓看","快了快了，就差一点","这次我认真的……才怪","你的手速不行啊，朋友"
 ];
 var doveEarned = false, doveTries = 0;
-var doveNeed = 3 + Math.floor(Math.random() * 2); /* 第 3~4 次才放行 */
+var doveNeed = 3 + Math.floor(Math.random() * 2);
 (function(){
   var a = document.getElementById("doveLink");
   a.textContent = DOVE_LABELS[Math.floor(Math.random() * DOVE_LABELS.length)];
@@ -269,93 +248,210 @@ var doveNeed = 3 + Math.floor(Math.random() * 2); /* 第 3~4 次才放行 */
   });
 })();
 
-/* ============ 呼吸粒子（按天气+时段） ============ */
+/* ============================================================
+   呼吸粒子引擎 v2 —— 分层视差 + 精灵缓存 + dt 驱动 + 挂起恢复
+   ============================================================ */
 var cv = document.getElementById("wind"), x = cv.getContext("2d");
-var W, H, parts = [], ripples = [], raf = null;
-var COLORS = {night:["150,180,255","110,231,216","201,167,255"], late:["150,180,255","110,231,216","201,167,255"],
-              dawn:["255,200,150","201,167,255","122,162,255"], day:["255,255,255","210,235,255","255,230,180"],
-              dusk:["255,180,140","201,167,255","122,162,255"]};
-function rs(){
-  W = cv.width = innerWidth; H = cv.height = innerHeight;
-  rebuild();
+var W, H, parts = [], effects = [];
+var raf = null, lastT = 0;
+var mouse = {x:0, y:0, tx:0, ty:0};
+addEventListener("pointermove", function(e){
+  mouse.tx = e.clientX / innerWidth - .5;
+  mouse.ty = e.clientY / innerHeight - .5;
+}, {passive:true});
+
+function makeGlow(color, size){
+  var s = document.createElement("canvas");
+  s.width = s.height = size * 2;
+  var sc = s.getContext("2d");
+  var g = sc.createRadialGradient(size, size, 0, size, size, size);
+  g.addColorStop(0, "rgba(" + color + ",.55)");
+  g.addColorStop(.4, "rgba(" + color + ",.18)");
+  g.addColorStop(1, "rgba(" + color + ",0)");
+  sc.fillStyle = g; sc.fillRect(0, 0, size * 2, size * 2);
+  return s;
 }
+var SPRITES = {};
+function initSprites(){
+  SPRITES = {
+    blue: makeGlow("122,162,255", 64), teal: makeGlow("110,231,216", 64),
+    violet: makeGlow("201,167,255", 64), warm: makeGlow("255,205,150", 64),
+    white: makeGlow("255,255,255", 64), cloud: makeGlow("235,242,252", 64)
+  };
+}
+initSprites();
+
+function rs(){ W = cv.width = innerWidth; H = cv.height = innerHeight; rebuild(); }
+
 function rebuild(){
-  parts = []; ripples = [];
+  parts = []; effects = [];
   var mode = effMode(), sky = curSky || "night";
+  var i;
   if(mode === "clear"){
-    /* 光斑：晴天白天漂浮的柔光圆 */
-    var n = sky === "day" ? 26 : 16;
-    for(var i = 0; i < n; i++) parts.push({t:"bokeh", x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*46+16, vx:(Math.random()-.5)*.22, vy:-Math.random()*.16-.04, a:Math.random()*.12+.05, ph:Math.random()*7});
+    var nb = sky === "day" ? 14 : 10;
+    for(i = 0; i < nb; i++) parts.push({t:"bokeh", x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*60+30, vx:(Math.random()-.5)*.24, vy:-Math.random()*.14-.03,
+      a:Math.random()*.5+.3, ph:Math.random()*7, d:Math.random()*.9+.1,
+      spr: (sky === "dawn" || sky === "dusk") ? "warm" : (Math.random() < .5 ? "blue" : "teal")});
+    for(i = 0; i < 5; i++) parts.push({t:"sparkle", x:Math.random()*W, y:Math.random()*H,
+      life:Math.random()*6, max:Math.random()*5+3, r:Math.random()*3+2.2, d:Math.random()});
+    if(sky === "night" || sky === "late"){
+      for(i = 0; i < (sky === "late" ? 150 : 110); i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.85,
+        r:Math.random()*1.4+.4, ph:Math.random()*7, sp:Math.random()*.9+.4, a:Math.random()*.6+.25, d:Math.random()});
+    } else if(sky === "dawn" || sky === "dusk"){
+      for(i = 0; i < 7; i++) parts.push({t:"fly", x:Math.random()*W, y:H*.45+Math.random()*H*.45,
+        ph:Math.random()*7, sp:Math.random()*.7+.5, d:Math.random()});
+    }
+  } else if(mode === "cloud"){
+    for(i = 0; i < 8; i++) parts.push({t:"puff", x:Math.random()*(W+500)-250, y:Math.random()*H*.75+H*.04,
+      s:Math.random()*1.6+.7, v:Math.random()*.32+.1, d:Math.random()*.9+.1, ph:Math.random()*7});
+    if(sky === "night" || sky === "late")
+      for(i = 0; i < 60; i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.6,
+        r:Math.random()*1.2+.4, ph:Math.random()*7, sp:Math.random()*.8+.4, a:Math.random()*.4+.2, d:Math.random()});
   } else if(mode === "rain"){
-    for(var j = 0; j < (reduced?60:150); j++) parts.push({t:"drop", x:Math.random()*W, y:Math.random()*H,
-      l:Math.random()*14+7, v:Math.random()*7+7, a:Math.random()*.3+.12});
+    for(i = 0; i < (reduced?60:150); i++) parts.push({t:"drop", x:Math.random()*W, y:Math.random()*H,
+      l:Math.random()*16+8, v:Math.random()*5.5+6.5, a:Math.random()*.28+.12, d:Math.random()});
+    for(i = 0; i < 4; i++) parts.push({t:"puff", x:Math.random()*(W+500)-250, y:Math.random()*H*.4,
+      s:Math.random()*1.4+.8, v:Math.random()*.2+.06, d:Math.random()*.6+.1, ph:Math.random()*7, dark:true});
   } else if(mode === "snow"){
-    for(var k = 0; k < 120; k++) parts.push({t:"flake", x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*2.4+1, v:Math.random()*.9+.4, ph:Math.random()*7, a:Math.random()*.5+.25});
+    for(i = 0; i < 120; i++) parts.push({t:"flake", x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*2.6+1, v:Math.random()*.8+.35, ph:Math.random()*7, a:Math.random()*.55+.25, d:Math.random()});
   } else {
-    /* cloud / 夜晴：星星或浮尘 */
-    var m = (sky === "night" || sky === "late") ? 1 : 0;
-    var cnt = m ? (sky === "late" ? 170 : 120) : 40;
-    for(var s = 0; s < cnt; s++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.85,
-      r:Math.random()*1.4+.4, ph:Math.random()*7, sp:Math.random()*.9+.4, a:Math.random()*.6+.25});
+    for(i = 0; i < 40; i++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*1.1+.3, ph:Math.random()*7, sp:.5, a:.3, d:Math.random()});
   }
 }
-function frame(t){
+
+function spawnMeteor(){
+  effects.push({t:"meteor", x:Math.random()*W*.7 + W*.15, y:Math.random()*H*.25,
+    vx:(Math.random()*4+5) * (Math.random()<.5?-1:1), vy:Math.random()*2.4+2.4, life:1});
+}
+function spawnSplash(px, py){
+  effects.push({t:"splash", x:px, y:py, r:0, a:.4});
+  if(Math.random() < .6) effects.push({t:"splash", x:px + Math.random()*14-7, y:py, r:0, a:.3});
+}
+
+var meteorCd = 5;
+function frame(now){
+  if(!lastT) lastT = now;
+  var dt = clamp((now - lastT) / 16.666, 0, 3); lastT = now;
+  mouse.x += (mouse.tx - mouse.x) * .06 * dt;
+  mouse.y += (mouse.ty - mouse.y) * .06 * dt;
+  var h1 = document.getElementById("halo1"), h2 = document.getElementById("halo2");
+  if(h1) h1.style.transform = "translate3d(" + (mouse.x * -30).toFixed(1) + "px," + (mouse.y * -20).toFixed(1) + "px,0)";
+  if(h2) h2.style.transform = "translate3d(" + (mouse.x * -46).toFixed(1) + "px," + (mouse.y * -30).toFixed(1) + "px,0)";
+
   x.clearRect(0, 0, W, H);
   var mode = effMode(), sky = curSky || "night";
-  var cols = COLORS[sky] || COLORS.night;
-  for(var i = 0; i < parts.length; i++){
-    var p = parts[i];
+  var i, p;
+  for(i = 0; i < parts.length; i++){
+    p = parts[i];
+    var px = p.x + mouse.x * 46 * (p.d || .4);
+    var py = p.y + mouse.y * 30 * (p.d || .4);
     if(p.t === "bokeh"){
-      p.x += p.vx; p.y += p.vy;
-      if(p.y < -p.r) { p.y = H + p.r; p.x = Math.random()*W; }
-      if(p.x < -p.r) p.x = W + p.r; if(p.x > W + p.r) p.x = -p.r;
-      var tw = .7 + Math.sin(t*.001 + p.ph)*.3;
-      var g = x.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-      var c0 = cols[i % cols.length];
-      g.addColorStop(0, "rgba(" + c0 + "," + (p.a*tw*2.2) + ")");
-      g.addColorStop(1, "rgba(" + c0 + ",0)");
-      x.fillStyle = g;
-      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.2832); x.fill();
-    } else if(p.t === "drop"){
-      p.y += p.v; p.x -= p.v*.18;
-      if(p.y > H){
-        p.y = -p.l; p.x = Math.random()*W;
-        if(Math.random() < .3) ripples.push({x:Math.random()*W, y:H*Math.random()*.3 + H*.68, r:0, a:.35});
-      }
-      x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x + p.l*.18, p.y - p.l);
-      x.strokeStyle = "rgba(180,210,255," + p.a + ")"; x.lineWidth = 1; x.stroke();
-    } else if(p.t === "flake"){
-      p.y += p.v; p.x += Math.sin(t*.001 + p.ph)*.5;
-      if(p.y > H + 4){ p.y = -4; p.x = Math.random()*W; }
-      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.2832);
-      x.fillStyle = "rgba(255,255,255," + p.a + ")"; x.fill();
-    } else { /* star */
-      var a = p.a * (.55 + Math.sin(t*.001*p.sp + p.ph)*.45);
-      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.2832);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if(p.y < -p.r){ p.y = H + p.r; p.x = Math.random()*W; }
+      if(p.x < -p.r) p.x = W + p.r; else if(p.x > W + p.r) p.x = -p.r;
+      var twb = .65 + Math.sin(now*.0009 + p.ph)*.35;
+      x.globalAlpha = p.a * twb;
+      x.drawImage(SPRITES[p.spr], px - p.r, py - p.r, p.r*2, p.r*2);
+    } else if(p.t === "sparkle"){
+      p.life += dt / 60;
+      if(p.life > p.max){ p.life = 0; p.x = Math.random()*W; p.y = Math.random()*H; p.max = Math.random()*5+3; }
+      var k = Math.sin(Math.PI * clamp(p.life / p.max, 0, 1));
+      var r = p.r * k;
+      x.globalAlpha = 1;
+      x.strokeStyle = "rgba(255,255,255,.9)"; x.lineWidth = 1;
+      x.beginPath();
+      x.moveTo(px - r*2, py); x.lineTo(px + r*2, py);
+      x.moveTo(px, py - r*2); x.lineTo(px, py + r*2);
+      x.stroke();
+      x.beginPath(); x.arc(px, py, r*.5, 0, 6.2832);
+      x.fillStyle = "rgba(255,255,255," + (k*.9) + ")"; x.fill();
+    } else if(p.t === "star"){
+      var a = p.a * (.55 + Math.sin(now*.001*p.sp + p.ph)*.45);
+      x.globalAlpha = 1;
+      x.beginPath(); x.arc(px, py, p.r, 0, 6.2832);
       x.fillStyle = "rgba(220,232,255," + a + ")"; x.fill();
-      if(p.r > 1.3){
-        x.beginPath(); x.arc(p.x, p.y, p.r*3.2, 0, 6.2832);
-        x.fillStyle = "rgba(160,190,255," + a*.12 + ")"; x.fill();
+      if(p.r > 1.25){
+        x.beginPath(); x.arc(px, py, p.r*3.4, 0, 6.2832);
+        x.fillStyle = "rgba(160,190,255," + a*.1 + ")"; x.fill();
       }
+    } else if(p.t === "fly"){
+      p.x += Math.sin(now*.0006*p.sp + p.ph)*.5*dt;
+      p.y += Math.cos(now*.0005*p.sp + p.ph*1.7)*.34*dt;
+      var fa = clamp(.45 + Math.sin(now*.002*p.sp + p.ph)*.4, .05, 1);
+      x.globalAlpha = fa;
+      x.drawImage(SPRITES.warm, px-9, py-9, 18, 18);
+    } else if(p.t === "puff"){
+      p.x += p.v * dt;
+      if(p.x > W + 260) p.x = -260;
+      var bob = Math.sin(now*.0004 + p.ph)*8;
+      x.globalAlpha = p.dark ? .1 : .16;
+      var spr = SPRITES.cloud, sw = 190*p.s, sh = 120*p.s;
+      x.drawImage(spr, px-sw/2, py+bob-sh/2, sw, sh);
+      x.drawImage(spr, px-sw*.32, py+bob+6-sh*.42, sw*.72, sh*.72);
+      x.drawImage(spr, px+sw*.26, py+bob+2-sh*.38, sw*.6, sh*.6);
+    } else if(p.t === "drop"){
+      p.y += p.v * dt; p.x -= p.v * .16 * dt;
+      if(p.y > H - 4){
+        if(Math.random() < .35) spawnSplash(px, H - Math.random()*H*.16);
+        p.y = -p.l; p.x = Math.random()*W;
+      }
+      x.globalAlpha = 1;
+      x.beginPath(); x.moveTo(px, py); x.lineTo(px + p.l*.16, py - p.l);
+      x.strokeStyle = "rgba(185,215,255," + p.a + ")"; x.lineWidth = p.d > .6 ? 1.4 : 1; x.stroke();
+    } else if(p.t === "flake"){
+      p.y += p.v * dt; p.x += Math.sin(now*.0008 + p.ph)*.5*dt;
+      if(p.y > H + 4){ p.y = -4; p.x = Math.random()*W; }
+      x.globalAlpha = 1;
+      x.beginPath(); x.arc(px, py, p.r, 0, 6.2832);
+      x.fillStyle = "rgba(255,255,255," + p.a + ")"; x.fill();
     }
   }
-  /* 涟漪 */
-  for(var r = ripples.length - 1; r >= 0; r--){
-    var rp = ripples[r];
-    rp.r += 1.4; rp.a *= .965;
-    if(rp.a < .01){ ripples.splice(r, 1); continue; }
-    x.beginPath(); x.ellipse(rp.x, rp.y, rp.r, rp.r*.32, 0, 0, 6.2832);
-    x.strokeStyle = "rgba(180,215,255," + rp.a + ")"; x.lineWidth = 1.1; x.stroke();
+  if(mode === "clear" && (sky === "night" || sky === "late")){
+    meteorCd -= dt;
+    if(meteorCd <= 0){ spawnMeteor(); meteorCd = Math.random()*11 + 6; }
   }
-  if(parts.length && parts[0].t === "drop" && Math.random() < .12)
-    ripples.push({x:Math.random()*W, y:H*Math.random()*.35 + H*.62, r:0, a:.3});
+  for(i = effects.length - 1; i >= 0; i--){
+    var e2 = effects[i];
+    if(e2.t === "meteor"){
+      e2.x += e2.vx * dt; e2.y += e2.vy * dt; e2.life -= .022 * dt;
+      if(e2.life <= 0 || e2.x < -80 || e2.x > W + 80){ effects.splice(i, 1); continue; }
+      var grad = x.createLinearGradient(e2.x, e2.y, e2.x - e2.vx*10, e2.y - e2.vy*10);
+      grad.addColorStop(0, "rgba(255,255,255," + (e2.life*.9) + ")");
+      grad.addColorStop(1, "rgba(160,190,255,0)");
+      x.globalAlpha = 1;
+      x.strokeStyle = grad; x.lineWidth = 1.6; x.lineCap = "round";
+      x.beginPath(); x.moveTo(e2.x, e2.y); x.lineTo(e2.x - e2.vx*10, e2.y - e2.vy*10); x.stroke();
+    } else if(e2.t === "splash"){
+      e2.r += 1.3 * dt; e2.a *= Math.pow(.94, dt);
+      if(e2.a < .02){ effects.splice(i, 1); continue; }
+      x.globalAlpha = 1;
+      x.beginPath(); x.ellipse(e2.x, e2.y, e2.r, e2.r*.3, 0, 0, 6.2832);
+      x.strokeStyle = "rgba(185,215,255," + e2.a + ")"; x.lineWidth = 1; x.stroke();
+    }
+  }
+  x.globalAlpha = 1;
   raf = requestAnimationFrame(frame);
 }
+
+/* 修复"切回来卡半秒"：隐藏时彻底停帧，回来先暖场一帧再继续 */
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){
+    if(raf){ cancelAnimationFrame(raf); raf = null; }
+  } else if(!reduced && !raf){
+    lastT = 0;
+    frame(0);
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(frame);
+  }
+});
+
 addEventListener("resize", rs);
 rs();
-if(reduced){ frame(0); cancelAnimationFrame(raf); } else { raf = requestAnimationFrame(frame); }
+if(reduced){ frame(0); cancelAnimationFrame(raf); raf = null; }
+else { raf = requestAnimationFrame(frame); }
 })();
 </script>
 </body>
