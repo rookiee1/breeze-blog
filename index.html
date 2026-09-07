@@ -278,12 +278,17 @@ body.ready .hero h1 .kine span{transform:none}
 .row-preview .rp-tip{position:absolute;left:14px;bottom:12px;color:#fff;font-size:11px;letter-spacing:.24em;opacity:.8}
 
 /* ================= 项目（非对称网格） ================= */
-#projects .pgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
-.project{padding:clamp(26px,3vw,40px);display:flex;flex-direction:column;gap:15px}
+#projects .pgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}.project{padding:clamp(26px,3vw,40px);display:flex;flex-direction:column;gap:15px}
 .p-a{grid-column:span 7;min-height:300px}
 .p-b{grid-column:span 5;min-height:300px}
 .p-c{grid-column:span 12;flex-direction:row;align-items:center;gap:clamp(20px,3vw,40px);min-height:0}
-@media(max-width:920px){.p-a,.p-b,.p-c{grid-column:span 12}.p-c{flex-direction:column;align-items:flex-start}}
+.p-d{grid-column:span 7;min-height:300px}
+.p-e{grid-column:span 5;min-height:300px}
+.tool-link{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin-top:auto;padding:9px 18px;border-radius:100px;
+  border:1px solid var(--line2);font-size:12.5px;font-weight:700;color:var(--text2);text-decoration:none;transition:.3s var(--ease)}
+.tool-link:hover{color:var(--a1);border-color:var(--a1);transform:translateX(4px)}
+.tool-link .arr{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+@media(max-width:920px){.p-a,.p-b,.p-c,.p-d,.p-e{grid-column:span 12}.p-c{flex-direction:column;align-items:flex-start}}
 .project .ico{width:54px;height:54px;flex:0 0 auto;border-radius:17px;background:var(--surface2);border:1px solid var(--line);display:grid;place-items:center;font-size:25px;transition:transform .4s var(--ease)}
 .project:hover .ico{transform:translateY(-5px) rotate(-7deg)}
 .project h3{font-size:21px;font-weight:800}
@@ -358,6 +363,25 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
   25%{opacity:1}
   100%{opacity:0;transform:translateX(130%) skewX(-12deg)}
 }
+
+/* ================= 登录（管理后台入口） ================= */
+.login-btn{padding:8px 18px;border-radius:100px;background:var(--grad);color:#fff;font-weight:700;font-size:12.5px;
+  border:none;cursor:pointer;transition:.3s var(--ease);font-family:inherit;letter-spacing:.05em;margin-right:10px}
+.login-btn:hover{filter:brightness(1.12);transform:translateY(-2px);box-shadow:0 6px 18px color-mix(in srgb,var(--a2) 35%,transparent)}
+#loginModal{position:fixed;inset:0;z-index:97;background:color-mix(in srgb,var(--bg) 60%,transparent);backdrop-filter:blur(6px);
+  display:grid;place-items:center;opacity:0;visibility:hidden;transition:.3s}
+#loginModal.open{opacity:1;visibility:visible}
+.login-box{width:min(360px,92vw);background:var(--surface);border:1px solid var(--line2);border-radius:18px;
+  box-shadow:var(--shadow);padding:26px;transform:translateY(14px);transition:transform .3s var(--ease)}
+#loginModal.open .login-box{transform:none}
+.login-box h3{font-size:17px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.login-box .sub{font-size:12.5px;color:var(--text3);margin-bottom:16px}
+.login-box input{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:10px;
+  padding:11px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;letter-spacing:.15em;transition:.3s}
+.login-box input:focus{border-color:var(--a1)}
+.login-err{color:#ff8f8f;font-size:12px;margin-top:8px;min-height:16px}
+.login-btns{display:flex;gap:10px;margin-top:14px;justify-content:flex-end}
+.login-btns button{padding:10px 22px;border-radius:100px;font-size:13.5px;cursor:pointer;transition:.3s;font-family:inherit}
 
 /* ================= 更多瞬间（上传图片） ================= */
 .g-card.custom .art{background-size:cover;background-position:center}
@@ -457,6 +481,7 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
     <a href="#projects" data-scramble data-page-node-id="tvXbWEXN1nJzKX85WH2bE8">项目</a>
     <a href="#path" data-scramble data-page-node-id="JarWNJJBLQbc1sMUjdwrW2">经历</a>
   </nav>
+  <button class="login-btn" id="loginBtn" title="登录后台">登录</button>
   <button class="theme-btn" id="searchBtn" aria-label="搜索（Ctrl+K）" style="margin-right:10px">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
   </button>
@@ -724,6 +749,23 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
             <div class="chips" data-page-node-id="y7gcO6KWGuk1laZ3RCtc4t"><i data-page-node-id="pMxgNCVW0Q9knRbnxQmkQp">Canvas</i><i data-page-node-id="WN0XGfyqyvJJeyld3XsOEZ">天气 API</i><i data-page-node-id="Idu6gl636FJ00wd0d2YRJu">Extension</i></div>
           </div>
         </article>
+        <article class="project tilt p-d zoom" data-delay="3">
+          <div class="glow"></div>
+          <div class="ico">🎯</div>
+          <span class="status">DEV · 开发中</span>
+          <h3>鸣潮抽卡分析</h3>
+          <p>粘贴千星奇域抽卡记录链接，自动分析各卡池出货率、歪与不歪、欧非指数、保底预警和历史趋势——看看风到底站在谁那边。</p>
+          <div class="chips"><i>数据可视化</i><i>鸣潮</i><i>Canvas 图表</i></div>
+          <a class="tool-link" href="/tools/wuwa-gacha.html">进入工具 <span class="arr">→</span></a>
+        </article>
+        <article class="project tilt p-e zoom" data-delay="4">
+          <div class="glow"></div>
+          <div class="ico">🧰</div>
+          <span class="status">SOON · 施工预留</span>
+          <h3>工具箱</h3>
+          <p>以后做的小工具都会住进这里，从这一排卡片直接跳转。手头排队中的还有：随机灵感发生器、写作日历、书签管理……</p>
+          <div class="chips"><i>规划中</i><i>持续上新</i></div>
+        </article>
       </div>
 
       <div class="method reveal" data-page-node-id="g6X0XqGiwEBBGiicSxkTK4">
@@ -851,6 +893,20 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
   </div>
 </div>
 
+<!-- 管理登录 -->
+<div id="loginModal" aria-hidden="true">
+  <div class="login-box">
+    <h3>🔐 管理登录</h3>
+    <div class="sub">输入管理密码，进入后台查看浏览数据与瞬间管理</div>
+    <input type="password" id="loginPwd" placeholder="管理密码" autocomplete="off">
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-btns">
+      <button class="mb-cancel" id="loginCancel">取消</button>
+      <button class="mb-ok" id="loginOk">进入后台 ✦</button>
+    </div>
+  </div>
+</div>
+
 <!-- 全局搜索（Ctrl+K） -->
 <div id="searchPanel" aria-hidden="true">
   <div class="search-box">
@@ -918,7 +974,7 @@ measure(); window.addEventListener("resize", measure);
 if(finePointer && !reduced){
   window.addEventListener("wheel", function(e){
     /* 阅读器 / 搜索面板打开时，滚轮交给它们自己 */
-    if(e.target.closest && e.target.closest("#reader, #searchPanel, #momentModal")) return;
+    if(e.target.closest && e.target.closest("#reader, #searchPanel, #momentModal, #loginModal")) return;
     e.preventDefault();
     var d = e.deltaY;
     if(e.deltaMode === 1) d *= 33;
@@ -1402,6 +1458,7 @@ document.addEventListener("keydown", function(e){
   if(e.key === "Escape"){
     if(searchPanel.classList.contains("open")) closeSearch();
     else if(momModal.classList.contains("open")) closeMomentModal();
+    else if(loginModal.classList.contains("open")) closeLogin();
     else if(readerOpen) closeReader();
     return;
   }
@@ -1634,6 +1691,42 @@ try{
     }
   }
 }catch(e){}
+
+/* ================= 管理登录（直达后台） ================= */
+var loginModal = document.getElementById("loginModal");
+var loginPwd = document.getElementById("loginPwd");
+var loginErr = document.getElementById("loginErr");
+function openLogin(){
+  loginModal.classList.add("open"); loginModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden"; target = window.scrollY;
+  loginErr.textContent = "";
+  setTimeout(function(){ loginPwd.focus(); }, 80);
+}
+function closeLogin(){
+  loginModal.classList.remove("open"); loginModal.setAttribute("aria-hidden", "true");
+  if(!readerOpen && !momModal.classList.contains("open")) document.body.style.overflow = "";
+}
+document.getElementById("loginBtn").addEventListener("click", openLogin);
+document.getElementById("loginCancel").addEventListener("click", closeLogin);
+loginModal.addEventListener("click", function(e){ if(e.target === loginModal) closeLogin(); });
+function doLogin(){
+  var k = loginPwd.value.trim();
+  if(!k){ loginErr.textContent = "请输入管理密码"; return; }
+  loginErr.textContent = "验证中…";
+  fetch("/api/stats", { headers: { "X-Admin-Key": k } }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.ok){
+      try{ localStorage.setItem("breeze-admin-key", k); }catch(e){}
+      loginErr.textContent = "";
+      toast("验证成功，正在进入后台 🍃");
+      setTimeout(function(){ location.href = "/admin.html"; }, 600);
+    } else {
+      loginErr.textContent = "密码不对，再想想？";
+      loginPwd.value = "";
+    }
+  }).catch(function(){ loginErr.textContent = "连不上云端，稍后再试"; });
+}
+document.getElementById("loginOk").addEventListener("click", doLogin);
+loginPwd.addEventListener("keydown", function(e){ if(e.key === "Enter") doLogin(); });
 
 /* ================= 运行天数 / 时段问候 / 标签页彩蛋 ================= */
 var SITE_BIRTH = new Date(2023, 5, 1); /* 建站日：2023.06.01 */
