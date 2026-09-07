@@ -1589,12 +1589,30 @@ document.getElementById("momentCancel").addEventListener("click", closeMomentMod
 momModal.addEventListener("click", function(e){ if(e.target === momModal) closeMomentModal(); });
 momTitle.addEventListener("keydown", function(e){ if(e.key === "Enter") document.getElementById("momentOk").click(); });
 renderMoments();
-/* 云端后端：健康检查 → 拉取云端瞬间 */
-if(API_BASE){
-  fetch(API_BASE + "/api/health", { method: "POST" }).then(function(r){ return r.json(); }).then(function(j){
-    if(j && j.ok){ CLOUD = true; loadCloudMoments(); }
-  }).catch(function(){});
-}
+/* 云端后端：智能探测（同源路由优先，workers.dev 兜底） */
+(function probeAPI(){
+  var WORKER_URL = "https://breeze-api.breeze-96424a.workers.dev";
+  var candidates = ["", WORKER_URL];
+  var i = 0;
+  function next(){
+    if(i >= candidates.length) return; /* 全部不可达：本地模式 */
+    var base = candidates[i++];
+    fetch(base + "/api/health", { method: "POST" }).then(function(r){ return r.json(); }).then(function(j){
+      if(j && j.ok){
+        API_BASE = base; CLOUD = true;
+        loadCloudMoments();
+        /* 会话首次访问 → 上报云端统计 */
+        try{
+          if(sessionStorage.getItem("breeze-visited")){
+            fetch(API_BASE + "/api/track", { method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ref: document.referrer || "直达" }) }).catch(function(){});
+          }
+        }catch(e){}
+      } else next();
+    }).catch(next);
+  }
+  next();
+})();
 
 /* ================= 本机访问记录（后台管理页数据源） ================= */
 try{
