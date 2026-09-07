@@ -11,18 +11,39 @@ html,body{height:100%}
 body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#eef2fa;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
   transition:background 2.5s ease}
-body.sky-night{background:linear-gradient(180deg,#050914 0%,#0b1226 55%,#141c38 100%)}
-body.sky-late{background:linear-gradient(180deg,#04060f 0%,#080d1d 60%,#0e1530 100%)}
-body.sky-dawn{background:linear-gradient(180deg,#1a2340 0%,#3d3a5e 45%,#8a5d6e 80%,#c98a6b 100%)}
-body.sky-day{background:linear-gradient(180deg,#5b8fc9 0%,#7fb2d9 45%,#a8cfe0 100%);color:#12203a}
-body.sky-dusk{background:linear-gradient(180deg,#241d3e 0%,#4a3060 30%,#5c3a5e 55%,#96575a 80%,#c98a6b 100%)}
+body.sky-night{background:linear-gradient(165deg,#04070f 0%,#0a1124 42%,#101a3a 72%,#1b2549 100%)}
+body.sky-late{background:linear-gradient(165deg,#03050c 0%,#070c1c 45%,#0d142e 78%,#131c3e 100%)}
+body.sky-dawn{background:linear-gradient(170deg,#182142 0%,#3d3a5e 42%,#8a5d6e 72%,#c98a6b 92%,#e0a67c 100%)}
+body.sky-day{background:linear-gradient(168deg,#4a7fb8 0%,#6fa3d0 34%,#8fc2dc 64%,#b9d9e7 100%);color:#12203a}
+body.sky-dusk{background:linear-gradient(172deg,#1f1838 0%,#4a3060 28%,#5c3a5e 50%,#96575a 76%,#c98a6b 92%,#e0a67c 100%)}
 body.cloudy{filter:saturate(.62) brightness(.92)}
 body.rainy{filter:saturate(.58) brightness(.84)}
+/* 环境光斑：每个时段一组色相，缓慢漂移，让纯色渐变"活"起来 */
+body{--wash1:rgba(122,162,255,.15);--wash2:rgba(110,231,216,.11);--wash3:rgba(201,167,255,.13)}
+body.sky-late{--wash1:rgba(90,120,220,.13);--wash2:rgba(70,180,200,.09);--wash3:rgba(160,120,255,.11)}
+body.sky-dawn{--wash1:rgba(255,170,140,.22);--wash2:rgba(255,120,150,.13);--wash3:rgba(150,120,255,.15)}
+body.sky-day{--wash1:rgba(255,255,255,.34);--wash2:rgba(255,232,200,.24);--wash3:rgba(185,222,255,.28)}
+body.sky-dusk{--wash1:rgba(255,140,110,.22);--wash2:rgba(255,100,160,.13);--wash3:rgba(120,90,220,.19)}
+body::before{content:"";position:fixed;inset:-6%;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(46vw 40vw at 14% 20%,var(--wash1),transparent 70%),
+    radial-gradient(52vw 42vw at 86% 80%,var(--wash2),transparent 72%),
+    radial-gradient(38vw 30vw at 78% 10%,var(--wash3),transparent 74%);
+  animation:washDrift 28s ease-in-out infinite alternate}
+@keyframes washDrift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-3vw,2.5vh,0) scale(1.07)}}
+/* 胶片噪点 + 暗角：去掉"塑料纯色感" */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.5;
+  background:
+    radial-gradient(130vw 95vw at 50% 42%,transparent 58%,rgba(5,8,18,.22) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E")}
 #wind{position:fixed;inset:0;pointer-events:none}
 .halo{position:fixed;border-radius:50%;pointer-events:none;filter:blur(56px);opacity:.2;
   will-change:transform;transition:opacity 2s}
 .halo.h1{width:46vw;height:46vw;left:-12vw;top:-16vw;background:radial-gradient(circle,#7aa2ff,transparent 60%)}
 .halo.h2{width:38vw;height:38vw;right:-10vw;bottom:-14vw;background:radial-gradient(circle,#6ee7d8,transparent 60%)}
+.halo.h3{width:62vw;height:36vw;left:28vw;top:-20vw;background:radial-gradient(ellipse at center,rgba(160,130,255,.55),transparent 66%);
+  animation:h3drift 36s ease-in-out infinite alternate}
+@keyframes h3drift{from{transform:translate3d(-4vw,0,0) rotate(-2deg)}to{transform:translate3d(4vw,2vh,0) rotate(2deg)}}
 .glass{position:relative;
   background:linear-gradient(120deg,rgba(255,255,255,.11),rgba(255,255,255,.045) 42%,rgba(255,255,255,.09));
   backdrop-filter:blur(22px) saturate(170%) brightness(1.05);-webkit-backdrop-filter:blur(22px) saturate(170%) brightness(1.05);
@@ -102,7 +123,7 @@ body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
 </head>
 <body class="sky-night">
 <canvas id="wind"></canvas>
-<div class="halo h1" id="halo1"></div><div class="halo h2" id="halo2"></div>
+<div class="halo h1" id="halo1"></div><div class="halo h2" id="halo2"></div><div class="halo h3"></div>
 
 <div class="wx glass liquid" id="wx">正在感知天气…</div>
 <div class="clock" id="clock">--:--</div>
