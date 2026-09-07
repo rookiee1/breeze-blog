@@ -466,6 +466,7 @@ function scnBuild(){
   var rS = scnMulberry(77), shims = [];
   for(i = 0; i < 14; i++) shims.push({y: rS(), x: rS(), w: .15 + rS() * .4, sp: .5 + rS(), ph: rS() * 7});
   SCN_DATA = {
+    sw: scn.width, sh: scn.height, /* 关键：供 scnRender 计算坐标 */
     mtn:   [ridgePts(11, 9),  ridgePts(23, 11), ridgePts(37, 13)],
     lake:  [ridgePts(41, 9),  ridgePts(53, 11)],
     forest:[ridgePts(71, 10), ridgePts(83, 14)],
@@ -510,8 +511,11 @@ function scnMist(y, h, col){
 }
 function scnRender(k, pal, now){
   var d = SCN_DATA, sw = d.sw, sh = d.sh, i;
+  if(!sw || !sh) return;
   var mode = effMode();
-  var dim = mode === "rain" ? .5 : mode === "cloud" ? .78 : 1;
+  var dim0 = mode === "rain" ? .5 : mode === "cloud" ? .78 : 1;
+  var fadeA = (k === scnIdx && scnFade < 1) ? scnFade : 1; /* 交叉淡入淡出烘进透明度 */
+  var dim = dim0 * fadeA;
   function ca(c, m){ return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (c[3] * (m == null ? 1 : m) * dim).toFixed(3) + ")"; }
   var kind = SCN_LIST[k].k;
   var par1 = mouse.x * 6, par2 = mouse.x * 13, par3 = mouse.x * 22;
@@ -530,14 +534,14 @@ function scnRender(k, pal, now){
     sx.fillStyle = wg; sx.fillRect(0, wl, sw, sh - wl);
     sx.save(); sx.translate(0, wl * 2); sx.scale(1, -1); sx.globalAlpha = .30 * dim;
     scnRidge(d.lake[1], sh * .52, sh * .16, ca(pal.mid, 1), par2, vy2);
-    sx.restore(); sx.globalAlpha = 1;
+    sx.restore(); /* save/restore 自动恢复渐隐透明度 */
     sx.strokeStyle = ca(pal.shimmer); sx.lineWidth = 1;
     for(i = 0; i < d.shimmer.length; i++){
       var sm = d.shimmer[i];
       var yy = wl + 6 + sm.y * (sh - wl) * .9;
       var xx = ((sm.x * sw + now * .006 * sm.sp) % (sw + 200)) - 100;
       var ww = sm.w * sw * .22 * (.6 + .4 * Math.sin(now * .001 * sm.sp + sm.ph));
-      sx.globalAlpha = (.14 + .12 * Math.sin(now * .0012 * sm.sp + sm.ph)) * dim;
+      sx.globalAlpha = clamp((.14 + .12 * Math.sin(now * .0012 * sm.sp + sm.ph)), 0, 1) * dim;
       sx.beginPath(); sx.moveTo(xx, yy); sx.lineTo(xx + ww, yy); sx.stroke();
     }
     sx.globalAlpha = 1;
@@ -581,10 +585,10 @@ function drawScenery(now, dt){
   if(!SCN_DATA || !scn.width) return;
   var pal = scnPalette(curSky || "night");
   sx.clearRect(0, 0, scn.width, scn.height);
-  if(scnFade < 1 && scnPrev >= 0) scnRender(scnPrev, pal, now);
-  if(scnFade < 1) sx.globalAlpha = scnFade;
-  scnRender(scnIdx, pal, now);
-  sx.globalAlpha = 1;
+  try{
+    if(scnFade < 1 && scnPrev >= 0) scnRender(scnPrev, pal, now);
+    scnRender(scnIdx, pal, now);
+  }catch(e){ /* 景观异常不连累粒子动画 */ }
   if(scnFade < 1) scnFade = Math.min(1, scnFade + dt / 140);
 }
 var scnBtn = document.getElementById("scnBtn");
