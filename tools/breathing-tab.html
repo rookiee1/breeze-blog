@@ -114,6 +114,7 @@ function greetOf(h){
   return "夜深了，风也困了";
 }
 var curSky = "";
+var WX_MODE = "auto", WX_REAL = "clear"; /* 必须先于 tick() 初始化 */
 function tick(){
   var d = new Date(), p = function(n){return String(n).padStart(2,"0")};
   document.getElementById("clock").textContent = p(d.getHours()) + ":" + p(d.getMinutes());
@@ -132,7 +133,6 @@ function applySky(){
 tick(); setInterval(tick, 1000);
 
 /* ============ 天气 ============ */
-var WX_MODE = "auto", WX_REAL = "clear";
 try{ var savedWx = localStorage.getItem("breath-wx"); if(savedWx){ WX_MODE = savedWx; syncChips("#wxMan", savedWx); } }catch(e){}
 function effMode(){ return WX_MODE === "auto" ? WX_REAL : WX_MODE; }
 function codeToMode(c){
@@ -288,6 +288,7 @@ function updateScene(){
 }
 
 function rebuild(){
+  if(!W || !H) return; /* rs() 尺寸就绪后再真正构建 */
   parts = []; effects = [];
   updateScene();
   var mode = effMode(), sky = curSky || "night";
