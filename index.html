@@ -46,12 +46,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   animation:grain 8s steps(10) infinite}
 @keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-2%)}80%{transform:translate(3%,3%)}}
 #sky{position:fixed;inset:0;z-index:0;pointer-events:none}
-.aurora{position:fixed;z-index:0;pointer-events:none;filter:blur(100px);opacity:.26;border-radius:50%}
-.aurora.a{width:56vw;height:56vw;left:-16vw;top:-20vw;background:radial-gradient(circle,var(--a2),transparent 65%);animation:drift 24s ease-in-out infinite alternate}
-.aurora.b{width:46vw;height:46vw;right:-14vw;top:22vh;background:radial-gradient(circle,var(--a1),transparent 65%);animation:drift 30s ease-in-out infinite alternate-reverse}
-.aurora.c{width:40vw;height:40vw;left:26vw;bottom:-24vw;background:radial-gradient(circle,var(--a3),transparent 65%);animation:drift 36s ease-in-out infinite alternate}
+.aurora{position:fixed;z-index:0;pointer-events:none;filter:blur(42px);opacity:.15;border-radius:50%}
+.aurora.a{width:44vw;height:44vw;left:-12vw;top:-18vw;background:radial-gradient(circle,var(--a2),transparent 58%);animation:drift 24s ease-in-out infinite alternate}
+.aurora.b{width:36vw;height:36vw;right:-10vw;top:22vh;background:radial-gradient(circle,var(--a1),transparent 58%);animation:drift 30s ease-in-out infinite alternate-reverse}
+.aurora.c{width:32vw;height:32vw;left:28vw;bottom:-22vw;background:radial-gradient(circle,var(--a3),transparent 58%);animation:drift 36s ease-in-out infinite alternate}
 @keyframes drift{to{transform:translate(8vw,6vh) scale(1.15)}}
-html[data-theme="light"] .aurora{opacity:.18}
+html[data-theme="light"] .aurora{opacity:.12}
 .grid-lines{position:fixed;inset:0;z-index:1;pointer-events:none;display:flex;justify-content:space-evenly}
 .grid-lines i{width:1px;background:linear-gradient(180deg,transparent,var(--line) 20%,var(--line) 80%,transparent)}
 
@@ -743,10 +743,11 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
           <div class="glow" data-page-node-id="Dvp5Te5c1iaNZAEOzQIMeY"></div>
           <div class="ico" data-page-node-id="dsFhAHVUftYBDfeSFbyYTC">🧭</div>
           <div style="flex:1" data-page-node-id="fXPdnwYjVdJSB2DGVm1eWq">
-            <span class="status" data-page-node-id="D9gu3NsBv8tvGJPDKF8OgQ">IDEA · 构思中</span>
+            <span class="status" data-page-node-id="D9gu3NsBv8tvGJPDKF8OgQ">BETA · 已上线</span>
             <h3 style="margin-top:10px" data-page-node-id="3wHVnAy0kg3Y2eo7e9JQOe">会呼吸的导航页</h3>
-            <p style="margin:8px 0 14px" data-page-node-id="FSmRrNlH67zEoS7p8YCZ6i">背景随天气与时间流动的新标签页：晴天有光斑，雨天有涟漪，凌晨三点有星星替你值班。</p>
-            <div class="chips" data-page-node-id="y7gcO6KWGuk1laZ3RCtc4t"><i data-page-node-id="pMxgNCVW0Q9knRbnxQmkQp">Canvas</i><i data-page-node-id="WN0XGfyqyvJJeyld3XsOEZ">天气 API</i><i data-page-node-id="Idu6gl636FJ00wd0d2YRJu">Extension</i></div>
+            <p style="margin:8px 0 14px" data-page-node-id="FSmRrNlH67zEoS7p8YCZ6i">背景随天气与时间流动的新标签页：晴天有光斑，雨天有涟漪，凌晨三点有星星替你值班。现在就去设为浏览器主页吧。</p>
+            <div class="chips" data-page-node-id="y7gcO6KWGuk1laZ3RCtc4t"><i data-page-node-id="pMxgNCVW0Q9knRbnxQmkQp">Canvas</i><i data-page-node-id="WN0XGfyqyvJJeyld3XsOEZ">天气 API</i><i data-page-node-id="Idu6gl636FJ00wd0d2YRJu">新标签页</i></div>
+            <a class="tool-link" href="/tools/breathing-tab.html" style="margin-top:14px">进入导航页 <span class="arr">→</span></a>
           </div>
         </article>
         <article class="project tilt p-d zoom" data-delay="3">
