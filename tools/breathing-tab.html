@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breath · 会呼吸的导航页</title>
+<style>
+:root{--ease:cubic-bezier(.22,.9,.3,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#eef2fa;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  transition:background 2.5s ease}
+/* ---- 时段天空 ---- */
+body.sky-night{background:linear-gradient(180deg,#050914 0%,#0b1226 55%,#141c38 100%)}
+body.sky-late{background:linear-gradient(180deg,#04060f 0%,#080d1d 60%,#0e1530 100%)}
+body.sky-dawn{background:linear-gradient(180deg,#1a2340 0%,#3d3a5e 45%,#8a5d6e 80%,#c98a6b 100%)}
+body.sky-day{background:linear-gradient(180deg,#5b8fc9 0%,#7fb2d9 45%,#a8cfe0 100%);color:#12203a}
+body.sky-dusk{background:linear-gradient(180deg,#241d3e 0%,#4a3060 30%,#5c3a5e 55%,#96575a 80%,#c98a6b 100%)}
+body.cloudy{filter:saturate(.65) brightness(.92)}
+body.rainy{filter:saturate(.6) brightness(.85)}
+#wind{position:fixed;inset:0;pointer-events:none}
+.halo{position:fixed;border-radius:50%;pointer-events:none;filter:blur(70px);opacity:.22;transition:opacity 2s}
+.halo.h1{width:46vw;height:46vw;left:-12vw;top:-16vw;background:radial-gradient(circle,#7aa2ff,transparent 60%)}
+.halo.h2{width:38vw;height:38vw;right:-10vw;bottom:-14vw;background:radial-gradient(circle,#6ee7d8,transparent 60%)}
+/* ---- 中央内容 ---- */
+.clock{font-size:clamp(64px,13vw,124px);font-weight:200;letter-spacing:.04em;line-height:1;
+  font-variant-numeric:tabular-nums;text-shadow:0 4px 40px rgba(0,0,0,.25)}
+body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
+.dateline{font-size:14.5px;opacity:.82;letter-spacing:.14em}
+.greet{font-size:16px;margin-top:6px;opacity:.92}
+.greet b{font-weight:700}
+/* ---- 搜索 ---- */
+.search{margin-top:34px;width:min(600px,88vw);display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:100px;
+  padding:6px 6px 6px 22px;backdrop-filter:blur(14px);transition:.3s var(--ease)}
+body.sky-day .search{background:rgba(255,255,255,.4);border-color:rgba(20,40,70,.15)}
+.search:focus-within{transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.22);background:rgba(255,255,255,.14)}
+.search input{flex:1;background:none;border:none;outline:none;color:inherit;font-size:15.5px;font-family:inherit}
+.search input::placeholder{color:currentColor;opacity:.5}
+.search button{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#6ee7d8,#7aa2ff 55%,#c9a7ff);color:#08101f;font-size:16px;transition:.3s}
+.search button:hover{filter:brightness(1.12);transform:scale(1.06)}
+/* ---- 引擎 & 天气 & 快捷 ---- */
+.chips{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.chip{font-size:12px;padding:6px 15px;border-radius:100px;border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.06);cursor:pointer;color:inherit;opacity:.75;transition:.3s;font-family:inherit;backdrop-filter:blur(8px)}
+.chip:hover{opacity:1;transform:translateY(-2px)}
+.chip.on{opacity:1;border-color:#6ee7d8;color:#6ee7d8}
+body.sky-day .chip{border-color:rgba(20,40,70,.25);background:rgba(255,255,255,.3)}
+body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
+.quick{display:flex;gap:14px;margin-top:26px;flex-wrap:wrap;justify-content:center}
+.quick a{font-size:13px;color:inherit;opacity:.7;text-decoration:none;padding:9px 20px;border-radius:100px;
+  border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);transition:.3s var(--ease)}
+.quick a:hover{opacity:1;transform:translateY(-3px)}
+body.sky-day .quick a{border-color:rgba(20,40,70,.2)}
+.wx{position:fixed;top:22px;right:26px;font-size:12.5px;opacity:.7;display:flex;align-items:center;gap:8px}
+.credit{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:11.5px;opacity:.5}
+.credit a{color:inherit}
+@media(max-width:560px){.clock{font-size:20vw}.wx{top:14px;right:16px;font-size:11.5px}}
+</style>
+</head>
+<body class="sky-night">
+<canvas id="wind"></canvas>
+<div class="halo h1"></div><div class="halo h2"></div>
+
+<div class="wx" id="wx">正在感知天气…</div>
+<div class="clock" id="clock">--:--</div>
+<div class="dateline" id="dateline"></div>
+<div class="greet" id="greet"></div>
+
+<form class="search" id="sForm">
+  <input id="sInput" type="text" placeholder="搜点什么，风会带路…（Enter）" autocomplete="off">
+  <button type="submit" title="搜索">➤</button>
+</form>
+<div class="chips" id="engines">
+  <button class="chip on" data-eng="bing">必应</button>
+  <button class="chip" data-eng="baidu">百度</button>
+  <button class="chip" data-eng="google">Google</button>
+</div>
+<div class="chips" id="wxMan">
+  <button class="chip on" data-wx="auto">自动</button>
+  <button class="chip" data-wx="clear">☀️ 晴</button>
+  <button class="chip" data-wx="cloud">⛅ 云</button>
+  <button class="chip" data-wx="rain">🌧️ 雨</button>
+  <button class="chip" data-wx="snow">❄️ 雪</button>
+</div>
+<div class="quick">
+  <a href="/">🍃 博客</a>
+  <a href="/admin.html">📊 后台</a>
+  <a href="/tools/wuwa-gacha.html">🎯 抽卡分析</a>
+</div>
+<div class="credit">会呼吸的导航页 · 来自 <a href="/">Breeze</a> · 浏览器设置里把启动页/主页设为本链接即可每日使用</div>
+
+<script>
+(function(){
+"use strict";
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var clamp = function(v,a,b){return Math.max(a,Math.min(b,v))};
+
+/* ============ 时钟 / 问候 / 天空 ============ */
+var WEEK = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+function skyOf(h){
+  if(h >= 5 && h < 8) return "dawn";
+  if(h >= 8 && h < 16) return "day";
+  if(h >= 16 && h < 19) return "dusk";
+  if(h >= 19 && h < 23) return "night";
+  return "late";
+}
+function greetOf(h){
+  if(h < 5) return "凌晨好，星星替你值班 🌙";
+  if(h < 9) return "早上好，今天有风 ☀️";
+  if(h < 12) return "上午好，适合写点什么";
+  if(h < 14) return "中午好，记得吃饭 🍚";
+  if(h < 18) return "下午好，来杯咖啡 ☕";
+  if(h < 23) return "晚上好，夜色正好 🌆";
+  return "夜深了，风也困了";
+}
+var curSky = "";
+function tick(){
+  var d = new Date(), p = function(n){return String(n).padStart(2,"0")};
+  document.getElementById("clock").textContent = p(d.getHours()) + ":" + p(d.getMinutes());
+  document.getElementById("dateline").textContent = (d.getMonth()+1) + " 月 " + d.getDate() + " 日 · " + WEEK[d.getDay()];
+  document.getElementById("greet").textContent = greetOf(d.getHours());
+  var sky = skyOf(d.getHours());
+  if(sky !== curSky){
+    curSky = sky;
+    document.body.className = "sky-" + sky + " " + (document.body.classList.contains("rainy")?"rainy":document.body.classList.contains("cloudy")?"cloudy":"");
+    rebuild();
+  }
+}
+tick(); setInterval(tick, 1000);
+
+/* ============ 天气（Open-Meteo 免费无 key，失败则仅按时段） ============ */
+var WX_MODE = "auto";          /* auto | clear | cloud | rain | snow */
+var WX_REAL = "clear";         /* 探测到的真实天气 */
+try{ var savedWx = localStorage.getItem("breath-wx"); if(savedWx){ WX_MODE = savedWx; syncChips("#wxMan", savedWx); } }catch(e){}
+function effMode(){ return WX_MODE === "auto" ? WX_REAL : WX_MODE; }
+function codeToMode(c){
+  if(c === 0 || c === 1) return "clear";
+  if(c === 2 || c === 3 || c === 45 || c === 48) return "cloud";
+  if((c >= 51 && c <= 67) || (c >= 80 && c <= 82) || (c >= 95 && c <= 99)) return "rain";
+  if((c >= 71 && c <= 77) || (c === 85) || (c === 86)) return "snow";
+  return "cloud";
+}
+var WX_NAME = {clear:"晴", cloud:"多云", rain:"雨", snow:"雪"};
+function tryGeo(){
+  if(!navigator.geolocation){ document.getElementById("wx").textContent = "🌤️ 天气未知 · 点下方按钮切换"; return; }
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + pos.coords.latitude.toFixed(2) +
+              "&longitude=" + pos.coords.longitude.toFixed(2) + "&current_weather=true";
+    fetch(url).then(function(r){ return r.json(); }).then(function(j){
+      var cw = j.current_weather;
+      if(!cw) throw 0;
+      WX_REAL = codeToMode(cw.weathercode);
+      var hot = cw.temperature != null ? " · " + Math.round(cw.temperature) + "°C" : "";
+      var icon = {clear:"☀️", cloud:"⛅", rain:"🌧️", snow:"❄️"}[WX_REAL];
+      document.getElementById("wx").textContent = icon + " " + WX_NAME[WX_REAL] + hot + (WX_MODE === "auto" ? "" : "（手动：" + WX_NAME[effMode()] + "）");
+      rebuild();
+    }).catch(function(){ document.getElementById("wx").textContent = "🌤️ 天气服务没连上 · 可手动切换"; });
+  }, function(){ document.getElementById("wx").textContent = "🌤️ 未授权定位 · 可手动切换天气"; }, {timeout: 8000});
+}
+function syncChips(sel, val){
+  document.querySelectorAll(sel + " .chip").forEach(function(c){
+    c.classList.toggle("on", c.getAttribute("data-" + (sel === "#wxMan" ? "wx" : "eng")) === val);
+  });
+}
+document.querySelectorAll("#wxMan .chip").forEach(function(c){
+  c.addEventListener("click", function(){
+    WX_MODE = c.getAttribute("data-wx");
+    try{ localStorage.setItem("breath-wx", WX_MODE); }catch(e){}
+    syncChips("#wxMan", WX_MODE);
+    var txt = WX_MODE === "auto" ? "已恢复自动感知" : "已切换：" + WX_NAME[WX_MODE];
+    document.getElementById("wx").textContent = (WX_MODE === "auto" ? document.getElementById("wx").textContent.split("（")[0] : icon + " " + txt);
+    if(WX_MODE !== "auto") document.getElementById("wx").textContent = {clear:"☀️",cloud:"⛅",rain:"🌧️",snow:"❄️"}[WX_MODE] + " " + WX_NAME[WX_MODE] + "（手动）";
+    rebuild();
+  });
+});
+tryGeo();
+
+/* ============ 搜索 ============ */
+var ENG = "bing";
+try{ var se = localStorage.getItem("breath-eng"); if(se){ ENG = se; syncChips("#engines", se); } }catch(e){}
+var ENG_URL = {bing:"https://www.bing.com/search?q=", baidu:"https://www.baidu.com/s?wd=", google:"https://www.google.com/search?q="};
+document.querySelectorAll("#engines .chip").forEach(function(c){
+  c.addEventListener("click", function(){
+    ENG = c.getAttribute("data-eng");
+    try{ localStorage.setItem("breath-eng", ENG); }catch(e){}
+    syncChips("#engines", ENG);
+  });
+});
+document.getElementById("sForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  var q = document.getElementById("sInput").value.trim();
+  if(q) location.href = ENG_URL[ENG] + encodeURIComponent(q);
+});
+
+/* ============ 呼吸粒子（按天气+时段） ============ */
+var cv = document.getElementById("wind"), x = cv.getContext("2d");
+var W, H, parts = [], ripples = [], raf = null;
+var COLORS = {night:["150,180,255","110,231,216","201,167,255"], late:["150,180,255","110,231,216","201,167,255"],
+              dawn:["255,200,150","201,167,255","122,162,255"], day:["255,255,255","210,235,255","255,230,180"],
+              dusk:["255,180,140","201,167,255","122,162,255"]};
+function rs(){
+  W = cv.width = innerWidth; H = cv.height = innerHeight;
+  rebuild();
+}
+function rebuild(){
+  parts = []; ripples = [];
+  var mode = effMode(), sky = curSky || "night";
+  if(mode === "clear"){
+    /* 光斑：晴天白天漂浮的柔光圆 */
+    var n = sky === "day" ? 26 : 16;
+    for(var i = 0; i < n; i++) parts.push({t:"bokeh", x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*46+16, vx:(Math.random()-.5)*.22, vy:-Math.random()*.16-.04, a:Math.random()*.12+.05, ph:Math.random()*7});
+  } else if(mode === "rain"){
+    for(var j = 0; j < (reduced?60:150); j++) parts.push({t:"drop", x:Math.random()*W, y:Math.random()*H,
+      l:Math.random()*14+7, v:Math.random()*7+7, a:Math.random()*.3+.12});
+  } else if(mode === "snow"){
+    for(var k = 0; k < 120; k++) parts.push({t:"flake", x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*2.4+1, v:Math.random()*.9+.4, ph:Math.random()*7, a:Math.random()*.5+.25});
+  } else {
+    /* cloud / 夜晴：星星或浮尘 */
+    var m = (sky === "night" || sky === "late") ? 1 : 0;
+    var cnt = m ? (sky === "late" ? 170 : 120) : 40;
+    for(var s = 0; s < cnt; s++) parts.push({t:"star", x:Math.random()*W, y:Math.random()*H*.85,
+      r:Math.random()*1.4+.4, ph:Math.random()*7, sp:Math.random()*.9+.4, a:Math.random()*.6+.25});
+  }
+}
+function frame(t){
+  x.clearRect(0, 0, W, H);
+  var mode = effMode(), sky = curSky || "night";
+  var cols = COLORS[sky] || COLORS.night;
+  for(var i = 0; i < parts.length; i++){
+    var p = parts[i];
+    if(p.t === "bokeh"){
+      p.x += p.vx; p.y += p.vy;
+      if(p.y < -p.r) { p.y = H + p.r; p.x = Math.random()*W; }
+      if(p.x < -p.r) p.x = W + p.r; if(p.x > W + p.r) p.x = -p.r;
+      var tw = .7 + Math.sin(t*.001 + p.ph)*.3;
+      var g = x.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      var c0 = cols[i % cols.length];
+      g.addColorStop(0, "rgba(" + c0 + "," + (p.a*tw*2.2) + ")");
+      g.addColorStop(1, "rgba(" + c0 + ",0)");
+      x.fillStyle = g;
+      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.2832); x.fill();
+    } else if(p.t === "drop"){
+      p.y += p.v; p.x -= p.v*.18;
+      if(p.y > H){
+        p.y = -p.l; p.x = Math.random()*W;
+        if(Math.random() < .3) ripples.push({x:Math.random()*W, y:H*Math.random()*.3 + H*.68, r:0, a:.35});
+      }
+      x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x + p.l*.18, p.y - p.l);
+      x.strokeStyle = "rgba(180,210,255," + p.a + ")"; x.lineWidth = 1; x.stroke();
+    } else if(p.t === "flake"){
+      p.y += p.v; p.x += Math.sin(t*.001 + p.ph)*.5;
+      if(p.y > H + 4){ p.y = -4; p.x = Math.random()*W; }
+      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.2832);
+      x.fillStyle = "rgba(255,255,255," + p.a + ")"; x.fill();
+    } else { /* star */
+      var a = p.a * (.55 + Math.sin(t*.001*p.sp + p.ph)*.45);
+      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.2832);
+      x.fillStyle = "rgba(220,232,255," + a + ")"; x.fill();
+      if(p.r > 1.3){
+        x.beginPath(); x.arc(p.x, p.y, p.r*3.2, 0, 6.2832);
+        x.fillStyle = "rgba(160,190,255," + a*.12 + ")"; x.fill();
+      }
+    }
+  }
+  /* 涟漪 */
+  for(var r = ripples.length - 1; r >= 0; r--){
+    var rp = ripples[r];
+    rp.r += 1.4; rp.a *= .965;
+    if(rp.a < .01){ ripples.splice(r, 1); continue; }
+    x.beginPath(); x.ellipse(rp.x, rp.y, rp.r, rp.r*.32, 0, 0, 6.2832);
+    x.strokeStyle = "rgba(180,215,255," + rp.a + ")"; x.lineWidth = 1.1; x.stroke();
+  }
+  if(parts.length && parts[0].t === "drop" && Math.random() < .12)
+    ripples.push({x:Math.random()*W, y:H*Math.random()*.35 + H*.62, r:0, a:.3});
+  raf = requestAnimationFrame(frame);
+}
+addEventListener("resize", rs);
+rs();
+if(reduced){ frame(0); cancelAnimationFrame(raf); } else { raf = requestAnimationFrame(frame); }
+})();
+</script>
+</body>
+</html>
