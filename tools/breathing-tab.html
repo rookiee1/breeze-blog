@@ -23,8 +23,22 @@ body.rainy{filter:saturate(.58) brightness(.84)}
   will-change:transform;transition:opacity 2s}
 .halo.h1{width:46vw;height:46vw;left:-12vw;top:-16vw;background:radial-gradient(circle,#7aa2ff,transparent 60%)}
 .halo.h2{width:38vw;height:38vw;right:-10vw;bottom:-14vw;background:radial-gradient(circle,#6ee7d8,transparent 60%)}
-.glass{background:var(--glass-bg);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
-  border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 12px 34px rgba(0,0,0,.16)}
+.glass{position:relative;
+  background:linear-gradient(120deg,rgba(255,255,255,.11),rgba(255,255,255,.045) 42%,rgba(255,255,255,.09));
+  backdrop-filter:blur(22px) saturate(170%) brightness(1.05);-webkit-backdrop-filter:blur(22px) saturate(170%) brightness(1.05);
+  border:1px solid rgba(255,255,255,.17);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -1px 0 rgba(255,255,255,.07),inset 0 0 24px rgba(255,255,255,.05),0 14px 40px rgba(0,0,0,.18)}
+/* 液态玻璃：光标跟随的镜面高光 */
+.glass::before{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(240px circle at var(--mx,50%) var(--my,-30%),rgba(255,255,255,.18),transparent 62%);
+  opacity:0;transition:opacity .45s}
+.glass:hover::before{opacity:1}
+/* 液态玻璃：悬停时一道流光扫过（仅 .liquid，避免裁切 Dock 里会跑路的鸽子） */
+.glass.liquid{overflow:hidden}
+.glass.liquid::after{content:"";position:absolute;left:-70%;top:0;width:45%;height:100%;pointer-events:none;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.18) 45%,rgba(255,255,255,.30) 50%,rgba(255,255,255,.18) 55%,transparent);
+  transform:skewX(-16deg);transition:left .8s var(--ease)}
+.glass.liquid:hover::after{left:135%}
 .clock{font-size:clamp(64px,13vw,124px);font-weight:200;letter-spacing:.04em;line-height:1;
   font-variant-numeric:tabular-nums;text-shadow:0 4px 40px rgba(0,0,0,.25)}
 body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
@@ -46,10 +60,40 @@ body.sky-day .clock{text-shadow:0 4px 30px rgba(255,255,255,.35)}
 .chip.on{opacity:1;border-color:#6ee7d8;color:#6ee7d8}
 body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
 .dock{display:flex;gap:6px;margin-top:26px;padding:7px;border-radius:100px;flex-wrap:wrap;justify-content:center}
-.dock a{font-size:13px;color:inherit;opacity:.75;text-decoration:none;padding:9px 20px;border-radius:100px;transition:.3s var(--ease)}
-.dock a:hover{opacity:1;background:rgba(255,255,255,.1);transform:translateY(-3px)}
+.dock a{font-size:13px;color:inherit;opacity:.75;text-decoration:none;padding:9px 20px;border-radius:100px;transition:.35s cubic-bezier(.3,1.5,.45,1)}
+.dock a:hover{opacity:1;background:rgba(255,255,255,.12);transform:translateY(-3px) scale(1.05);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 26px rgba(0,0,0,.20)}
+.dock a:active{transform:translateY(-1px) scale(.96);transition-duration:.1s}
 .dock a.frenemy{border:1px dashed rgba(255,255,255,.3);transform:rotate(-1.6deg)}
 .dock a.frenemy:hover{transform:translateY(-3px) rotate(1.6deg);border-color:#c9a7ff;background:rgba(201,167,255,.08)}
+.dock a.addl{opacity:.55;border:1px dashed rgba(255,255,255,.28);width:35px;height:35px;padding:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1}
+.dock a.addl:hover{opacity:1;transform:rotate(90deg) scale(1.1);border-color:#6ee7d8;color:#6ee7d8;background:rgba(110,231,216,.08)}
+.dock a.ulink .del{display:none;margin-left:7px;opacity:.6;font-size:12px;line-height:1}
+.dock a.ulink:hover .del{display:inline}
+.dock a.ulink .del:hover{opacity:1;color:#ff9d9d}
+/* 添加链接弹窗 */
+.lmask{position:fixed;inset:0;background:rgba(4,8,18,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.35s;z-index:50}
+.lmask.show{opacity:1;pointer-events:auto}
+.lcard{width:min(380px,88vw);border-radius:22px;padding:22px 22px 18px;
+  transform:translateY(16px) scale(.95);transition:.45s var(--ease)}
+.lmask.show .lcard{transform:none}
+.lcard h3{font-size:15px;font-weight:600;margin-bottom:6px;letter-spacing:.06em}
+.lcard .lsub{font-size:11.5px;opacity:.55;margin-bottom:10px}
+.lcard label{display:block;font-size:11px;opacity:.6;margin:10px 0 4px;letter-spacing:.12em}
+.lcard input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+  padding:9px 12px;color:inherit;font-size:13.5px;font-family:inherit;outline:none;transition:.25s}
+.lcard input:focus{border-color:#6ee7d8;background:rgba(255,255,255,.10)}
+.lcard input::placeholder{color:currentColor;opacity:.35}
+.lcard input.err{border-color:#ff9d9d;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-3px)}}
+.lrow{display:flex;gap:10px;margin-top:18px}
+.lrow button{flex:1;padding:9px 0;border-radius:100px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.07);color:inherit;font-size:13px;cursor:pointer;font-family:inherit;transition:.3s var(--ease)}
+.lrow button:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
+.lrow button.ok{background:linear-gradient(135deg,#6ee7d8,#7aa2ff);color:#08101f;border:none;font-weight:600}
+.lrow button.ok:hover{filter:brightness(1.1)}
 .wx{position:fixed;top:22px;right:26px;font-size:12.5px;opacity:.75;padding:8px 16px;border-radius:100px}
 .credit{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:11.5px;opacity:.5}
 .credit a{color:inherit}
@@ -60,12 +104,12 @@ body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
 <canvas id="wind"></canvas>
 <div class="halo h1" id="halo1"></div><div class="halo h2" id="halo2"></div>
 
-<div class="wx glass" id="wx">正在感知天气…</div>
+<div class="wx glass liquid" id="wx">正在感知天气…</div>
 <div class="clock" id="clock">--:--</div>
 <div class="dateline" id="dateline"></div>
 <div class="greet" id="greet"></div>
 
-<form class="search glass" id="sForm">
+<form class="search glass liquid" id="sForm">
   <input id="sInput" type="text" placeholder="搜点什么，风会带路…（Enter）" autocomplete="off">
   <button type="submit" title="搜索">➤</button>
 </form>
@@ -81,13 +125,29 @@ body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
   <button class="chip" data-wx="rain">🌧️ 雨</button>
   <button class="chip" data-wx="snow">❄️ 雪</button>
 </div>
-<div class="dock glass">
+<div class="dock glass" id="dock">
   <a href="/">🍃 博客</a>
   <a href="/admin.html">📊 后台</a>
   <a href="/tools/wuwa-gacha.html">🎯 抽卡分析</a>
+  <span id="userLinks" style="display:contents"></span>
+  <a class="addl" id="addLink" title="添加自定义链接">＋</a>
   <a class="frenemy" id="doveLink" href="https://dove.best" target="_blank" rel="noopener noreferrer"></a>
 </div>
 <div class="credit">会呼吸的导航页 · 来自 <a href="/">Breeze</a> · 浏览器设置里把启动页/主页设为本链接即可每日使用</div>
+
+<div class="lmask" id="linkMask">
+  <div class="lcard glass liquid">
+    <h3>✨ 添加快捷链接</h3>
+    <div class="lsub">存在这台浏览器里，下次打开还在</div>
+    <label>图标（可选，一个 emoji）</label>
+    <input id="lkEmoji" maxlength="4" placeholder="🚀">
+    <label>名称</label>
+    <input id="lkName" maxlength="10" placeholder="比如：B站">
+    <label>网址</label>
+    <input id="lkUrl" placeholder="bilibili.com 或 https://…">
+    <div class="lrow"><button type="button" id="lkCancel">取消</button><button type="button" class="ok" id="lkSave">收进口袋</button></div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -239,6 +299,71 @@ var doveNeed = 3 + Math.floor(Math.random() * 2);
     a.textContent = "🕊️ ……算你厉害，放行";
   });
 })();
+
+/* ============ 自定义快捷链接 ============ */
+function loadLinks(){ try{ return JSON.parse(localStorage.getItem("breath-links") || "[]"); }catch(e){ return []; } }
+function saveLinks(arr){ try{ localStorage.setItem("breath-links", JSON.stringify(arr)); }catch(e){} }
+function normUrl(u){
+  u = (u || "").trim();
+  if(!u) return "";
+  if(!/^https?:\/\//i.test(u)) u = "https://" + u;
+  return u;
+}
+function renderLinks(){
+  var box = document.getElementById("userLinks");
+  box.innerHTML = "";
+  loadLinks().forEach(function(l, i){
+    var a = document.createElement("a");
+    a.className = "ulink"; a.href = l.u; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.title = l.u;
+    var tx = document.createElement("span"); tx.textContent = (l.e ? l.e + " " : "") + l.n;
+    var del = document.createElement("span"); del.className = "del"; del.textContent = "×"; del.title = "移除";
+    del.addEventListener("click", function(e){
+      e.preventDefault(); e.stopPropagation();
+      var arr = loadLinks(); arr.splice(i, 1); saveLinks(arr); renderLinks();
+    });
+    a.appendChild(tx); a.appendChild(del);
+    box.appendChild(a);
+  });
+}
+(function(){
+  var mask = document.getElementById("linkMask");
+  var inEmoji = document.getElementById("lkEmoji"), inName = document.getElementById("lkName"), inUrl = document.getElementById("lkUrl");
+  document.getElementById("addLink").addEventListener("click", function(){
+    mask.classList.add("show");
+    setTimeout(function(){ inName.focus(); }, 260);
+  });
+  function closeLk(){
+    mask.classList.remove("show");
+    [inEmoji, inName, inUrl].forEach(function(el){ el.value = ""; el.classList.remove("err"); });
+  }
+  function flashErr(el){ el.classList.remove("err"); void el.offsetWidth; el.classList.add("err"); el.focus(); }
+  document.getElementById("lkCancel").addEventListener("click", closeLk);
+  mask.addEventListener("pointerdown", function(e){ if(e.target === mask) closeLk(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && mask.classList.contains("show")) closeLk(); });
+  document.getElementById("lkSave").addEventListener("click", function(){
+    var n = inName.value.trim(), u = normUrl(inUrl.value);
+    if(!n){ flashErr(inName); return; }
+    if(!u){ flashErr(inUrl); return; }
+    var arr = loadLinks();
+    if(arr.length >= 12){ inName.value = "口袋最多装 12 个哦"; flashErr(inName); return; }
+    arr.push({ n: n, u: u, e: inEmoji.value.trim() });
+    saveLinks(arr); renderLinks(); closeLk();
+  });
+  [inName, inUrl].forEach(function(el){
+    el.addEventListener("keydown", function(e){ if(e.key === "Enter") document.getElementById("lkSave").click(); });
+  });
+})();
+renderLinks();
+
+/* ============ 液态玻璃：光标跟随镜面高光 ============ */
+document.querySelectorAll(".glass").forEach(function(g){
+  g.addEventListener("pointermove", function(e){
+    var r = g.getBoundingClientRect();
+    g.style.setProperty("--mx", (((e.clientX - r.left) / Math.max(r.width, 1)) * 100).toFixed(1) + "%");
+    g.style.setProperty("--my", (((e.clientY - r.top) / Math.max(r.height, 1)) * 100).toFixed(1) + "%");
+  }, { passive: true });
+});
 
 /* ============================================================
    呼吸粒子引擎 v3 —— 场景（极光/篝火/绿植） + 分层视差
