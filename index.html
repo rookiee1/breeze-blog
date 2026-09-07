@@ -359,6 +359,45 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
   100%{opacity:0;transform:translateX(130%) skewX(-12deg)}
 }
 
+/* ================= 文章阅读器 ================= */
+#reader{position:fixed;inset:0;z-index:95;background:var(--bg);opacity:0;visibility:hidden;transition:opacity .45s var(--ease),visibility .45s}
+#reader.open{opacity:1;visibility:visible}
+.reader-bar{position:absolute;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:2}
+.reader-close{position:absolute;top:22px;right:26px;z-index:2;width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);background:var(--surface);color:var(--text2);font-size:15px;transition:.3s}
+.reader-close:hover{color:var(--text);border-color:var(--a1);transform:rotate(90deg)}
+.reader-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain}
+.reader-body{max-width:760px;margin:0 auto;padding:clamp(60px,10vh,110px) 24px 80px}
+.reader-cover{height:180px;border-radius:var(--radius);margin-bottom:34px;border:1px solid var(--line)}
+.reader-meta{display:flex;gap:14px;align-items:center;font-size:13px;color:var(--text3);margin-bottom:14px}
+.reader-meta .rtag{padding:4px 12px;border-radius:100px;border:1px solid var(--line);color:var(--a1);font-weight:600;font-size:12px}
+.reader-body h1{font-size:clamp(26px,4vw,40px);font-weight:900;line-height:1.35;margin-bottom:26px}
+.reader-content{font-size:var(--rfs,17px);line-height:2;color:var(--text2)}
+.reader-content p{margin:0 0 1.2em}
+.reader-content h2{font-size:1.25em;color:var(--text);margin:1.6em 0 .8em;font-weight:800}
+.reader-content h2::before{content:"# ";color:var(--a1)}
+.reader-content blockquote{border-left:3px solid var(--a1);padding:6px 0 6px 18px;margin:1.4em 0;color:var(--text);background:var(--surface);border-radius:0 12px 12px 0}
+.reader-content strong{color:var(--text)}
+.reader-foot{display:flex;justify-content:space-between;align-items:center;margin-top:44px;padding-top:22px;border-top:1px solid var(--line)}
+.reader-fs{display:flex;gap:8px}
+.reader-fs button,.reader-share{padding:8px 16px;border-radius:100px;border:1px solid var(--line2);background:none;color:var(--text2);font-size:13px;transition:.3s;cursor:pointer;font-family:inherit}
+.reader-fs button:hover,.reader-share:hover{color:var(--a1);border-color:var(--a1)}
+/* ================= 全局搜索 ================= */
+#searchPanel{position:fixed;inset:0;z-index:96;background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:.3s}
+#searchPanel.open{opacity:1;visibility:visible}
+.search-box{width:min(620px,92vw);margin:14vh auto 0;background:var(--surface);border:1px solid var(--line2);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transform:translateY(-14px);transition:transform .3s var(--ease)}
+#searchPanel.open .search-box{transform:none}
+.search-input-row{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.search-input-row svg{width:18px;height:18px;color:var(--text3);flex:0 0 auto}
+.search-input-row input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:16px;font-family:inherit}
+.search-input-row input::placeholder{color:var(--text3)}
+.search-input-row kbd{font-size:11px;color:var(--text3);border:1px solid var(--line2);border-radius:6px;padding:2px 7px}
+.search-results{max-height:46vh;overflow-y:auto;padding:8px}
+.sr-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:var(--text2)}
+.sr-item.sel,.sr-item:hover{background:var(--surface2);color:var(--text)}
+.sr-item .sr-type{flex:0 0 auto;font-size:10.5px;letter-spacing:.12em;padding:3px 9px;border-radius:100px;border:1px solid var(--line);color:var(--a1)}
+.sr-item .sr-title{flex:1;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-empty{padding:28px;text-align:center;color:var(--text3);font-size:13.5px}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
@@ -391,6 +430,9 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
     <a href="#projects" data-scramble data-page-node-id="tvXbWEXN1nJzKX85WH2bE8">项目</a>
     <a href="#path" data-scramble data-page-node-id="JarWNJJBLQbc1sMUjdwrW2">经历</a>
   </nav>
+  <button class="theme-btn" id="searchBtn" aria-label="搜索（Ctrl+K）" style="margin-right:10px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+  </button>
   <button class="theme-btn" id="themeBtn" aria-label="切换主题" data-page-node-id="upvrG09snxm3DqDtRzkK3k">
     <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-page-node-id="u5US9YjP4y6PADrAI59IDd"><circle cx="12" cy="12" r="4" data-page-node-id="HuHqzX8kwEy7tgsgF1UHMm"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" data-page-node-id="fpdaz0cxn9ijh1W92omALV"/></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-page-node-id="OgYHCrW00HdlW5xoUm3gnY"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" data-page-node-id="IGDJ9jPNEvBgzVG51AyCWh"/></svg>
@@ -478,7 +520,7 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
           <h3 data-page-node-id="FFsZMp0Mk4xC1EH7ycGCC7">Breeze</h3>
           <p class="role" data-page-node-id="E88ijN8ugTbdM4AUHdk78z">Writer · Builder · Daydreamer</p>
           <div class="socials" data-page-node-id="2ojTcAOU5T3Wi1PkAziSSZ">
-            <a href="javascript:void(0)" aria-label="GitHub" data-magnet data-page-node-id="fFsxJOxDufuOYQ6Yba8Nc1">
+            <a href="https://github.com/rookiee1" target="_blank" rel="noopener noreferrer" aria-label="GitHub" data-magnet data-page-node-id="fFsxJOxDufuOYQ6Yba8Nc1">
               <svg viewBox="0 0 24 24" fill="currentColor" data-page-node-id="t6YkFJf8yHaWDVuHVqHoOe"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.54-3.87-1.54-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.3-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.69 5.4-5.25 5.68.41.36.78 1.05.78 2.12v3.15c0 .31.2.67.8.55A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z" data-page-node-id="4Zt5lTGmeYiixizm5QnKEQ"/></svg>
             </a>
             <a href="javascript:void(0)" aria-label="X / Twitter" data-magnet data-page-node-id="PZvPYEoA9XE9bNSRfiWhEd">
@@ -720,6 +762,7 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
     <div class="foot-left" data-page-node-id="nY2GQpB0q0vAz2YhpFi85Q">
       <h4 style="font-size:22px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent" data-page-node-id="oOh7JKPV687tpsivP92YAe">Breeze</h4>
       <p data-page-node-id="XGijuRSEQEgzObmQqjUWtF">把风写进文字里，把思考留在屏幕上。</p>
+      <p style="font-size:12.5px;color:var(--text3);margin-top:8px">🌱 本站已吹了 <b id="runDays" style="color:var(--a1)">--</b> 天的风 · <span id="dayGreet"></span></p>
     </div>
     <div class="foot-right" data-page-node-id="kF08fmdAeCxj2ml61BDeam">
       <div class="clock" data-page-node-id="MWGrRt8VR2CwjfEodSTKpH"><span id="clockTime" data-page-node-id="rrDcxd3W6ctecBh6aHgW8Z">--:--:--</span><span id="clockDay" data-page-node-id="upqsyLg8l1ewo70XgF2qVU"></span></div>
@@ -740,6 +783,40 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
 </button>
 <div class="gust-sweep" id="gustSweep" data-page-node-id="FT4XVrhRwHFHGBz0VFucLk"></div>
 <div id="toast" data-page-node-id="XpUo7eOxje431pm63JUILf"><span class="t-dot" data-page-node-id="MtaXB0yMdp4aCFBKlR9Vcu"></span><span id="toastMsg" data-page-node-id="2GrZflnxcXI0KXewiHdVGs">已复制到剪贴板</span></div>
+
+<!-- 文章阅读器 -->
+<div id="reader" aria-hidden="true">
+  <div class="reader-bar" id="readerBar"></div>
+  <button class="reader-close" id="readerClose" aria-label="关闭阅读器">✕</button>
+  <div class="reader-scroll" id="readerScroll">
+    <div class="reader-body">
+      <div class="reader-cover" id="readerCover"></div>
+      <div class="reader-meta"><span class="rtag" id="readerTag"></span><time id="readerDate"></time><span id="readerWords"></span></div>
+      <h1 id="readerTitle"></h1>
+      <div class="reader-content" id="readerContent"></div>
+      <div class="reader-foot">
+        <span style="color:var(--text3);font-size:13px">感谢阅读 · Breeze 🍃</span>
+        <div class="reader-fs">
+          <button id="fsMinus" title="缩小字号">A－</button>
+          <button id="fsPlus" title="放大字号">A＋</button>
+          <button class="reader-share" id="readerShare">复制链接</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 全局搜索（Ctrl+K） -->
+<div id="searchPanel" aria-hidden="true">
+  <div class="search-box">
+    <div class="search-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="searchInput" type="text" placeholder="搜索文章、项目、页面…（试试「风」「滚动」）" autocomplete="off">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -795,6 +872,8 @@ function measure(){ maxScroll = Math.max(0, document.documentElement.scrollHeigh
 measure(); window.addEventListener("resize", measure);
 if(finePointer && !reduced){
   window.addEventListener("wheel", function(e){
+    /* 阅读器 / 搜索面板打开时，滚轮交给它们自己 */
+    if(e.target.closest && e.target.closest("#reader, #searchPanel")) return;
     e.preventDefault();
     var d = e.deltaY;
     if(e.deltaMode === 1) d *= 33;
@@ -861,16 +940,16 @@ var rowPreview = document.getElementById("rowPreview");
 
 /* ================= 文章悬浮预览 ================= */
 var pvX = 0, pvY = 0, pvTX = 0, pvTY = 0;
-if(finePointer){
-  document.querySelectorAll(".post-row").forEach(function(row){
+document.querySelectorAll(".post-row").forEach(function(row, i){
+  if(finePointer){
     row.addEventListener("mouseenter", function(){
       document.getElementById("rpArt").className = "rp-art " + row.getAttribute("data-art");
       rowPreview.classList.add("show");
     });
     row.addEventListener("mouseleave", function(){ rowPreview.classList.remove("show"); });
-    row.addEventListener("click", function(){ toast("📖 文章详情开发中，敬请期待"); });
-  });
-}
+  }
+  row.addEventListener("click", function(){ openReader(i); });
+});
 
 /* ================= 渲染主循环 ================= */
 var mqPos = 0, mqHalf = 0;
@@ -884,8 +963,8 @@ var prevSy = window.scrollY, smoothVel = 0;
 function render(){
   var sy = window.scrollY;
 
-  /* 惯性滚动推进 */
-  if(finePointer && !reduced){
+  /* 惯性滚动推进（阅读器/搜索打开时暂停） */
+  if(finePointer && !reduced && document.body.style.overflow !== "hidden"){
     if(Math.abs(sy - lastY) > 2 && Math.abs(sy - current) > 2){ target = sy; current = sy; }
     current += (target - current) * .085;
     if(Math.abs(target - current) < .1) current = target;
@@ -1134,6 +1213,187 @@ if(badge) badge.addEventListener("click", function(){
   else document.getElementById("manifesto").scrollIntoView({behavior:"smooth"});
 });
 
+/* ================= 文章数据（正文） ================= */
+var ARTICLES = [
+{ t:"把博客当成一座花园，而不是一份简历", tag:"建站", date:"2026.08.30", art:"art-1",
+  html:"<p>很多人的个人网站是一次性的：写好首页、放上简历、截图发朋友圈，然后<strong>再也没更新过</strong>。它更像一张名片，而不是一个地方。</p><p>我更愿意把博客当成一座花园。花园不需要一次性建成，它允许有一块地荒着，允许杂草，允许一株植物长歪了再扶正。重要的是你<strong>经常回来照料它</strong>。</p><h2>内容是植物</h2><p>每一篇文章都是一颗种子。有的种子当天发芽，有的要埋很久才破土。别急着删掉那些「写得不好」的旧文——它们是花园的腐殖质，是后来一切的基础。</p><blockquote>写的目的不是让别人看到，而是让自己想清楚。</blockquote><h2>留白也是内容</h2><p>不是每一页都要塞满。一段空白、一张没配文字的照片、一个只有一行的页面，都是花园里的小径。读者需要呼吸的地方。</p><h2>杂草怎么办</h2><p>过时的项目、失效的链接、当年觉得酷现在觉得羞耻的文案——定期拔一拔。但不用拔干净，花园的野趣恰恰来自那些没被管住的地方。</p><p>所以这个站不会「完工」。它会长很久，长歪很久，也好看很久。</p>" },
+{ t:"丝滑是一种态度：滚动交互设计手记", tag:"交互", date:"2026.08.18", art:"art-2",
+  html:"<p>为什么有的网页滑起来像黄油，有的像砂纸？技术差异只占两成，剩下八成是<strong>节奏感</strong>。</p><h2>惯性是信任</h2><p>惯性滚动的本质，是把「输入」和「响应」之间加了一点柔软的延迟。页面不再是你手指的奴隶，而是一个有质量的物体。你推它，它滑行，然后温柔地停下。这种<strong>可预测的柔软</strong>，就是用户说的「高级感」。</p><h2>缓动曲线是语气</h2><blockquote>ease-out 是「好嘞马上到」，ease-in-out 是「您稍等，我缓缓」。</blockquote><p>同一个动画，换一条曲线，性格完全不同。我在这个站上大部分地方用了 <strong>0.22 左右的插值系数</strong>——快，但留一点拖尾，像风停之前总要摆两下树叶。</p><h2>少即是多（又来了）</h2><p>动效最贵的成本不是性能，是注意力。每一帧动画都在跟内容抢眼睛。我的原则：<strong>进入时动一次，停留时静如水，离开时干脆利落</strong>。常驻动画只留给背景的风。</p><p>说到底，丝滑不是炫技，是一种「我很在意你的手感」的态度。</p>" },
+{ t:"风的观察日记：散步时我在想什么", tag:"生活", date:"2026.08.02", art:"art-3",
+  html:"<p>不带耳机的散步，是我最便宜的输入方式。这三十天，我把路上闪过的念头记在手机备忘录里，挑一些放出来。</p><h2>第 3 天</h2><p>树叶响的时候，其实每一片都在用自己的频率抖。风没有旋律，是千万个声部即兴的。</p><h2>第 11 天</h2><p>路口等红灯的电动车，起步的瞬间像一场微型的发令枪。城市里到处都是没人颁奖的比赛。</p><h2>第 19 天</h2><blockquote>所谓灵感，就是注意力不在任务上的时候，脑子里冒出来的那点东西。</blockquote><h2>第 26 天</h2><p>发现一个小规律：<strong>想不通的问题，走到第二个路口基本就想通了</strong>。走路大概是人类的强制异步处理模式。</p><h2>第 30 天</h2><p>日记到此为止。风每天都不一样，我的念头越来越像它了——来得快，去得也快，但总留下一点什么。</p>" },
+{ t:"关于极简主义的十次反悔", tag:"设计", date:"2026.07.21", art:"art-4",
+  html:"<p>这个站改了十版。每一版我都以为「这次够了」，然后第二天开始后悔。以下是一份不完全的忏悔录。</p><h2>第一次反悔</h2><p>删掉了首页的欢迎语，觉得太啰嗦。三天后加回来，因为空着的首页像一个没打招呼就盯着你看的人。</p><h2>第四次反悔</h2><p>把所有圆角改成直角，想要「锐利」。后来发现锐利和友好并不冲突——<strong>锐利靠排版，友好靠圆角</strong>，我又把圆角请了回来。</p><h2>第七次反悔</h2><blockquote>极简最大的陷阱：为了少而少，最后少到只剩下「少」本身。</blockquote><p>删掉三栏布局的那天我很得意，第二天就发现信息找不到地方放了。极简不是做减法，是<strong>反复权衡之后仍然心动的保留</strong>。</p><h2>第十次反悔</h2><p>这一版你不一定能看出和上一版的区别。但我能。每一处细节的犹豫和回摆，最后都变成了页面上说不清但感觉得到的「舒服」。</p><p>第十一版在路上了。我已经开始后悔了。</p>" },
+{ t:"我与夜里那盏灯：我的夜读工作流", tag:"工具", date:"2026.07.09", art:"art-5",
+  html:"<p>我的夜读装备朴实得可疑：纸质书、一支高亮笔、一盏暖光灯，和一个<strong>反复失败的摘抄系统</strong>。</p><h2>为什么是纸质书</h2><p>不是情怀，是物理。手机在触手可及的地方，我的注意力就会周期性地溺水。纸不会弹通知，纸只有一个功能：<strong>被读</strong>。</p><h2>摘抄系统迭代史</h2><p>v1：抄进笔记本。三个月后笔记本失踪。<br>v2：拍照存相册。三个月后相册里混着外卖截图。<br>v3：专门的笔记软件，打标签、建双向链接。坚持了四个月——然后在我最需要那条摘抄的时候，它藏在三层文件夹深处。</p><blockquote>笔记系统的敌人不是工具，是「再也不看第二遍」。</blockquote><h2>现在的方案</h2><p>极简到丢人：每周日翻一遍本周摘抄，<strong>只留下还会让我心动的三条</strong>，写进下周的计划里。让笔记「活」过第二遍的方法，就是逼它跟接下来的生活发生关系。</p><p>工具会一直换，夜里那盏灯不会。</p>" },
+{ t:"像素与呼吸：屏幕之外的一天", tag:"随想", date:"2026.06.28", art:"art-6",
+  html:"<p>实验很简单：关掉所有设备 24 小时。手机、电脑、手表，全部进抽屉。以下是不太成功但很必要的记录。</p><h2>第 1-2 小时：戒断反应</h2><p>手会自己摸口袋，像身体里住着一只找不到钥匙的动物。我把这种动作记录了 47 次。</p><h2>第 4 小时：时间变稠了</h2><p>没有屏幕切割时间之后，一天突然变得很长。烧一壶水就是烧一壶水，<strong>不是等水开的间隙刷手机</strong>。原来单线程才是时间的原味。</p><h2>第 9 小时：想明白了三件事</h2><blockquote>无聊不是空的，是留白的。留白里会长出想法。</blockquote><p>那天下午我盯着天花板想了很久，居然把一个拖了两周的方案理顺了。没有打开任何文档，全靠脑子里的草稿纸。</p><h2>第 22 小时：认输</h2><p>朋友的聚餐通知只发在了群里。我提前结束了实验——但我一点也不觉得失败。24 小时证明了：<strong>我依赖的不是屏幕，是跟人保持连接的感觉</strong>。</p><p>现在我把这个实验变成了每季度一次的常规操作。像素会一直亮着，但呼吸要留给自己。</p>" }
+];
+
+/* ================= 文章阅读器 ================= */
+var reader = document.getElementById("reader");
+var readerScroll = document.getElementById("readerScroll");
+var readerBar = document.getElementById("readerBar");
+var readerOpen = false, readerArt = null, rfs = 17;
+try{ rfs = clamp(parseFloat(localStorage.getItem("breeze-rfs")) || 17, 14, 22); }catch(e){}
+document.getElementById("readerContent").style.setProperty("--rfs", rfs + "px");
+
+function openReader(i){
+  var a = ARTICLES[i]; if(!a) return;
+  readerArt = a;
+  document.getElementById("readerCover").className = "reader-cover " + a.art;
+  document.getElementById("readerTitle").textContent = a.t;
+  document.getElementById("readerTag").textContent = a.tag;
+  document.getElementById("readerDate").textContent = a.date;
+  var plain = a.html.replace(/<[^>]+>/g, "");
+  document.getElementById("readerWords").textContent = "约 " + Math.max(1, Math.round(plain.length / 400)) + " 分钟读完";
+  document.getElementById("readerContent").innerHTML = a.html;
+  readerScroll.scrollTop = 0;
+  if(rowPreview) rowPreview.classList.remove("show");
+  reader.classList.add("open");
+  reader.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  target = window.scrollY; /* 锁住惯性滚动 */
+  readerOpen = true;
+}
+function closeReader(){
+  reader.classList.remove("open");
+  reader.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  readerOpen = false;
+}
+document.getElementById("readerClose").addEventListener("click", closeReader);
+readerScroll.addEventListener("scroll", function(){
+  var max = readerScroll.scrollHeight - readerScroll.clientHeight;
+  readerBar.style.width = (max > 0 ? (readerScroll.scrollTop / max) * 100 : 0) + "%";
+});
+document.getElementById("fsPlus").addEventListener("click", function(){
+  rfs = clamp(rfs + 1, 14, 22);
+  document.getElementById("readerContent").style.setProperty("--rfs", rfs + "px");
+  try{ localStorage.setItem("breeze-rfs", rfs); }catch(e){}
+});
+document.getElementById("fsMinus").addEventListener("click", function(){
+  rfs = clamp(rfs - 1, 14, 22);
+  document.getElementById("readerContent").style.setProperty("--rfs", rfs + "px");
+  try{ localStorage.setItem("breeze-rfs", rfs); }catch(e){}
+});
+document.getElementById("readerShare").addEventListener("click", function(){
+  var link = "https://breeze.boats/#blog";
+  if(navigator.clipboard){ navigator.clipboard.writeText(link).then(function(){ toast("链接已复制，分享给朋友吧 🍃"); }); }
+  else toast(link);
+});
+reader.addEventListener("click", function(e){ if(e.target === reader) closeReader(); });
+
+/* ================= 全局搜索（Ctrl+K） ================= */
+var searchPanel = document.getElementById("searchPanel");
+var searchInput = document.getElementById("searchInput");
+var searchResults = document.getElementById("searchResults");
+var searchIndex = [];
+document.querySelectorAll(".post-row").forEach(function(row, i){
+  searchIndex.push({
+    type: "文章", title: ARTICLES[i] ? ARTICLES[i].t : row.querySelector("h3").textContent,
+    desc: row.querySelector("p") ? row.querySelector("p").textContent : "",
+    keys: (ARTICLES[i] ? ARTICLES[i].tag : "") + " " + (ARTICLES[i] ? ARTICLES[i].t : ""),
+    act: function(){ openReader(i); }
+  });
+});
+document.querySelectorAll(".project h3").forEach(function(h){
+  var card = h.closest(".project");
+  searchIndex.push({ type:"项目", title: h.textContent, desc: card.querySelector("p").textContent, keys: h.textContent, act: function(){
+    document.getElementById("projects").scrollIntoView({behavior:"smooth"}); target = document.getElementById("projects").getBoundingClientRect().top + window.scrollY - 60;
+  }});
+});
+[["home","首页"],["manifesto","宣言"],["about","关于我"],["life","生活切片"],["blog","文章"],["projects","项目"],["path","经历"]].forEach(function(s){
+  searchIndex.push({ type:"页面", title: s[1], desc: "跳转到「" + s[1] + "」板块", keys: s[1], act: function(){
+    var el = document.getElementById(s[0]);
+    if(finePointer && !reduced){ target = clamp(el.getBoundingClientRect().top + window.scrollY - 60, 0, maxScroll); }
+    else el.scrollIntoView({behavior:"smooth"});
+  }});
+});
+searchIndex.push({ type:"彩蛋", title:"试一下输入 breeze", desc:"满屏文字会被风吹走，然后慢慢飘回来 🍃", keys:"风 wind 彩蛋 breeze", act: function(){ windBlast(); } });
+
+function renderSearch(q){
+  q = (q || "").trim().toLowerCase();
+  var list = q ? searchIndex.filter(function(it){
+    return (it.title + " " + it.desc + " " + it.keys).toLowerCase().indexOf(q) > -1;
+  }) : searchIndex.slice(0, 8);
+  if(!list.length){
+    searchResults.innerHTML = '<div class="sr-empty">风里没找到「' + q.replace(/</g,"&lt;") + '」，换个词试试？</div>';
+    return;
+  }
+  searchResults.innerHTML = "";
+  list.forEach(function(it, i){
+    var d = document.createElement("div");
+    d.className = "sr-item" + (i === 0 ? " sel" : "");
+    d.innerHTML = '<span class="sr-type">' + it.type + '</span><span class="sr-title">' + it.title.replace(/</g,"&lt;") + '</span>';
+    d.addEventListener("click", function(){ closeSearch(); it.act(); });
+    searchResults.appendChild(d);
+  });
+  searchResults._items = list;
+}
+function openSearch(){
+  searchPanel.classList.add("open");
+  searchPanel.setAttribute("aria-hidden", "false");
+  renderSearch("");
+  searchInput.value = "";
+  setTimeout(function(){ searchInput.focus(); }, 60);
+  document.body.style.overflow = "hidden";
+  target = window.scrollY;
+}
+function closeSearch(){
+  searchPanel.classList.remove("open");
+  searchPanel.setAttribute("aria-hidden", "true");
+  if(!readerOpen) document.body.style.overflow = "";
+}
+document.getElementById("searchBtn").addEventListener("click", openSearch);
+searchPanel.addEventListener("click", function(e){ if(e.target === searchPanel) closeSearch(); });
+searchInput.addEventListener("input", function(){ renderSearch(searchInput.value); });
+document.addEventListener("keydown", function(e){
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k"){
+    e.preventDefault();
+    searchPanel.classList.contains("open") ? closeSearch() : openSearch();
+    return;
+  }
+  if(e.key === "Escape"){
+    if(searchPanel.classList.contains("open")) closeSearch();
+    else if(readerOpen) closeReader();
+    return;
+  }
+  if(searchPanel.classList.contains("open") && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter")){
+    var items = searchResults.querySelectorAll(".sr-item");
+    if(!items.length) return;
+    var sel = Array.prototype.indexOf.call(items, searchResults.querySelector(".sr-item.sel"));
+    if(e.key === "ArrowDown" || e.key === "ArrowUp"){
+      e.preventDefault();
+      var next = e.key === "ArrowDown" ? (sel + 1) % items.length : (sel - 1 + items.length) % items.length;
+      items[sel].classList.remove("sel"); items[next].classList.add("sel");
+      items[next].scrollIntoView({block:"nearest"});
+    } else if(e.key === "Enter"){
+      e.preventDefault();
+      items[sel].click();
+    }
+  }
+});
+
+/* ================= 运行天数 / 时段问候 / 标签页彩蛋 ================= */
+var SITE_BIRTH = new Date(2023, 5, 1); /* 建站日：2023.06.01 */
+(function(){
+  var days = Math.max(1, Math.floor((Date.now() - SITE_BIRTH.getTime()) / 86400000));
+  document.getElementById("runDays").textContent = days;
+  var h = new Date().getHours(), greet;
+  if(h < 5) greet = "夜深了，风也困了";
+  else if(h < 9) greet = "早上好，今天有风 ☀️";
+  else if(h < 12) greet = "上午好，适合写点什么";
+  else if(h < 14) greet = "中午好，记得吃饭 🍚";
+  else if(h < 18) greet = "下午好，来杯咖啡 ☕";
+  else if(h < 23) greet = "晚上好，夜色正好 🌆";
+  else greet = "夜深了，早点休息 🌙";
+  document.getElementById("dayGreet").textContent = greet;
+})();
+var DOC_TITLE = document.title;
+document.addEventListener("visibilitychange", function(){
+  document.title = document.hidden ? "🌾 风把页面吹走了……" : DOC_TITLE;
+});
+
 /* ================= 风场粒子 ================= */
 var canvas = document.getElementById("sky");
 var ctx = canvas.getContext("2d", {alpha:true});
@@ -1163,7 +1423,9 @@ function spawn(){
     len: Math.random()*22+8,
     c: COLORS[Math.floor(Math.random()*3)],
     a: Math.random()*.4+.12,
-    o: Math.random()*Math.PI*2
+    o: Math.random()*Math.PI*2,
+    ph: Math.random()*60000,  /* 每颗粒子有自己的流场相位，避免同步聚堆 */
+    stag: 0                   /* 低速停滞帧数计时 */
   };
 }
 function field(x, y, t){
@@ -1179,14 +1441,22 @@ function frame(t){
   var gW = 1.1 + gust*.9;
   var gA = 1 + gust*.9;
   for(var i=0;i<parts.length;i++){
-    var p = parts[i], f = field(p.x, p.y, t);
-    p.vx += (f.x*.55*g - p.vx)*.03;
-    p.vy += (f.y*.5*g - p.vy)*.03;
+    var p = parts[i], f = field(p.x, p.y, t + p.ph);
+    p.vx += (f.x*.55*g - p.vx)*.03 + (Math.random()-.5)*.022;
+    p.vy += (f.y*.5*g - p.vy)*.03 + (Math.random()-.5)*.022;
     var dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx*dx+dy*dy;
     if(d2 < 22500 && d2 > 1){
       var d = Math.sqrt(d2), force = (150-d)/150*1.1;
       p.vx += (dx/d)*force; p.vy += (dy/d)*force;
     }
+    /* 防堆积：速度过低时维持一个最小漂移速度 */
+    var spNow = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+    if(spNow < .18 && spNow > .0001){
+      p.vx += p.vx/spNow*.012; p.vy += p.vy/spNow*.012;
+      p.stag++;
+      /* 停滞超过 4 秒直接重生到随机位置，彻底打散聚集 */
+      if(p.stag > 240){ parts[i] = spawn(); continue; }
+    } else { p.stag = 0; }
     p.x += p.vx*2.6; p.y += p.vy*2.6; p.o += .012;
     if(p.x > W+30) p.x = -30; if(p.x < -30) p.x = W+30;
     if(p.y > H+30) p.y = -30; if(p.y < -30) p.y = H+30;
