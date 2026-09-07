@@ -844,7 +844,7 @@ footer{border-top:1px solid var(--line);position:relative;z-index:2;background:c
   </div>
   <div class="copy-foot" data-page-node-id="4FAXlfMgDGfJNaYioVcXPB">
     <span data-page-node-id="y3vs49MTr1jMs1tCdP115w">© 2026 Breeze. 手写于某个有风的夜晚。</span>
-    <span data-page-node-id="jACFhVWYziXl2Fp2DGBwty">小彩蛋：试着连续输入 "breeze" 🍃 · <a href="/admin.html" style="color:var(--text3);text-decoration:none;border-bottom:1px dashed var(--line2)">站点管理</a></span>
+    <span data-page-node-id="jACFhVWYziXl2Fp2DGBwty">小彩蛋：试着连续输入 "breeze" 🍃 · <a href="/admin.html?v=2" style="color:var(--text3);text-decoration:none;border-bottom:1px dashed var(--line2)">站点管理</a></span>
   </div>
 </footer>
 
@@ -1719,7 +1719,7 @@ function doLogin(){
       try{ localStorage.setItem("breeze-admin-key", k); }catch(e){}
       loginErr.textContent = "";
       toast("验证成功，正在进入后台 🍃");
-      setTimeout(function(){ location.href = "/admin.html"; }, 600);
+      setTimeout(function(){ location.href = "/admin.html?v=2"; }, 600);
     } else {
       loginErr.textContent = "密码不对，再想想？";
       loginPwd.value = "";
