@@ -37,6 +37,11 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
     radial-gradient(130vw 95vw at 50% 42%,transparent 58%,rgba(5,8,18,.22) 100%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E")}
 #wind{position:fixed;inset:0;pointer-events:none}
+#scn{position:fixed;left:0;bottom:0;pointer-events:none}
+.scnbtn{position:fixed;bottom:16px;right:24px;font-size:15px;padding:8px 12px;border-radius:100px;cursor:pointer;
+  color:inherit;z-index:5;line-height:1;transition:.35s cubic-bezier(.3,1.5,.45,1)}
+.scnbtn:hover{transform:translateY(-3px) scale(1.06)}
+.scnbtn:active{transform:scale(.94);transition-duration:.1s}
 .halo{position:fixed;border-radius:50%;pointer-events:none;filter:blur(56px);opacity:.2;
   will-change:transform;transition:opacity 2s}
 .halo.h1{width:46vw;height:46vw;left:-12vw;top:-16vw;background:radial-gradient(circle,#7aa2ff,transparent 60%)}
@@ -118,10 +123,11 @@ body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
 .wx{position:fixed;top:22px;right:26px;font-size:12.5px;opacity:.75;padding:8px 16px;border-radius:100px}
 .credit{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:11.5px;opacity:.5}
 .credit a{color:inherit}
-@media(max-width:560px){.clock{font-size:20vw}.wx{top:14px;right:16px;font-size:11.5px}.search{margin-top:24px}}
+@media(max-width:560px){.clock{font-size:20vw}.wx{top:14px;right:16px;font-size:11.5px}.search{margin-top:24px}.scnbtn{bottom:46px;right:14px;font-size:13px;padding:7px 10px}}
 </style>
 </head>
 <body class="sky-night">
+<canvas id="scn"></canvas>
 <canvas id="wind"></canvas>
 <div class="halo h1" id="halo1"></div><div class="halo h2" id="halo2"></div><div class="halo h3"></div>
 
@@ -154,6 +160,7 @@ body.sky-day .chip.on{color:#0b6e63;border-color:#0b6e63}
   <a class="addl" id="addLink" title="添加自定义链接">＋</a>
   <a class="frenemy" id="doveLink" href="https://dove.best" target="_blank" rel="noopener noreferrer"></a>
 </div>
+<button class="scnbtn glass" id="scnBtn" title="风景">🏞️</button>
 <div class="credit">会呼吸的导航页 · 来自 <a href="/">Breeze</a> · 浏览器设置里把启动页/主页设为本链接即可每日使用</div>
 
 <div class="lmask" id="linkMask">
@@ -421,7 +428,181 @@ function initSprites(){
 }
 initSprites();
 
-function rs(){ W = cv.width = innerWidth; H = cv.height = innerHeight; rebuild(); }
+function rs(){
+  W = cv.width = innerWidth; H = cv.height = innerHeight;
+  scn.width = innerWidth; scn.height = Math.max(220, Math.floor(innerHeight * .5));
+  scnBuild(); rebuild();
+}
+
+/* ============================================================
+   远景自然景观 v1 —— 远山 / 湖畔 / 松林 / 丘陵 · 自动轮播
+   ============================================================ */
+var scn = document.getElementById("scn"), sx = scn.getContext("2d");
+var SCN_LIST = [
+  {k:"mountain", n:"远山", e:"🏔️"},
+  {k:"lake",     n:"湖畔", e:"🌊"},
+  {k:"forest",   n:"松林", e:"🌲"},
+  {k:"hills",    n:"丘陵", e:"🌄"}
+];
+var scnIdx = 0, scnPrev = -1, scnFade = 1, SCN_DATA = null;
+try{
+  var sv = parseInt(localStorage.getItem("breath-scn"), 10);
+  if(!isNaN(sv) && sv >= 0 && sv < SCN_LIST.length) scnIdx = sv;
+}catch(e){}
+function scnMulberry(a){
+  return function(){ a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function scnBuild(){
+  function ridgePts(seed, n){
+    var r = scnMulberry(seed), pts = [], i;
+    for(i = 0; i <= n; i++) pts.push(r());
+    return pts;
+  }
+  var rP = scnMulberry(55), pines = [], i;
+  for(i = 0; i < 26; i++) pines.push({x: rP(), h: .45 + rP() * .55});
+  var rS = scnMulberry(77), shims = [];
+  for(i = 0; i < 14; i++) shims.push({y: rS(), x: rS(), w: .15 + rS() * .4, sp: .5 + rS(), ph: rS() * 7});
+  SCN_DATA = {
+    mtn:   [ridgePts(11, 9),  ridgePts(23, 11), ridgePts(37, 13)],
+    lake:  [ridgePts(41, 9),  ridgePts(53, 11)],
+    forest:[ridgePts(71, 10), ridgePts(83, 14)],
+    hills: [ridgePts(97, 8),  ridgePts(101, 8), ridgePts(103, 8)],
+    pines: pines, shimmer: shims
+  };
+}
+function scnPalette(sky){
+  var P = {
+    night:{far:[26,40,84,.5],   mid:[16,26,58,.72],  near:[7,12,30,.95],  mist:[90,130,220,.10], water:[16,30,64,.9],  waterDeep:[6,12,30,.95], shimmer:[150,190,255,.28]},
+    late:{ far:[20,32,70,.5],   mid:[12,20,48,.72],  near:[5,9,24,.95],   mist:[80,120,210,.09], water:[12,24,54,.9],  waterDeep:[4,9,24,.95],  shimmer:[140,180,250,.25]},
+    dawn:{ far:[130,110,165,.45],mid:[95,75,130,.62],near:[55,42,85,.9],  mist:[255,190,150,.13],water:[90,80,130,.85],waterDeep:[40,32,70,.95],shimmer:[255,210,170,.30]},
+    day:{  far:[150,182,214,.5],mid:[112,148,184,.65],near:[82,118,152,.82],mist:[255,255,255,.28],water:[110,165,200,.85],waterDeep:[70,120,160,.95],shimmer:[255,255,255,.5]},
+    dusk:{ far:[125,82,135,.5], mid:[88,56,104,.7],  near:[48,32,68,.92], mist:[255,150,120,.12],water:[80,55,105,.85],waterDeep:[35,24,60,.95],shimmer:[255,190,150,.32]}
+  };
+  return P[sky] || P.night;
+}
+function scnRidgeAt(pts, t){
+  var n = pts.length - 1, f = clamp(t, 0, 1) * n, i = Math.floor(f);
+  if(i >= n) return pts[n];
+  return pts[i] + (pts[i + 1] - pts[i]) * (f - i);
+}
+function scnRidge(pts, y0, amp, col, par, vy){
+  var sw = SCN_DATA.sw, sh = SCN_DATA.sh, n = pts.length - 1, i;
+  sx.fillStyle = col; sx.beginPath();
+  sx.moveTo(-90, sh + 50);
+  var prevX = -90, prevY = y0 + (vy || 0);
+  for(i = 0; i <= n; i++){
+    var px = -90 + (sw + 180) * (i / n) + (par || 0);
+    var py = y0 + (vy || 0) - pts[i] * amp;
+    if(i === 0) sx.lineTo(px, py);
+    else sx.quadraticCurveTo((prevX + px) / 2, Math.min(prevY, py) - amp * .10, px, py);
+    prevX = px; prevY = py;
+  }
+  sx.lineTo(sw + 90, sh + 50);
+  sx.closePath(); sx.fill();
+}
+function scnMist(y, h, col){
+  var g = sx.createLinearGradient(0, y - h / 2, 0, y + h / 2);
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(.5, col); g.addColorStop(1, "rgba(0,0,0,0)");
+  sx.fillStyle = g; sx.fillRect(0, y - h / 2, SCN_DATA.sw, h);
+}
+function scnRender(k, pal, now){
+  var d = SCN_DATA, sw = d.sw, sh = d.sh, i;
+  var mode = effMode();
+  var dim = mode === "rain" ? .5 : mode === "cloud" ? .78 : 1;
+  function ca(c, m){ return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (c[3] * (m == null ? 1 : m) * dim).toFixed(3) + ")"; }
+  var kind = SCN_LIST[k].k;
+  var par1 = mouse.x * 6, par2 = mouse.x * 13, par3 = mouse.x * 22;
+  var vy1 = mouse.y * 4, vy2 = mouse.y * 7, vy3 = mouse.y * 11;
+  if(kind === "mountain"){
+    scnRidge(d.mtn[0], sh * .52, sh * .30, ca(pal.far), par1, vy1);
+    scnMist(sh * .52, sh * .22, ca(pal.mist, .8));
+    scnRidge(d.mtn[1], sh * .68, sh * .26, ca(pal.mid), par2, vy2);
+    scnRidge(d.mtn[2], sh * .88, sh * .20, ca(pal.near), par3, vy3);
+  } else if(kind === "lake"){
+    scnRidge(d.lake[0], sh * .40, sh * .26, ca(pal.far), par1, vy1);
+    scnRidge(d.lake[1], sh * .52, sh * .16, ca(pal.mid), par2, vy2);
+    var wl = sh * .58;
+    var wg = sx.createLinearGradient(0, wl, 0, sh);
+    wg.addColorStop(0, ca(pal.water, .85)); wg.addColorStop(1, ca(pal.waterDeep, .95));
+    sx.fillStyle = wg; sx.fillRect(0, wl, sw, sh - wl);
+    sx.save(); sx.translate(0, wl * 2); sx.scale(1, -1); sx.globalAlpha = .30 * dim;
+    scnRidge(d.lake[1], sh * .52, sh * .16, ca(pal.mid, 1), par2, vy2);
+    sx.restore(); sx.globalAlpha = 1;
+    sx.strokeStyle = ca(pal.shimmer); sx.lineWidth = 1;
+    for(i = 0; i < d.shimmer.length; i++){
+      var sm = d.shimmer[i];
+      var yy = wl + 6 + sm.y * (sh - wl) * .9;
+      var xx = ((sm.x * sw + now * .006 * sm.sp) % (sw + 200)) - 100;
+      var ww = sm.w * sw * .22 * (.6 + .4 * Math.sin(now * .001 * sm.sp + sm.ph));
+      sx.globalAlpha = (.14 + .12 * Math.sin(now * .0012 * sm.sp + sm.ph)) * dim;
+      sx.beginPath(); sx.moveTo(xx, yy); sx.lineTo(xx + ww, yy); sx.stroke();
+    }
+    sx.globalAlpha = 1;
+    sx.fillStyle = ca(pal.shimmer, .45); sx.fillRect(0, wl - 1, sw, 1);
+  } else if(kind === "forest"){
+    scnRidge(d.forest[0], sh * .55, sh * .30, ca(pal.far), par1, vy1);
+    scnMist(sh * .56, sh * .20, ca(pal.mist, .8));
+    var bY = sh * .80, amp2 = sh * .22;
+    scnRidge(d.forest[1], bY, amp2, ca(pal.near), par3, vy3);
+    sx.fillStyle = ca(pal.near);
+    for(i = 0; i < d.pines.length; i++){
+      var pn = d.pines[i];
+      var pxx = pn.x * sw + par3 * .6;
+      var gy = bY - scnRidgeAt(d.forest[1], (pxx + 90) / (sw + 180)) * amp2 + vy3;
+      var ph2 = amp2 * .6 * pn.h;
+      sx.beginPath();
+      sx.moveTo(pxx, gy - ph2);
+      sx.lineTo(pxx - ph2 * .30, gy + 2);
+      sx.lineTo(pxx + ph2 * .30, gy + 2);
+      sx.closePath(); sx.fill();
+      sx.beginPath();
+      sx.moveTo(pxx, gy - ph2 * 1.35);
+      sx.lineTo(pxx - ph2 * .20, gy - ph2 * .55);
+      sx.lineTo(pxx + ph2 * .20, gy - ph2 * .55);
+      sx.closePath(); sx.fill();
+    }
+  } else {
+    scnRidge(d.hills[0], sh * .50, sh * .12, ca(pal.far), par1, vy1);
+    scnMist(sh * .52, sh * .16, ca(pal.mist, .7));
+    scnRidge(d.hills[1], sh * .68, sh * .16, ca(pal.mid), par2, vy2);
+    scnRidge(d.hills[2], sh * .88, sh * .16, ca(pal.near), par3, vy3);
+    var tpar = .62;
+    var tx = sw * tpar + par3;
+    var ty = sh * .88 - scnRidgeAt(d.hills[2], tpar) * sh * .16 + vy3;
+    sx.strokeStyle = ca(pal.near); sx.lineWidth = 2; sx.lineCap = "round";
+    sx.beginPath(); sx.moveTo(tx, ty + 2); sx.lineTo(tx, ty - 15); sx.stroke();
+    sx.beginPath(); sx.arc(tx, ty - 22, 9, 0, 6.2832); sx.fillStyle = ca(pal.near); sx.fill();
+  }
+}
+function drawScenery(now, dt){
+  if(!SCN_DATA || !scn.width) return;
+  var pal = scnPalette(curSky || "night");
+  sx.clearRect(0, 0, scn.width, scn.height);
+  if(scnFade < 1 && scnPrev >= 0) scnRender(scnPrev, pal, now);
+  if(scnFade < 1) sx.globalAlpha = scnFade;
+  scnRender(scnIdx, pal, now);
+  sx.globalAlpha = 1;
+  if(scnFade < 1) scnFade = Math.min(1, scnFade + dt / 140);
+}
+var scnBtn = document.getElementById("scnBtn");
+function scnLabel(){
+  var it = SCN_LIST[scnIdx];
+  scnBtn.textContent = it.e;
+  scnBtn.title = "风景 · " + it.n + "（点击切换）";
+}
+function cycleScene(save){
+  scnPrev = scnIdx;
+  scnIdx = (scnIdx + 1) % SCN_LIST.length;
+  scnFade = 0;
+  scnLabel();
+  if(save){ try{ localStorage.setItem("breath-scn", String(scnIdx)); }catch(e){} }
+}
+scnBtn.addEventListener("click", function(){ cycleScene(true); });
+setInterval(function(){ cycleScene(false); }, 60000);
+scnLabel();
 
 /* 场景开关：极光 / 篝火 / 绿植 */
 var SCN = {aurora:false, fire:false, plant:false};
@@ -679,6 +860,7 @@ function frame(now){
   if(SCN.plant) drawPlant(now);
   if(SCN.fire) drawCampfire(now);
   x.globalAlpha = 1;
+  if(SCN_DATA) drawScenery(now, dt);
   raf = requestAnimationFrame(frame);
 }
 
