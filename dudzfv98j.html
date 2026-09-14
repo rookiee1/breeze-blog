@@ -207,6 +207,112 @@ a{color:inherit}
 canvas.spark{width:100%; height:104px; display:block}
 .empty{padding:34px 20px; text-align:center; color:var(--dim2); font-size:13px; font-family:var(--serif); letter-spacing:.06em}
 
+/* ============ 今晚：抽卡 + 计时 ============ */
+.tonight{padding:22px 20px 20px; margin-bottom:16px}
+.tnHead{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px}
+.tnHead .cap{margin:0}
+.cardEmpty{font-size:12.5px; color:var(--dim2); padding:12px 2px; font-family:var(--serif); letter-spacing:.05em}
+.playCard{padding:18px 18px 15px; border-radius:16px; position:relative; overflow:hidden;
+  background:linear-gradient(135deg,rgba(216,183,140,.11),rgba(201,143,159,.07) 60%,rgba(255,255,255,.02));
+  border:1px solid rgba(216,183,140,.2); animation:cardIn .7s var(--ease) both}
+@keyframes cardIn{from{opacity:0; transform:translateY(8px) scale(.985)}to{opacity:1; transform:none}}
+.playCard .pcScene{font-size:19px; letter-spacing:.05em; line-height:1.55; margin-bottom:9px}
+.playCard .pcRule{font-size:13px; color:rgba(241,236,228,.72); line-height:1.85; padding-left:13px;
+  border-left:1px solid rgba(216,183,140,.34)}
+.playCard .pcFoot{display:flex; align-items:center; gap:9px; margin-top:15px; flex-wrap:wrap}
+.playCard .pcFoot .sp{flex:1}
+
+.timer{margin-top:18px; padding-top:18px; border-top:1px solid rgba(241,236,228,.07)}
+.tWho{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap}
+.tWho .cap{margin:0}
+.tRow{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:16px}
+.tChip{font-size:12px; padding:6px 13px; border-radius:100px; border:1px solid var(--line); color:var(--dim);
+  transition:.26s var(--ease); font-variant-numeric:tabular-nums}
+.tChip:hover{border-color:var(--line2); color:var(--ink)}
+.tChip.on{background:linear-gradient(140deg,rgba(216,183,140,.9),rgba(201,143,159,.8)); color:#14100e; border-color:transparent}
+.tFace{text-align:center; padding:6px 0 14px}
+.tFace .tNum{font-family:var(--serif); font-size:60px; line-height:1.05; letter-spacing:.04em;
+  font-variant-numeric:tabular-nums; display:block; transition:color .5s var(--ease)}
+.tFace .tGoal{display:block; font-size:11.5px; color:var(--dim2); letter-spacing:.08em; margin-top:5px; min-height:16px}
+.timer.run .tNum{color:#f0dfc4; text-shadow:0 0 34px rgba(216,183,140,.3)}
+.timer.paused .tNum{color:var(--dim2)}
+.tActs{display:flex; gap:9px; justify-content:center; flex-wrap:wrap}
+.tHint{margin-top:13px; text-align:center; font-size:11.5px; color:var(--dim2); letter-spacing:.06em; min-height:18px}
+.tHint.warn{color:#e8c8a0}
+
+/* ============ 时长账本 ============ */
+.ledger{margin-top:18px; padding-top:18px; border-top:1px solid rgba(241,236,228,.07)}
+.lgGrp{margin-bottom:15px}
+.lgGrp .lgHead{font-size:10.5px; letter-spacing:.2em; color:var(--dim2); margin-bottom:10px}
+.lgRow{display:grid; grid-template-columns:72px 1fr 96px; gap:10px; align-items:center; margin-bottom:7px}
+.lgRow .k{font-size:11.5px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lgRow .b{height:6px; border-radius:100px; background:rgba(255,255,255,.06); position:relative; overflow:hidden}
+.lgRow .b i{position:absolute; inset:0 auto 0 0; border-radius:100px; transition:width .9s var(--ease)}
+.lgRow .b i.ra{background:linear-gradient(90deg,rgba(216,183,140,.45),rgba(216,183,140,.95))}
+.lgRow .b i.rb{background:linear-gradient(90deg,rgba(201,143,159,.4),rgba(201,143,159,.9))}
+.lgRow .v{font-size:11.5px; color:var(--dim); text-align:right; font-variant-numeric:tabular-nums}
+.lgSum{font-family:var(--serif); font-size:13.5px; line-height:1.9; color:rgba(241,236,228,.84);
+  padding:11px 14px; border-radius:13px; background:rgba(255,255,255,.03);
+  border:1px solid rgba(241,236,228,.06)}
+.lgList{margin-top:14px; border-top:1px solid rgba(241,236,228,.06); padding-top:10px}
+.lgItem{display:flex; align-items:center; gap:10px; font-size:11.5px; color:var(--dim2); padding:5px 0}
+.lgItem .sp{flex:1}
+.lgItem .x{font-size:11px; color:var(--dim2); border:1px solid var(--line); border-radius:100px;
+  padding:2px 10px; transition:.25s var(--ease)}
+.lgItem .x:hover{color:#e59a9a; border-color:rgba(220,120,120,.42)}
+
+/* ============ 角色语气 ============ */
+.voice{margin-top:12px; padding:14px 16px; border-radius:14px;
+  background:rgba(255,255,255,.028); border:1px solid rgba(241,236,228,.06);
+  animation:cardIn .55s var(--ease) both}
+.voice .vl{font-family:var(--serif); font-size:14.5px; line-height:1.95; color:rgba(241,236,228,.88); letter-spacing:.02em}
+.voice .vf{display:flex; justify-content:flex-end; margin-top:9px}
+
+/* ============ 城市检索 ============ */
+.geoWrap{position:relative}
+.geoList{margin-top:8px; border-radius:14px; overflow:hidden; display:none;
+  border:1px solid var(--line); background:rgba(10,11,19,.96); max-height:230px; overflow-y:auto}
+.geoList.on{display:block}
+.geoItem{padding:11px 14px; font-size:13.5px; cursor:pointer; border-bottom:1px solid rgba(241,236,228,.05);
+  display:flex; justify-content:space-between; gap:10px; align-items:baseline; transition:.2s}
+.geoItem:last-child{border-bottom:none}
+.geoItem:hover{background:rgba(216,183,140,.1)}
+.geoItem b{font-weight:400}
+.geoItem small{font-size:11px; color:var(--dim2); white-space:nowrap}
+.geoCur{margin-top:8px; font-size:11.5px; color:var(--dim2); letter-spacing:.05em; min-height:17px}
+.geoCur.ok{color:#e8d3ae}
+.geoTip{font-size:11px; color:var(--dim2); padding:9px 14px}
+
+/* ============ 道具 ============ */
+.propPrompt{font-family:var(--serif); font-size:13px; line-height:1.9; color:rgba(241,236,228,.74);
+  padding:11px 14px; border-radius:13px; background:rgba(216,183,140,.07);
+  border:1px solid rgba(216,183,140,.16); margin-bottom:12px}
+.propAdd{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.propAdd .inp{flex:1; min-width:132px}
+.propList{display:flex; gap:7px; flex-wrap:wrap; margin-top:12px}
+.propTag{display:inline-flex; align-items:center; gap:7px; font-size:12.5px; padding:6px 8px 6px 13px;
+  border-radius:100px; border:1px solid var(--line); background:rgba(255,255,255,.04)}
+.propTag.like{color:#eadcc2; border-color:rgba(216,183,140,.34); background:rgba(216,183,140,.1)}
+.propTag.meh{color:var(--dim); border-color:rgba(241,236,228,.12)}
+.propTag .x{width:17px; height:17px; border-radius:50%; font-size:12px; line-height:1; display:flex;
+  align-items:center; justify-content:center; color:var(--dim2); border:1px solid var(--line); transition:.22s}
+.propTag .x:hover{color:#e59a9a; border-color:rgba(220,120,120,.45)}
+.propNudge{font-size:12px; color:var(--dim2); margin-top:12px; padding-left:13px;
+  border-left:1px solid rgba(216,183,140,.28); font-family:var(--serif); line-height:1.85}
+.propLine{margin-top:14px}
+.propLine .cap{display:block; margin-bottom:9px}
+.match{margin-top:16px; padding:15px 16px; border-radius:14px;
+  background:linear-gradient(135deg,rgba(216,183,140,.13),rgba(201,143,159,.07));
+  border:1px solid rgba(216,183,140,.24); animation:cardIn .7s var(--ease) both}
+.match .mt{display:flex; align-items:center; gap:8px; margin-bottom:4px;
+  font-size:10.5px; letter-spacing:.22em; color:#e8d3ae}
+.match .mrow{display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-top:9px}
+.match .mlk{font-size:11px; color:var(--dim2); letter-spacing:.1em; flex:0 0 auto; min-width:62px}
+.mch{font-size:12.5px; padding:5px 13px; border-radius:100px; font-family:var(--serif)}
+.mch.like{background:rgba(216,183,140,.18); border:1px solid rgba(216,183,140,.42); color:#f2e2c6}
+.mch.meh{background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--dim)}
+.match .mfoot{font-size:12px; color:var(--dim2); margin-top:11px; font-family:var(--serif); line-height:1.8}
+
 /* ============ 弹层 ============ */
 .mask{position:fixed; inset:0; z-index:70; background:rgba(3,4,9,.68); backdrop-filter:blur(10px);
   display:flex; align-items:flex-start; justify-content:center; padding:24px 14px 40px; overflow-y:auto;
@@ -313,6 +419,26 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     <div style="margin-top:14px"><span class="hb" id="hb"><i></i><span id="hbTxt">—</span></span></div>
   </section>
 
+  <section class="tonight glass">
+    <div class="tnHead">
+      <span class="cap">今晚</span>
+      <button class="mini" id="btnDraw">抽一张</button>
+    </div>
+    <div id="cardBox"></div>
+    <div class="timer" id="timer">
+      <div class="tWho"><span class="cap">这一场我当</span><div class="seg" id="tRole"></div></div>
+      <div class="tRow" id="tPresets"></div>
+      <div class="tFace"><span class="tNum" id="tNum">00:00</span><span class="tGoal" id="tGoal"></span></div>
+      <div class="tActs">
+        <button class="pill primary" id="tStart">开始</button>
+        <button class="mini gold" id="tEnd">结束并记账</button>
+        <button class="mini danger" id="tStop">停一下</button>
+      </div>
+      <div class="tHint" id="tHint"></div>
+    </div>
+    <div class="ledger" id="ledger"></div>
+  </section>
+
   <div class="inbox" id="inbox"></div>
 
   <div class="sechead"><h2>一场一场</h2><span class="n" id="cnt"></span></div>
@@ -330,6 +456,7 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     <div class="grp">
       <span class="cap">你在这一场</span>
       <div class="seg" id="scoreRole"></div>
+      <div class="voice hidden" id="voiceScore"></div>
     </div>
     <div class="grp">
       <span class="cap">给 TA 的印象</span>
@@ -338,6 +465,17 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     <div class="grp">
       <label class="f" for="fNote">想说的话（可选）</label>
       <textarea class="inp" id="fNote" maxlength="2000" placeholder="写点什么，只有你们两个人会看到"></textarea>
+    </div>
+    <div class="grp">
+      <span class="cap">这一场用到的</span>
+      <div class="propPrompt" id="propPrompt"></div>
+      <div class="propAdd">
+        <input class="inp" id="fProp" maxlength="24" placeholder="写一件用过的…" autocomplete="off" spellcheck="false">
+        <div class="seg" id="propSeg"></div>
+        <button class="mini gold" id="propAddBtn" type="button">加进去</button>
+      </div>
+      <div class="propList" id="propList"></div>
+      <div class="hintline" id="propHint"></div>
     </div>
     <div class="srow">
       <button class="pill" id="scoreCancel">取消</button>
@@ -359,6 +497,7 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     <div class="grp" style="margin-top:18px">
       <label class="f">你在这一场是什么角色</label>
       <div class="seg" id="newRole"></div>
+      <div class="voice hidden" id="voiceNew"></div>
       <div class="hintline">只影响统计口径，改不了也没关系。</div>
     </div>
     <div class="srow">
@@ -397,10 +536,54 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     </div>
     <div class="grp">
       <span class="cap">两座城</span>
-      <label class="f" for="cCityA">我这边（城市名,纬度,经度,时区）</label><input class="inp" id="cCityA" maxlength="60" placeholder="北京,39.9042,116.4074,Asia/Shanghai">
-      <div style="height:12px"></div>
-      <label class="f" for="cCityB">TA 那边</label><input class="inp" id="cCityB" maxlength="60" placeholder="上海,31.2304,121.4737,Asia/Shanghai">
-      <div class="hintline">坐标只发给我们自己的服务器去取天气，不会给第三方。</div>
+      <label class="f" for="cCityA">我这边</label>
+      <div class="geoWrap">
+        <input class="inp" id="cCityA" maxlength="20" placeholder="输入城市名，如 上海" autocomplete="off" spellcheck="false">
+        <div class="geoList" id="geoL_A"></div>
+      </div>
+      <div class="geoCur" id="geoCurA"></div>
+      <div style="height:14px"></div>
+      <label class="f" for="cCityB">TA 那边</label>
+      <div class="geoWrap">
+        <input class="inp" id="cCityB" maxlength="20" placeholder="输入城市名，如 成都" autocomplete="off" spellcheck="false">
+        <div class="geoList" id="geoL_B"></div>
+      </div>
+      <div class="geoCur" id="geoCurB"></div>
+      <div class="hintline">只需要打城市名，坐标由服务器去查——你们的浏览器不会直接连任何第三方。</div>
+    </div>
+    <div class="grp">
+      <span class="cap">角色语气池（一行一句，抽到哪个角色就随机给一句）</span>
+      <label class="f" for="cVoiceA" id="lbVoiceA">角色一</label>
+      <textarea class="inp" id="cVoiceA" style="min-height:96px"></textarea>
+      <div style="height:14px"></div>
+      <label class="f" for="cVoiceB" id="lbVoiceB">角色二</label>
+      <textarea class="inp" id="cVoiceB" style="min-height:96px"></textarea>
+    </div>
+    <div class="grp">
+      <span class="cap">玩法池（一行一条，点「抽一张」随机）</span>
+      <textarea class="inp" id="cScenes" style="min-height:88px"></textarea>
+      <div style="height:14px"></div>
+      <label class="f" for="cRules">规则池</label>
+      <textarea class="inp" id="cRules" style="min-height:80px"></textarea>
+      <div style="height:14px"></div>
+      <label class="f" for="cSafeword">暂停暗号（任何一方说出它，立刻停下来）</label>
+      <input class="inp" id="cSafeword" maxlength="12" placeholder="自己定一个词">
+      <div style="height:14px"></div>
+      <label class="f" for="cDurs">计时档位（用 / 分隔，单位分钟）</label>
+      <input class="inp" id="cDurs" maxlength="60" placeholder="5 / 10 / 15 / 20 / 30 / 45 / 60">
+    </div>
+    <div class="grp">
+      <span class="cap">道具</span>
+      <label class="f" for="cPropPrompt">引导语（打分时会显示给你们看）</label>
+      <textarea class="inp" id="cPropPrompt" style="min-height:66px"></textarea>
+      <div style="height:14px"></div>
+      <div class="g2">
+        <div><label class="f" for="cPropLike">「喜欢」的叫法</label><input class="inp" id="cPropLike" maxlength="12"></div>
+        <div><label class="f" for="cPropMeh">「一般」的叫法</label><input class="inp" id="cPropMeh" maxlength="12"></div>
+      </div>
+      <div style="height:14px"></div>
+      <label class="f" for="cPropMatchTitle">两个人一样时的标题</label>
+      <input class="inp" id="cPropMatchTitle" maxlength="24">
     </div>
     <div class="srow">
       <button class="pill" id="cfgExport">导出</button>
@@ -419,6 +602,9 @@ var $ = function(id){ return document.getElementById(id); };
 var API = "", TOKEN = null, WHO = null, CFG = null;
 var SESSIONS = [], STATS = null, PARTNER = null, INBOX = [];
 var WEATHER = null, CUR = null, EDIT_MODE = null, IDLE = null, POLL = null, TICK = null, LAST_DATA = 0;
+var PICKA = null, PICKB = null, CARD = null;
+var T = { goal: 0, elapsed: 0, base: 0, startAt: 0, run: false, blown: false, int: null };
+var PROPS = [], PROP_V = "like";
 
 /* ---------------- 基础 ---------------- */
 function probe(){
@@ -541,7 +727,7 @@ function load(silent){
   });
 }
 function boot(){
-  load().then(function(){ loadWeather(); });
+  load().then(function(){ loadWeather(); loadT(); });
   clearInterval(POLL);
   POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
   clearInterval(TICK);
@@ -559,7 +745,7 @@ function loadWeather(){
 
 /* ---------------- 渲染：我们 ---------------- */
 function render(){
-  renderUs(); renderInbox(); renderList(); renderTrend();
+  renderUs(); renderTonight(); renderInbox(); renderList(); renderTrend();
 }
 function renderUs(){
   var st = CFG.startDate;
@@ -715,6 +901,35 @@ function renderList(){
         '<div class="tags">' + (sm.tags || []).map(function(t){ return '<span class="chip gold">' + esc(t) + "</span>"; }).join("") + "</div></div>" +
         '</div><div class="sumlines">' + (sm.lines || []).map(function(l){ return "<p>" + esc(l) + "</p>"; }).join("") + "</div></div>";
     }
+    var L = propLabels();
+    var propBlock = "";
+    if(s.my && s.my.props && s.my.props.length){
+      propBlock += '<div class="propLine"><span class="cap">我记下的</span><div class="propList" style="margin-top:0">' +
+        s.my.props.map(function(p){
+          return '<span class="propTag ' + (isLike(p.v) ? "like" : "meh") + '">' + esc(p.n) + "</span>";
+        }).join("") + "</div></div>";
+    }
+    if(s.reveal.their && s.reveal.their.props && s.reveal.their.props.length){
+      propBlock += '<div class="propLine"><span class="cap">' + esc(taName()) + ' 记下的</span><div class="propList" style="margin-top:0">' +
+        s.reveal.their.props.map(function(p){
+          return '<span class="propTag ' + (isLike(p.v) ? "like" : "meh") + '">' + esc(p.n) + "</span>";
+        }).join("") + "</div></div>";
+    }
+    if(!s.my || !(s.my.props || []).length){
+      propBlock += '<div class="propNudge">这一场用过的东西还没记下来——趁现在还记得，写进「改一改」里。</div>';
+    }
+    var matchBlock = "";
+    if(s.propMatch && s.propMatch.count){
+      var pm = s.propMatch;
+      matchBlock = '<div class="match"><div class="mt">' + esc(CFG.propMatchTitle || "") + '</div>' +
+        (pm.likes.length ? '<div class="mrow"><span class="mlk">都' + esc(L.like) + '</span>' +
+          pm.likes.map(function(n){ return '<span class="mch like">' + esc(n) + "</span>"; }).join("") + "</div>" : "") +
+        (pm.mehs.length ? '<div class="mrow"><span class="mlk">都' + esc(L.meh) + '</span>' +
+          pm.mehs.map(function(n){ return '<span class="mch meh">' + esc(n) + "</span>"; }).join("") + "</div>" : "") +
+        '<div class="mfoot">' + (pm.hits >= 2
+          ? "有 " + pm.hits + " 件东西你们想到一块去了。"
+          : "有一件东西你们想到一块去了。") + "</div></div>";
+    }
     var reveal = "";
     if(s.both){
       if(s.reveal.state === "granted"){
@@ -757,7 +972,7 @@ function renderList(){
           (s.both ? '<span class="chip gold">已合上</span>' : "") +
         '</div></div>' +
       '</div>' +
-      sum +
+      sum + matchBlock + propBlock +
       mineRows + taBlock +
       '<div class="state"><span class="sp">' + esc(stTxt) + '</span>' +
         '<span class="who' + (s.iSubmitted ? " ok" : "") + '"><b></b>我</span>' +
@@ -832,27 +1047,100 @@ function readSliders(){
   });
   return o;
 }
+/* ---------- 道具（打分时记下这一场用过的东西） ---------- */
+function propLabels(){ return { like: (CFG.propLike || "喜欢"), meh: (CFG.propMeh || "一般") }; }
+function isLike(v){ return v !== "meh"; }
+function renderPropSeg(){
+  var L = propLabels();
+  $("propSeg").innerHTML = ["like", "meh"].map(function(v){
+    return '<button type="button" data-v="' + v + '" class="' + (PROP_V === v ? "on" : "") + '">' +
+      esc(v === "like" ? L.like : L.meh) + "</button>";
+  }).join("");
+  $("propSeg").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      $("propSeg").querySelectorAll("button").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on"); PROP_V = b.getAttribute("data-v");
+    });
+  });
+}
+function renderPropList(){
+  $("propList").innerHTML = PROPS.map(function(p, i){
+    return '<span class="propTag ' + (isLike(p.v) ? "like" : "meh") + '">' + esc(p.n) +
+      '<button class="x" type="button" data-i="' + i + '" aria-label="移除">×</button></span>';
+  }).join("");
+  $("propList").querySelectorAll(".x").forEach(function(b){
+    b.addEventListener("click", function(){
+      PROPS.splice(Number(b.getAttribute("data-i")), 1);
+      renderPropList(); saveDraft();
+    });
+  });
+}
+function addProp(){
+  var n = $("fProp").value.trim();
+  if(!n) return;
+  PROPS = PROPS.filter(function(p){ return p.n.toLowerCase() !== n.toLowerCase(); });
+  if(PROPS.length >= 16) PROPS.shift();
+  PROPS.push({ n: n.slice(0, 24), v: PROP_V });
+  $("fProp").value = "";
+  renderPropList(); saveDraft();
+}
+/* 草稿：写到一半被打断也不会忘（存在你自己这台设备上，存过就清掉） */
+function draftKey(sid){ return "vr-draft-" + sid; }
+function saveDraft(){
+  if(!CUR) return;
+  try{
+    localStorage.setItem(draftKey(CUR.id), JSON.stringify({
+      at: Date.now(), props: PROPS, note: $("fNote").value.slice(0, 2000)
+    }));
+  }catch(e){}
+}
+function readDraft(sid){
+  try{
+    var o = JSON.parse(localStorage.getItem(draftKey(sid)) || "null");
+    if(o && o.at && Date.now() - o.at < 7 * 86400000) return o;
+  }catch(e){}
+  return null;
+}
+function clearDraft(sid){ try{ localStorage.removeItem(draftKey(sid)); }catch(e){} }
+
 function openScore(s){
   CUR = s;
   $("scoreTitle").textContent = s.scene || "写这一场";
   $("scoreSub").textContent = "你在这一场是「" + roleLbl(s.myRole) + "」。写完先封着，等 TA 也写完才会打开。";
   $("scoreRole").innerHTML = '<button class="on" disabled>' + esc(roleLbl(s.myRole)) + "</button>";
+  renderVoice($("voiceScore"), s.myRole, false);
   buildSliders(s.my ? s.my.vals : null);
   $("fNote").value = s.my ? (s.my.note || "") : "";
+  PROPS = (s.my && s.my.props) ? s.my.props.map(function(p){ return { n: p.n, v: p.v }; }) : [];
+  PROP_V = "like";
+  var d = readDraft(s.id);
+  var restored = false;
+  if(d){
+    if(!PROPS.length && d.props && d.props.length){ PROPS = d.props; restored = true; }
+    if(!$("fNote").value && d.note){ $("fNote").value = d.note; restored = true; }
+  }
+  renderPropSeg(); renderPropList();
+  $("propPrompt").textContent = CFG.propPrompt || "";
+  $("propHint").textContent = CFG.propHint || "";
   $("scoreHint").textContent = s.theySubmitted ? (taName() + " 已经写好了，你写完这一场就合上。") : "";
   $("maskScore").classList.add("show");
+  if(restored) toast("把上次没存完的找回来了");
 }
-$("scoreCancel").addEventListener("click", function(){ $("maskScore").classList.remove("show"); });
-$("maskScore").addEventListener("pointerdown", function(e){ if(e.target === $("maskScore")) $("maskScore").classList.remove("show"); });
+$("propAddBtn").addEventListener("click", addProp);
+$("fProp").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addProp(); } });
+$("fNote").addEventListener("input", saveDraft);
+$("scoreCancel").addEventListener("click", function(){ saveDraft(); $("maskScore").classList.remove("show"); });
+$("maskScore").addEventListener("pointerdown", function(e){ if(e.target === $("maskScore")) saveDraft(), $("maskScore").classList.remove("show"); });
 $("scoreSave").addEventListener("click", function(){
   if(!CUR) return;
   var b = $("scoreSave"); b.disabled = true;
-  var body = { session_id: CUR.id, vals: readSliders(), note: $("fNote").value.trim() };
+  var body = { session_id: CUR.id, vals: readSliders(), note: $("fNote").value.trim(), props: PROPS };
   api("/api/vault/score", { method:"POST", body: JSON.stringify(body) }).then(function(r){
     b.disabled = false;
     if(r.status === 401) return lock("需要重新解锁");
     return r.json().then(function(j){
       if(j && j.ok){
+        clearDraft(CUR.id);
         $("maskScore").classList.remove("show");
         toast(CUR.theySubmitted ? "合上了" : "封存好了，等 TA");
         load(true);
@@ -870,8 +1158,11 @@ function buildRoleSeg(box, onRoleA){
     x.addEventListener("click", function(){
       box.querySelectorAll("button").forEach(function(y){ y.classList.remove("on"); });
       x.classList.add("on");
+      var idx = Number(x.getAttribute("data-r"));
+      if(box.id === "newRole") renderVoice($("voiceNew"), idx, true);
     });
   });
+  if(box.id === "newRole") renderVoice($("voiceNew"), onRoleA, false);
 }
 function pickedRole(box){
   var on = box.querySelector("button.on");
@@ -916,6 +1207,300 @@ $("newSave").addEventListener("click", function(){
     });
   }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
 });
+
+/* ---------------- 语气 / 抽一张 / 计时 ---------------- */
+function pickOne(a){ return a[Math.floor(Math.random() * a.length)]; }
+function poolFor(idx){ return (idx === 1 ? (CFG.voiceA || []) : (CFG.voiceB || [])); }
+var lastVoice = {};
+function renderVoice(el, idx, reroll){
+  if(!el) return;
+  var p = poolFor(idx);
+  if(!p.length){ el.classList.add("hidden"); el.innerHTML = ""; return; }
+  var key = el.id + "|" + idx;
+  var v = (!reroll && lastVoice[key]) ? lastVoice[key] : pickOne(p);
+  lastVoice[key] = v;
+  el.classList.remove("hidden");
+  el.innerHTML = '<div class="vl">' + esc(v) + "</div>" +
+    '<div class="vf"><button class="mini" type="button">换一句</button></div>';
+  el.querySelector(".vf button").addEventListener("click", function(ev){
+    ev.preventDefault(); ev.stopPropagation();
+    renderVoice(el, idx, true);
+  });
+}
+
+function drawCard(){
+  var sc = CFG.scenes || [], ru = CFG.rules || [], du = CFG.durations || [15];
+  if(!sc.length && !ru.length){ toast("玩法池还是空的，去「设置」里加几条"); return; }
+  CARD = { scene: sc.length ? pickOne(sc) : "", rule: ru.length ? pickOne(ru) : "", min: pickOne(du) };
+  renderCard();
+}
+function renderCard(){
+  var box = $("cardBox"); if(!box) return;
+  if(!CARD){
+    box.innerHTML = '<div class="cardEmpty">点右上「抽一张」，让今晚从一个随机的地方开始。</div>';
+    return;
+  }
+  box.innerHTML = '<div class="playCard">' +
+    (CARD.scene ? '<div class="pcScene serif">' + esc(CARD.scene) + "</div>" : "") +
+    (CARD.rule ? '<div class="pcRule">' + esc(CARD.rule) + "</div>" : "") +
+    '<div class="pcFoot"><span class="chip gold">' + CARD.min + ' 分钟</span><span class="sp"></span>' +
+    '<button class="mini" id="pcAgain">再抽</button>' +
+    '<button class="mini" id="pcUse">照这个计时</button>' +
+    '<button class="mini gold" id="pcNew">用它开场</button></div></div>';
+  $("pcAgain").addEventListener("click", drawCard);
+  $("pcUse").addEventListener("click", function(){
+    T.goal = CARD.min * 60; T.blown = false;
+    resetTimer(); startTimer();
+    toast("开始 · 目标 " + CARD.min + " 分钟");
+  });
+  $("pcNew").addEventListener("click", function(){
+    openNew(null);
+    $("fScene").value = CARD.scene || "";
+    toast(CARD.rule ? "规则：" + CARD.rule : "已填好名字");
+  });
+}
+
+function fmt(s){
+  s = Math.max(0, Math.round(s));
+  var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  if(h > 0) return h + ":" + (m < 10 ? "0" : "") + m + ":" + (x < 10 ? "0" : "") + x;
+  return (m < 10 ? "0" : "") + m + ":" + (x < 10 ? "0" : "") + x;
+}
+function dur(s){
+  s = Math.round(s || 0);
+  if(s < 60) return s + " 秒";
+  var h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  if(h) return h + " 小时" + (m ? " " + m + " 分" : "");
+  return m + " 分钟";
+}
+function elapsedNow(){ return T.run ? (T.base + (Date.now() - T.startAt) / 1000) : T.elapsed; }
+function renderTimer(){
+  var el = $("timer"); if(!el) return;
+  var e = elapsedNow();
+  $("tNum").textContent = fmt(e);
+  $("tStart").textContent = T.run ? "暂停" : (e > 0.5 ? "继续" : "开始");
+  $("tEnd").disabled = e < 5;
+  el.className = "timer" + (T.run ? " run" : "") + (!T.run && e >= 5 ? " paused" : "");
+  if(T.goal){
+    var left = Math.max(0, T.goal - e);
+    $("tGoal").textContent = left > 0
+      ? ("目标 " + Math.round(T.goal / 60) + " 分钟 · 还剩 " + fmt(left))
+      : ("目标 " + Math.round(T.goal / 60) + " 分钟 · 已过");
+  } else {
+    $("tGoal").textContent = "";
+  }
+  $("tPresets").querySelectorAll(".tChip").forEach(function(c){
+    c.classList.toggle("on", T.goal === Number(c.getAttribute("data-m")) * 60);
+  });
+}
+function renderPresets(){
+  var d = (CFG && CFG.durations) || [15];
+  $("tPresets").innerHTML = '<span class="cap" style="margin:2px 4px 0 0">目标</span>' + d.map(function(m){
+    return '<button class="tChip" data-m="' + m + '">' + m + " 分</button>";
+  }).join("");
+  $("tPresets").querySelectorAll(".tChip").forEach(function(c){
+    c.addEventListener("click", function(){
+      var m = Number(c.getAttribute("data-m")) * 60;
+      T.goal = (T.goal === m) ? 0 : m;
+      T.blown = false;
+      renderTimer(); saveT();
+    });
+  });
+  renderTimer();
+}
+function renderTRole(){
+  if($("tRole").querySelector("button.on")) return;
+  var pick = SESSIONS.length ? SESSIONS[0].myRole : 1;
+  $("tRole").innerHTML = [1, 0].map(function(i){
+    return '<button data-r="' + i + '" class="' + (i === pick ? "on" : "") + '">' + esc(roleLbl(i)) + "</button>";
+  }).join("");
+  $("tRole").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      $("tRole").querySelectorAll("button").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+  });
+}
+function tRoleIdx(){
+  var on = $("tRole").querySelector("button.on");
+  return on ? Number(on.getAttribute("data-r")) : 1;
+}
+function startTimer(){
+  if(T.run) return;
+  T.base = elapsedNow(); T.startAt = Date.now(); T.run = true; T.blown = false;
+  clearInterval(T.int);
+  T.int = setInterval(function(){
+    var e = elapsedNow();
+    if(T.goal && !T.blown && e >= T.goal){
+      T.blown = true;
+      var p = poolFor(1).concat(poolFor(0));
+      $("tHint").textContent = p.length ? pickOne(p) : "时间到了。";
+      $("tHint").className = "tHint warn";
+      toast("到点了");
+    }
+    renderTimer(); saveT();
+  }, 500);
+  renderTimer(); saveT();
+}
+function pauseTimer(){
+  T.elapsed = elapsedNow(); T.run = false; clearInterval(T.int);
+  renderTimer(); saveT();
+}
+function resetTimer(){
+  clearInterval(T.int);
+  T.run = false; T.elapsed = 0; T.base = 0; T.startAt = 0; T.blown = false;
+  renderTimer(); saveT();
+}
+function endTimer(){
+  var e = Math.round(elapsedNow());
+  if(e < 5){ toast("太短了，不算"); return; }
+  var role = tRoleIdx();
+  var b = $("tEnd"); b.disabled = true;
+  api("/api/vault/time", { method: "POST", body: JSON.stringify({ role: role, sec: e }) })
+    .then(function(r){
+      if(r.status === 401) return lock("需要重新解锁");
+      return r.json().then(function(j){
+        b.disabled = false;
+        if(j && j.ok){
+          toast("记下了 · " + roleLbl(role) + " " + dur(e));
+          resetTimer();
+          load(true);
+        } else toast("没记上，再试一次");
+      });
+    }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
+}
+function saveT(){
+  try{
+    sessionStorage.setItem("vr-t", JSON.stringify({
+      goal: T.goal, elapsed: T.elapsed, base: T.base, startAt: T.run ? T.startAt : 0
+    }));
+  }catch(e){}
+}
+function loadT(){
+  try{
+    var o = JSON.parse(sessionStorage.getItem("vr-t") || "null");
+    if(o){
+      T.goal = o.goal || 0;
+      if(o.startAt){
+        T.elapsed = (o.base || 0) + (Date.now() - o.startAt) / 1000;
+        T.run = false; startTimer();
+      } else {
+        T.elapsed = o.elapsed || 0;
+        renderTimer();
+      }
+      return;
+    }
+  }catch(e){}
+  renderTimer();
+}
+function renderLedger(){
+  var box = $("ledger"); if(!box) return;
+  var t = (STATS && STATS.times) || { a: [0, 0], b: [0, 0] };
+  var mine = t[WHO] || [0, 0], theirs = t[WHO === "a" ? "b" : "a"] || [0, 0];
+  var mx = Math.max(mine[0], mine[1], theirs[0], theirs[1], 1);
+  function rows(arr){
+    return '<div class="lgRow"><span class="k">当「' + esc(roleLbl(1)) + '」</span>' +
+        '<span class="b"><i class="ra" style="width:' + (arr[1] / mx * 100).toFixed(1) + '%"></i></span>' +
+        '<span class="v">' + (arr[1] ? dur(arr[1]) : "—") + "</span></div>" +
+      '<div class="lgRow"><span class="k">当「' + esc(roleLbl(0)) + '」</span>' +
+        '<span class="b"><i class="rb" style="width:' + (arr[0] / mx * 100).toFixed(1) + '%"></i></span>' +
+        '<span class="v">' + (arr[0] ? dur(arr[0]) : "—") + "</span></div>";
+  }
+  var total = mine[0] + mine[1] + theirs[0] + theirs[1];
+  var sum;
+  if(!total){
+    sum = "还没有记录。按一次「结束并记账」，这里就会开始累。";
+  } else {
+    var dA = mine[1] - theirs[1];
+    if(Math.abs(dA) < 60){
+      sum = "你们在「" + esc(roleLbl(1)) + "」上的时间几乎一样长。";
+    } else {
+      sum = (dA > 0 ? "你" : esc(taName())) + "当「" + esc(roleLbl(1)) + "」的时间更长，多出 " + dur(Math.abs(dA)) + "。";
+    }
+    var dm = Math.abs(mine[1] - mine[0]);
+    if(dm >= 60){
+      sum += "你自己" + (mine[1] > mine[0]
+        ? "更常当「" + esc(roleLbl(1)) + "」" : "更常当「" + esc(roleLbl(0)) + "」") + "，差 " + dur(dm) + "。";
+    }
+  }
+  var rec = ((STATS && STATS.recentTime) || []).filter(function(r){ return r.who === WHO; }).slice(0, 5);
+  var list = rec.length ? '<div class="lgList">' + rec.map(function(r){
+    return '<div class="lgItem"><span>' + esc(r.d || "") + " · 我当「" + esc(roleLbl(r.role ? 1 : 0)) + "」 " + dur(r.sec) + "</span>" +
+      '<span class="sp"></span><button class="x" data-tdel="' + r.id + '">抹掉</button></div>';
+  }).join("") + "</div>" : "";
+  box.innerHTML =
+    '<div class="lgGrp"><div class="lgHead">' + esc(myName()) + "</div>" + rows(mine) + "</div>" +
+    '<div class="lgGrp"><div class="lgHead">' + esc(taName()) + "</div>" + rows(theirs) + "</div>" +
+    '<div class="lgSum">' + sum + "</div>" + list;
+}
+$("ledger").addEventListener("click", function(ev){
+  var b = ev.target.closest("[data-tdel]"); if(!b) return;
+  if(!confirm("抹掉这一条时长记录？")) return;
+  var id = Number(b.getAttribute("data-tdel"));
+  api("/api/vault/time/" + id, { method: "DELETE" }).then(function(r){
+    if(r.status === 401) return lock("需要重新解锁");
+    return r.json().then(function(j){ if(j && j.ok){ toast("抹掉了"); load(true); } });
+  });
+});
+var presetsSig = "";
+function renderTonight(){
+  if(!CFG) return;
+  var sig = ((CFG.durations || []).join(",")) + "|" + (CFG.safeword || "");
+  if(sig !== presetsSig){ presetsSig = sig; renderPresets(); }
+  renderTRole();
+  if(!$("cardBox").innerHTML) renderCard();
+  renderLedger();
+}
+
+$("btnDraw").addEventListener("click", drawCard);
+$("tStart").addEventListener("click", function(){ if(T.run) pauseTimer(); else startTimer(); });
+$("tEnd").addEventListener("click", endTimer);
+$("tStop").addEventListener("click", function(){
+  resetTimer();
+  $("tHint").textContent = "已经停下来了。停下来不是失败，是安全 · 暗号：" + ((CFG && CFG.safeword) || "未设置");
+  $("tHint").className = "tHint warn";
+  toast("停了");
+});
+
+/* ---------------- 城市名检索 ---------------- */
+function geoBind(inputEl, listEl, onPick){
+  var timer = null, seq = 0;
+  function close(){ listEl.classList.remove("on"); listEl.innerHTML = ""; }
+  function run(){
+    var q = inputEl.value.trim();
+    if(q.length < 1){ close(); return; }
+    var mine = ++seq;
+    listEl.innerHTML = '<div class="geoTip">在找…</div>'; listEl.classList.add("on");
+    api("/api/vault/geo?q=" + encodeURIComponent(q)).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if(mine !== seq) return;
+        var cs = (j && j.cities) || [];
+        if(!cs.length){ listEl.innerHTML = '<div class="geoTip">没找到，换个说法试试</div>'; return; }
+        listEl.innerHTML = cs.map(function(c, i){
+          var sub = [c.admin, c.country].filter(Boolean).join(" · ");
+          return '<div class="geoItem" data-i="' + i + '"><b>' + esc(c.name) + "</b><small>" + esc(sub) + "</small></div>";
+        }).join("");
+        listEl.querySelectorAll(".geoItem").forEach(function(el){
+          el.addEventListener("click", function(){
+            onPick(cs[Number(el.getAttribute("data-i"))]);
+            inputEl.value = ""; close();
+          });
+        });
+      }).catch(function(){ if(mine === seq) close(); });
+  }
+  inputEl.addEventListener("input", function(){ clearTimeout(timer); timer = setTimeout(run, 280); });
+  inputEl.addEventListener("focus", function(){ if(inputEl.value.trim()) run(); });
+  document.addEventListener("pointerdown", function(e){
+    if(e.target !== inputEl && !listEl.contains(e.target)) close();
+  });
+}
+function renderGeoCur(){
+  var a = PICKA || (CFG && CFG.cityA) || null;
+  var b = PICKB || (CFG && CFG.cityB) || null;
+  function txt(c){ return c ? ("已选：" + c.name + "（" + Number(c.lat).toFixed(2) + ", " + Number(c.lon).toFixed(2) + "）") : "还没选城市"; }
+  $("geoCurA").textContent = txt(a); $("geoCurA").className = "geoCur" + (a ? " ok" : "");
+  $("geoCurB").textContent = txt(b); $("geoCurB").className = "geoCur" + (b ? " ok" : "");
+}
 
 /* ---------------- 趋势 ---------------- */
 function renderTrend(){
@@ -987,11 +1572,8 @@ function spark(given, syncs){
 }
 
 /* ---------------- 设置 ---------------- */
-function cityStr(c){
-  if(!c) return "";
-  return c.name + "," + c.lat + "," + c.lon + "," + (c.tz || "auto");
-}
 function openCfg(){
+  PICKA = null; PICKB = null;
   $("cNameA").value = CFG.nameA || "你";
   $("cNameB").value = CFG.nameB || "TA";
   $("cTitle").value = CFG.title || "";
@@ -999,31 +1581,50 @@ function openCfg(){
   $("cRoleA").value = CFG.roleA || "";
   $("cRoleB").value = CFG.roleB || "";
   $("cDims").value = (CFG.dims || []).join(" / ");
-  $("cCityA").value = cityStr(CFG.cityA);
-  $("cCityB").value = cityStr(CFG.cityB);
+  $("lbVoiceA").textContent = (CFG.roleA || "角色一") + " 的语气（一行一句）";
+  $("lbVoiceB").textContent = (CFG.roleB || "角色二") + " 的语气（一行一句）";
+  $("cVoiceA").value = (CFG.voiceA || []).join("\n");
+  $("cVoiceB").value = (CFG.voiceB || []).join("\n");
+  $("cScenes").value = (CFG.scenes || []).join("\n");
+  $("cRules").value = (CFG.rules || []).join("\n");
+  $("cSafeword").value = CFG.safeword || "";
+  $("cDurs").value = (CFG.durations || []).join(" / ");
+  $("cPropPrompt").value = CFG.propPrompt || "";
+  $("cPropLike").value = CFG.propLike || "";
+  $("cPropMeh").value = CFG.propMeh || "";
+  $("cPropMatchTitle").value = CFG.propMatchTitle || "";
+  $("cCityA").value = ""; $("cCityB").value = "";
+  $("geoL_A").classList.remove("on"); $("geoL_B").classList.remove("on");
+  renderGeoCur();
   $("maskCfg").classList.add("show");
 }
 $("btnCfg").addEventListener("click", openCfg);
+geoBind($("cCityA"), $("geoL_A"), function(c){ PICKA = c; renderGeoCur(); toast("我这边：" + c.name); });
+geoBind($("cCityB"), $("geoL_B"), function(c){ PICKB = c; renderGeoCur(); toast("TA 那边：" + c.name); });
 $("cfgCancel").addEventListener("click", function(){ $("maskCfg").classList.remove("show"); });
 $("maskCfg").addEventListener("pointerdown", function(e){ if(e.target === $("maskCfg")) $("maskCfg").classList.remove("show"); });
-function parseCityStr(v){
-  var p = String(v || "").split(",").map(function(s){ return s.trim(); });
-  if(!p[0]) return null;
-  var lat = parseFloat(p[1]), lon = parseFloat(p[2]);
-  if(!isFinite(lat) || !isFinite(lon)) return null;
-  return { name: p[0].slice(0, 16), lat: lat, lon: lon, tz: (p[3] || "auto").slice(0, 40) };
-}
 $("cfgSave").addEventListener("click", function(){
   var dd = $("cDims").value.split("/").map(function(s){ return s.trim(); }).filter(Boolean).slice(0, 12);
+  var lines = function(id){
+    return $(id).value.split("\n").map(function(s){ return s.trim(); }).filter(Boolean).slice(0, 60);
+  };
   var cfg = {
     title: $("cTitle").value.trim(), nameA: $("cNameA").value.trim(), nameB: $("cNameB").value.trim(),
     roleA: $("cRoleA").value.trim(), roleB: $("cRoleB").value.trim(),
-    startDate: $("cStart").value || ""
+    startDate: $("cStart").value || "",
+    voiceA: lines("cVoiceA"), voiceB: lines("cVoiceB"),
+    scenes: lines("cScenes"), rules: lines("cRules"),
+    safeword: $("cSafeword").value.trim(),
+    propPrompt: $("cPropPrompt").value.trim(),
+    propLike: $("cPropLike").value.trim(),
+    propMeh: $("cPropMeh").value.trim(),
+    propMatchTitle: $("cPropMatchTitle").value.trim(),
+    durations: $("cDurs").value.split("/").map(function(s){ return Math.round(Number(s.trim())); })
+      .filter(function(n){ return isFinite(n) && n >= 1 && n <= 180; }).slice(0, 10)
   };
   if(dd.length) cfg.dims = dd;
-  var cA = parseCityStr($("cCityA").value), cB = parseCityStr($("cCityB").value);
-  if(cA) cfg.cityA = cA;
-  if(cB) cfg.cityB = cB;
+  if(PICKA) cfg.cityA = PICKA;
+  if(PICKB) cfg.cityB = PICKB;
   var b = $("cfgSave"); b.disabled = true;
   api("/api/vault/config", { method:"POST", body: JSON.stringify({ config: cfg }) }).then(function(r){
     b.disabled = false;
@@ -1074,7 +1675,7 @@ probe().then(function(base){
             $("vTitle").textContent = CFG.title || "两个人的房间";
             $("lockTitle").textContent = CFG.title || "两个人的房间";
             $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
-            render(); idleReset(); loadWeather();
+            render(); idleReset(); loadWeather(); loadT();
             clearInterval(POLL); POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
             clearInterval(TICK); TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
           }
