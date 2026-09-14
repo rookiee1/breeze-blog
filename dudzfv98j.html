@@ -889,33 +889,43 @@ $("go").addEventListener("click", doUnlock);
 $("pw").addEventListener("keydown", function(e){ if(e.key === "Enter") doUnlock(); });
 
 /* ---------------- 数据 ---------------- */
+/* 把一份 /api/vault/data 的结果套到页面上。
+ * 「启动自动续登」和「之后每 45 秒轮询」都走这里 —— 以前是两段各写一遍，
+ * 结果刷新页面那条路径漏了计时还原，才出现「刷新就归零」。 */
+function applyData(j){
+  CFG = j.config || {}; SESSIONS = j.sessions || []; STATS = j.stats || {};
+  PARTNER = j.partner || {}; INBOX = j.inbox || [];
+  HOLDS = j.holds || { incoming: [], outgoing: [] };
+  LOCKS = j.locks || {};
+  if(typeof j.serverNow === "number" && j.serverNow > 0) SKEW = j.serverNow - Date.now();
+  syncTimerFromServer();
+  if(T.run){ startLocalTicker(); if(!FT) startFloatLoop(); }
+  LAST_DATA = Date.now();
+  $("vTitle").textContent = CFG.title || "两个人的房间";
+  $("lockTitle").textContent = CFG.title || "两个人的房间";
+  $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
+  render();
+  checkHolds();
+}
+function startLoops(){
+  clearInterval(POLL);
+  POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
+  clearInterval(TICK);
+  TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
+}
 function load(silent){
   return api("/api/vault/data").then(function(r){
     if(r.status === 401){ lock("需要重新解锁"); return null; }
     return r.json();
   }).then(function(j){
     if(!j || !j.ok) return null;
-    CFG = j.config || {}; SESSIONS = j.sessions || []; STATS = j.stats || {};
-    PARTNER = j.partner || {}; INBOX = j.inbox || [];
-    HOLDS = j.holds || { incoming: [], outgoing: [] };
-    LOCKS = j.locks || {};
-    if(typeof j.serverNow === "number" && j.serverNow > 0) SKEW = j.serverNow - Date.now();
-    syncTimerFromServer();
-    LAST_DATA = Date.now();
-    $("vTitle").textContent = CFG.title || "两个人的房间";
-    $("lockTitle").textContent = CFG.title || "两个人的房间";
-    $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
-    render();
-    checkHolds();
+    applyData(j);
     return j;
   });
 }
 function boot(){
   load().then(function(){ loadWeather(); loadT(); });
-  clearInterval(POLL);
-  POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
-  clearInterval(TICK);
-  TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
+  startLoops();
 }
 document.addEventListener("visibilitychange", function(){
   if(!document.hidden && TOKEN){ load(true); loadWeather(); }
@@ -2283,16 +2293,11 @@ probe().then(function(base){
         $("app").classList.remove("hidden");
         return r.json().then(function(j){
           if(j && j.ok){
-            CFG = j.config || {}; SESSIONS = j.sessions || []; STATS = j.stats || {};
-            PARTNER = j.partner || {}; INBOX = j.inbox || [];
-            HOLDS = j.holds || { incoming: [], outgoing: [] };
-            LOCKS = j.locks || {};
-            $("vTitle").textContent = CFG.title || "两个人的房间";
-            $("lockTitle").textContent = CFG.title || "两个人的房间";
-            $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
-            render(); checkHolds(); idleReset(); loadWeather(); loadT();
-            clearInterval(POLL); POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
-            clearInterval(TICK); TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
+            /* 与 boot() 走同一条路径：计时该还原就还原 */
+            applyData(j);
+            loadWeather(); loadT();
+            startLoops();
+            idleReset();
           }
         });
       }
