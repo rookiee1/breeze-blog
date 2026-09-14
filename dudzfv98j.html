@@ -1471,6 +1471,7 @@ function splitScene(s){
   return { t: t.trim(), min: 0 };
 }
 function drawCard(){
+  if(!CFG){ toast("还在读数据，再等一秒"); return; }
   var sc = CFG.scenes || [], ru = CFG.rules || [], du = CFG.durations || [15];
   if(!sc.length && !ru.length){ toast("玩法池还是空的，去「设置」里加几条"); return; }
   var pick = sc.length ? splitScene(pickOne(sc)) : { t:"", min:0 };
@@ -1998,6 +1999,7 @@ $("tStart").addEventListener("click", function(){ if(T.run) pauseTimer(); else s
 $("tEnd").addEventListener("click", endTimer);
 $("tStop").addEventListener("click", openHold);
 function setManualGoal(){
+  if(!CFG){ toast("还在读数据，再等一秒"); return; }
   var v = Number($("tManNum").value);
   var u = Number($("tManUnit").value) || 1;
   if(!isFinite(v) || v <= 0){ toast("先写一个数字"); return; }
