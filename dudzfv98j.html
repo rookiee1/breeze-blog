@@ -350,6 +350,82 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
 .grp{margin-bottom:20px}
 .grp > .cap{display:block; margin-bottom:11px; padding-bottom:7px; border-bottom:1px solid rgba(241,236,228,.07)}
 .hintline{font-size:11.5px; color:var(--dim2); margin-top:9px; letter-spacing:.04em}
+/* ============ 计时：自己定 / 无限那个选项 ============ */
+.tMan{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:-4px 0 14px}
+.tMan .cap{margin:0}
+.tManIn{width:96px; padding:9px 12px; font-size:14px; text-align:center}
+.tManSel{width:auto; padding:9px 10px; font-size:13px}
+.tChip.inf{border-style:dashed; border-color:rgba(201,143,159,.5); color:#e9c2ce;
+  background:linear-gradient(120deg,rgba(201,143,159,.14),rgba(216,183,140,.1));
+  position:relative; overflow:hidden}
+.tChip.inf:hover{border-color:rgba(201,143,159,.85); color:#f3d3dc}
+.tChip.inf::after{content:""; position:absolute; inset:0; transform:translateX(-120%);
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);
+  animation:sheen 3.4s ease-in-out infinite}
+@keyframes sheen{0%{transform:translateX(-120%)}55%{transform:translateX(120%)}100%{transform:translateX(120%)}}
+.tFace .tNum.sm{font-size:34px}
+
+/* ============ 锁定：这一场没走完，别的都动不了 ============ */
+.lockBar{margin-top:14px; padding:11px 15px; border-radius:13px; font-size:12.5px; line-height:1.8;
+  background:linear-gradient(120deg,rgba(216,183,140,.14),rgba(201,143,159,.09));
+  border:1px solid rgba(216,183,140,.3); color:#f0e2cb; display:none}
+.timer.run .lockBar{display:block}
+.lockBar b{font-weight:500; color:#f7ecd8}
+body.locked .top .acts,body.locked .us,body.locked .inbox,body.locked #list,
+body.locked .sechead,body.locked .tonight .tnHead{opacity:.28; pointer-events:none; filter:saturate(.45)}
+body.locked #tStart,body.locked #tEnd{opacity:.28; pointer-events:none}
+body.locked #tPresets,body.locked .tMan{opacity:.5}
+body.locked .tChip:not(.inf){cursor:not-allowed}
+
+/* ============ 浮在页面上的话 ============ */
+.floatLayer{position:fixed; inset:0; z-index:75; pointer-events:none; overflow:hidden}
+.float{position:absolute; max-width:min(340px,74vw); font-family:var(--serif); font-size:15px;
+  line-height:1.85; letter-spacing:.02em; color:#f3e7d5; padding:12px 17px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(26,22,26,.86),rgba(20,18,26,.8));
+  border:1px solid rgba(216,183,140,.28); backdrop-filter:blur(14px);
+  box-shadow:0 18px 44px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.08);
+  opacity:0; transform:translateY(12px) scale(.97);
+  animation:floatIn .9s var(--ease) forwards, floatDrift 7s ease-in-out infinite alternate}
+.float.out{animation:floatOut 1.5s var(--ease) forwards}
+@keyframes floatIn{to{opacity:1; transform:none}}
+@keyframes floatDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--dx,20px),-16px,0)}}
+.float.rose{border-color:rgba(201,143,159,.34); color:#f5dee4}
+.float.gold{border-color:rgba(216,183,140,.42); color:#f7ead2}
+.float.vow{background:linear-gradient(135deg,rgba(36,20,26,.9),rgba(22,16,24,.86)); border-color:rgba(201,143,159,.45)}
+
+/* ============ 统计页 ============ */
+.statSec{margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid rgba(241,236,228,.07)}
+.statSec:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0}
+.propCloud{display:flex; flex-wrap:wrap; gap:10px; align-items:baseline; margin-top:14px}
+.pchip{font-family:var(--serif); letter-spacing:.04em; padding:3px 8px; border-radius:100px;
+  line-height:1.5; transition:.4s var(--ease); white-space:nowrap}
+.pchip.like{color:#f5e3c4; background:rgba(216,183,140,.13); border:1px solid rgba(216,183,140,.34);
+  box-shadow:0 0 22px rgba(216,183,140,.14)}
+.pchip.meh{color:var(--dim); background:rgba(255,255,255,.035); border:1px solid var(--line)}
+.pchip i{font-style:normal; font-size:.68em; opacity:.7; margin-left:5px; font-family:var(--sans)}
+.statNote{font-size:11.5px; color:var(--dim2); letter-spacing:.04em; line-height:1.8}
+.motto{margin:14px 0 0; font-family:var(--serif); font-size:15px; line-height:1.95; letter-spacing:.03em;
+  color:#f2e4cd; padding-left:15px; border-left:2px solid rgba(201,143,159,.45)}
+
+/* ============ 商量：停下来 / 那个选项 ============ */
+.opt{padding:15px 16px; border-radius:15px; background:rgba(255,255,255,.032);
+  border:1px solid var(--line); margin-bottom:11px}
+.opt .oh{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-size:14.5px; margin-bottom:7px}
+.opt .ob{font-size:12.5px; color:var(--dim2); line-height:1.85}
+.opt .orow{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.opt.gold{border-color:rgba(216,183,140,.28); background:linear-gradient(130deg,rgba(216,183,140,.1),rgba(255,255,255,.02))}
+.opt.rose{border-color:rgba(201,143,159,.3); background:linear-gradient(130deg,rgba(201,143,159,.11),rgba(255,255,255,.02))}
+.opt .task{font-family:var(--serif); font-size:14px; line-height:1.95; color:#f5e6d4; margin-top:8px;
+  padding-left:14px; border-left:1px solid rgba(216,183,140,.4)}
+.opt.dim{opacity:.55}
+.vowLine{font-family:var(--serif); font-size:15.5px; line-height:2.05; color:#f4e3e8; min-height:62px;
+  padding:15px 17px; border-radius:15px; background:linear-gradient(135deg,rgba(201,143,159,.13),rgba(216,183,140,.06));
+  border:1px solid rgba(201,143,159,.26)}
+.vowAsk{margin-top:16px; font-family:var(--serif); font-size:21px; letter-spacing:.08em; text-align:center;
+  color:#f7ecdc; line-height:1.7}
+.vowNo{margin-top:14px; font-family:var(--serif); font-size:27px; letter-spacing:.12em; text-align:center;
+  color:#f0c9d4; animation:cardIn .8s var(--ease) both}
+
 .toast{position:fixed; left:50%; bottom:calc(28px + env(safe-area-inset-bottom)); transform:translate(-50%,20px);
   z-index:90; font-size:13px; padding:11px 22px; border-radius:100px; opacity:0; pointer-events:none;
   transition:.36s var(--ease); background:rgba(14,15,24,.94); border:1px solid var(--line);
@@ -363,6 +439,11 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
   .sumTop{gap:16px}
   .ring{width:68px; height:68px}
   .ring span{font-size:21px}
+  .tFace .tNum{font-size:46px}
+  .tFace .tNum.sm{font-size:26px}
+  .float{font-size:14px; padding:10px 14px; max-width:78vw}
+  .vowAsk{font-size:18px}
+  .vowNo{font-size:22px}
 }
 </style>
 </head>
@@ -404,6 +485,7 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     <div class="brand"><span class="dot"></span><span id="vTitle">两个人的房间</span></div>
     <div class="acts">
       <button class="pill primary" id="btnNew">＋ 新的一场</button>
+      <button class="pill" id="btnStats">统计</button>
       <button class="pill" id="btnCfg">设置</button>
       <button class="pill" id="btnLock">锁上</button>
     </div>
@@ -428,6 +510,16 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     <div class="timer" id="timer">
       <div class="tWho"><span class="cap">这一场我当</span><div class="seg" id="tRole"></div></div>
       <div class="tRow" id="tPresets"></div>
+      <div class="tMan">
+        <span class="cap">自己定</span>
+        <input class="inp tManIn" id="tManNum" type="number" min="1" max="525600" inputmode="numeric" placeholder="数字" autocomplete="off">
+        <select class="inp tManSel" id="tManUnit">
+          <option value="1">分钟</option>
+          <option value="60">小时</option>
+          <option value="1440">天</option>
+        </select>
+        <button class="mini gold" id="tManSet">设为目标</button>
+      </div>
       <div class="tFace"><span class="tNum" id="tNum">00:00</span><span class="tGoal" id="tGoal"></span></div>
       <div class="tActs">
         <button class="pill primary" id="tStart">开始</button>
@@ -435,8 +527,8 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
         <button class="mini danger" id="tStop">停一下</button>
       </div>
       <div class="tHint" id="tHint"></div>
+      <div class="lockBar" id="lockBar"></div>
     </div>
-    <div class="ledger" id="ledger"></div>
   </section>
 
   <div class="inbox" id="inbox"></div>
@@ -444,8 +536,9 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
   <div class="sechead"><h2>一场一场</h2><span class="n" id="cnt"></span></div>
   <div id="list"></div>
 
-  <div class="sechead"><h2>只属于你的那一半</h2><span class="n">你看得见的</span></div>
-  <section class="trend glass" id="trend"></section>
+  <div class="sechead"><h2>只属于你的那一半</h2>
+    <span class="n"><button class="mini" id="btnStats2">看统计</button></span></div>
+  <section class="trend glass" id="trendHint"></section>
 </div>
 
 <!-- ================= 写这一场 ================= -->
@@ -561,16 +654,34 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
     </div>
     <div class="grp">
       <span class="cap">玩法池（一行一条，点「抽一张」随机）</span>
-      <textarea class="inp" id="cScenes" style="min-height:88px"></textarea>
+      <div class="hintline" style="margin:0 0 9px">想给某一条自带计时，写成「文案 | 20」，抽到它时就会用这个分钟数。</div>
+      <textarea class="inp" id="cScenes" style="min-height:110px"></textarea>
       <div style="height:14px"></div>
       <label class="f" for="cRules">规则池</label>
-      <textarea class="inp" id="cRules" style="min-height:80px"></textarea>
+      <textarea class="inp" id="cRules" style="min-height:100px"></textarea>
+      <div style="height:14px"></div>
+      <label class="f" for="cRefuse">「无法拒绝的玩法」池（想中途停下来时，从这里面抽一个）</label>
+      <textarea class="inp" id="cRefuse" style="min-height:100px"></textarea>
       <div style="height:14px"></div>
       <label class="f" for="cSafeword">暂停暗号（任何一方说出它，立刻停下来）</label>
       <input class="inp" id="cSafeword" maxlength="12" placeholder="自己定一个词">
       <div style="height:14px"></div>
-      <label class="f" for="cDurs">计时档位（用 / 分隔，单位分钟）</label>
-      <input class="inp" id="cDurs" maxlength="60" placeholder="5 / 10 / 15 / 20 / 30 / 45 / 60">
+      <label class="f" for="cDurs">计时档位</label>
+      <div class="hintline" style="margin:0 0 9px">单位写法：5m = 5 分钟，2h = 2 小时，3d = 3 天。最远一年。</div>
+      <input class="inp" id="cDurs" maxlength="160" placeholder="5m / 30m / 2h / 1d / 7d / 30d">
+    </div>
+    <div class="grp">
+      <span class="cap">那个点不下去的选项</span>
+      <label class="f" for="cVowAsk">每次要问的那句话（{role} 会换成角色名）</label>
+      <input class="inp" id="cVowAsk" maxlength="80">
+      <div style="height:14px"></div>
+      <label class="f" for="cVowPool">反复确认时逐步加重的话（一行一句）</label>
+      <textarea class="inp" id="cVowPool" style="min-height:96px"></textarea>
+      <div style="height:14px"></div>
+      <div class="g2">
+        <div><label class="f" for="cVowNo">最后那句</label><input class="inp" id="cVowNo" maxlength="40"></div>
+        <div><label class="f" for="cVowNoSub">下面那行小字</label><input class="inp" id="cVowNoSub" maxlength="80"></div>
+      </div>
     </div>
     <div class="grp">
       <span class="cap">道具</span>
@@ -584,6 +695,11 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
       <div style="height:14px"></div>
       <label class="f" for="cPropMatchTitle">两个人一样时的标题</label>
       <input class="inp" id="cPropMatchTitle" maxlength="24">
+      <div style="height:14px"></div>
+      <div class="g2">
+        <div><label class="f" for="cPropBoardTitle">统计页那一栏的标题</label><input class="inp" id="cPropBoardTitle" maxlength="24"></div>
+        <div><label class="f" for="cPropBoardNote">下面那行说明</label><input class="inp" id="cPropBoardNote" maxlength="80"></div>
+      </div>
     </div>
     <div class="srow">
       <button class="pill" id="cfgExport">导出</button>
@@ -593,6 +709,62 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
   </div>
 </div>
 
+<!-- ================= 统计 ================= -->
+<div class="mask" id="maskStats">
+  <div class="sheet glass">
+    <h3>统计</h3>
+    <div class="subt">这里的数字只属于你们两个人</div>
+    <div class="statSec">
+      <span class="cap">我写下的数字</span>
+      <section class="trend" id="trend" style="padding:10px 0 0;background:none;border:none;box-shadow:none"></section>
+    </div>
+    <div class="statSec">
+      <span class="cap">谁在这个角色上更久</span>
+      <div class="ledger" id="ledger" style="margin-top:14px;padding-top:0;border-top:none"></div>
+    </div>
+    <div class="statSec">
+      <span class="cap" id="propBoardTitle"></span>
+      <div class="statNote" id="propBoardNote"></div>
+      <div class="propCloud" id="propBoard"></div>
+    </div>
+    <div class="srow"><button class="pill" id="statsClose">关上</button></div>
+  </div>
+</div>
+
+<!-- ================= 停一下 ================= -->
+<div class="mask" id="maskHold">
+  <div class="sheet glass" style="width:min(560px,96vw)">
+    <h3>停一下</h3>
+    <div class="subt" id="holdSub">开始之后，这一场就归计时器管了</div>
+    <div id="holdBody"></div>
+    <div class="srow"><button class="pill" id="holdClose">继续</button></div>
+  </div>
+</div>
+
+<!-- ================= 无上限 ================= -->
+<div class="mask" id="maskVow">
+  <div class="sheet glass" style="width:min(520px,96vw)">
+    <h3>无上限</h3>
+    <div class="subt">这一档没有尽头，所以它要多问你几句</div>
+    <div class="vowLine" id="vowLine"></div>
+    <div class="vowAsk" id="vowAsk"></div>
+    <div class="srow" id="vowRow"></div>
+  </div>
+</div>
+
+<!-- ================= 二次确认 ================= -->
+<div class="mask" id="maskAck">
+  <div class="sheet glass" style="width:min(480px,96vw)">
+    <h3 id="ackTitle">确认一下</h3>
+    <div class="subt" id="ackBody"></div>
+    <div class="srow">
+      <button class="pill" id="ackNo">再想想</button>
+      <button class="pill primary" id="ackYes">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="floatLayer" id="floatLayer"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -605,6 +777,8 @@ var WEATHER = null, CUR = null, EDIT_MODE = null, IDLE = null, POLL = null, TICK
 var PICKA = null, PICKB = null, CARD = null;
 var T = { goal: 0, elapsed: 0, base: 0, startAt: 0, run: false, blown: false, int: null };
 var PROPS = [], PROP_V = "like";
+var HOLDS = { incoming: [], outgoing: [] }, LOCKS = {}, ST = null;
+var ACKED = {}, VOW = null, FT = null, VOW_MAX = 3;
 
 /* ---------------- 基础 ---------------- */
 function probe(){
@@ -658,8 +832,11 @@ function ago(ts){
 /* ---------------- 锁定 / 解锁 ---------------- */
 function lock(reason){
   TOKEN = null; WHO = null; CFG = null; SESSIONS = []; INBOX = [];
+  HOLDS = { incoming: [], outgoing: [] }; LOCKS = {};
   try{ sessionStorage.removeItem("vr-tk"); }catch(e){}
   clearInterval(POLL); clearInterval(TICK);
+  stopFloatLoop(); clearFloats();
+  document.body.classList.remove("locked");
   $("app").classList.add("hidden");
   $("lock").classList.remove("out");
   $("pw").value = "";
@@ -718,11 +895,14 @@ function load(silent){
     if(!j || !j.ok) return null;
     CFG = j.config || {}; SESSIONS = j.sessions || []; STATS = j.stats || {};
     PARTNER = j.partner || {}; INBOX = j.inbox || [];
+    HOLDS = j.holds || { incoming: [], outgoing: [] };
+    LOCKS = j.locks || {};
     LAST_DATA = Date.now();
     $("vTitle").textContent = CFG.title || "两个人的房间";
     $("lockTitle").textContent = CFG.title || "两个人的房间";
     $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
     render();
+    checkHolds();
     return j;
   });
 }
@@ -745,8 +925,21 @@ function loadWeather(){
 
 /* ---------------- 渲染：我们 ---------------- */
 function render(){
-  renderUs(); renderTonight(); renderInbox(); renderList(); renderTrend();
+  renderUs(); renderTonight(); renderLock(); renderInbox(); renderList(); renderTeaser();
 }
+/* 主页面只放一句引子，真正的数字都搬到统计页里去了 */
+function renderTeaser(){
+  var box = $("trendHint"); if(!box) return;
+  var sy = (STATS && STATS.syncs) || [], g = (STATS && STATS.given) || [];
+  var last = sy.length ? sy[sy.length - 1] : null;
+  box.innerHTML = '<div class="statNote" style="font-size:12.5px">' +
+    "写下的、合上的、谁在哪个角色上更久、哪些东西你们用得最多——" +
+    (last === null ? "都在统计里。" : "最近一次同频 " + last + "。") +
+    "</div><div class=\"orow\" style=\"margin-top:12px\"><button class=\"mini gold\" data-open-stats=\"1\">打开统计</button></div>";
+}
+$("trendHint").addEventListener("click", function(ev){
+  if(ev.target.closest("[data-open-stats]")) openStats();
+});
 function renderUs(){
   var st = CFG.startDate;
   if(st && /^\d{4}-\d{2}-\d{2}$/.test(st)){
@@ -842,20 +1035,59 @@ function tickHeart(){
   $("hbTxt").textContent = on ? (taName() + " 此刻也在") : (taName() + " " + ago(PARTNER.last_seen) + "来过");
 }
 
-/* ---------------- 渲染：申请箱 ---------------- */
+/* ---------------- 渲染：申请箱（看分申请 + 停不下来的商量） ---------------- */
 function renderInbox(){
-  if(!INBOX.length){ $("inbox").innerHTML = ""; return; }
-  $("inbox").innerHTML = INBOX.map(function(r){
-    var s = sess(r.session_id);
+  var html = "";
+  html += (HOLDS.incoming || []).map(function(h){
+    var s = sess(h.session_id);
     var nm = s && s.scene ? s.scene : "这一场";
-    return '<div class="req glass">' +
-      '<div class="txt"><b>' + esc(taName()) + '</b> 想看你写在「' + esc(nm) + '」里的那些分。<br>' +
-      '<span style="color:var(--dim2);font-size:12px">给不给，都由你。</span></div>' +
-      '<div class="row"><button class="mini" data-req="' + r.id + '" data-ok="0">先不给</button>' +
-      '<button class="mini gold" data-req="' + r.id + '" data-ok="1">给 TA 看</button></div></div>';
+    var yes = '<button class="mini gold" data-hd="' + h.id + '" data-ok="1">';
+    var no = '<button class="mini" data-hd="' + h.id + '" data-ok="0">';
+    if(h.kind === "task"){
+      return '<div class="req glass"><div class="txt"><b>' + esc(taName()) +
+        '</b> 想停下来，先给自己领了一个玩法——' +
+        '<div class="opt task" style="margin-top:9px">' + esc((h.payload && h.payload.text) || "") + "</div>" +
+        '<span style="color:var(--dim2);font-size:12px">TA 做到了，你点头，这一场才放人。</span></div>' +
+        '<div class="row">' + no + "还不行</button>" + yes + "确认做到了</button></div></div>";
+    }
+    if(h.kind === "change"){
+      var tg = (h.payload && h.payload.target) || 0;
+      return '<div class="req glass"><div class="txt"><b>' + esc(taName()) + "</b> 想把目标改成「" +
+        esc(chipLbl(tg)) + "」。<br><span style=\"color:var(--dim2);font-size:12px\">准了就得按新目标走完。</span></div>" +
+        '<div class="row">' + no + "维持原样</button>" + yes + "准了</button></div></div>";
+    }
+    return '<div class="req glass"><div class="txt"><b>' + esc(taName()) + "</b> 在「" + esc(nm) +
+      "」里想停下来。<br><span style=\"color:var(--dim2);font-size:12px\">点不点头，你说了算。</span></div>" +
+      '<div class="row">' + no + "不许停</button>" + yes + "准了</button></div></div>";
   }).join("");
+  if(INBOX.length){
+    html += INBOX.map(function(r){
+      var s = sess(r.session_id);
+      var nm = s && s.scene ? s.scene : "这一场";
+      return '<div class="req glass">' +
+        '<div class="txt"><b>' + esc(taName()) + "</b> 想看你写在「" + esc(nm) + "」里的那些分。<br>" +
+        '<span style="color:var(--dim2);font-size:12px">给不给，都由你。</span></div>' +
+        '<div class="row"><button class="mini" data-req="' + r.id + '" data-ok="0">先不给</button>' +
+        '<button class="mini gold" data-req="' + r.id + '" data-ok="1">给 TA 看</button></div></div>';
+    }).join("");
+  }
+  $("inbox").innerHTML = html;
 }
 $("inbox").addEventListener("click", function(ev){
+  var hb = ev.target.closest("[data-hd]");
+  if(hb){
+    var hid = Number(hb.getAttribute("data-hd")), hok = hb.getAttribute("data-ok") === "1";
+    hb.disabled = true;
+    api("/api/vault/hold/decide", { method:"POST", body: JSON.stringify({ id:hid, approve:hok }) }).then(function(r){
+      if(r.status === 401) return lock("需要重新解锁");
+      return r.json().then(function(j){
+        hb.disabled = false;
+        if(j && j.ok){ toast(hok ? "你点头了" : "你没有点头"); load(true); }
+        else toast("没成功，再试一次");
+      });
+    }).catch(function(){ hb.disabled = false; toast("网络不太顺"); });
+    return;
+  }
   var b = ev.target.closest("[data-req]"); if(!b) return;
   var id = Number(b.getAttribute("data-req")), ok = b.getAttribute("data-ok") === "1";
   b.disabled = true;
@@ -899,7 +1131,8 @@ function renderList(){
         '<div class="ring" data-p="' + sm.sync + '"><span>' + sm.sync + '</span><em>同频度</em></div>' +
         '<div class="meta"><div class="band serif">' + esc(sm.band) + '</div>' +
         '<div class="tags">' + (sm.tags || []).map(function(t){ return '<span class="chip gold">' + esc(t) + "</span>"; }).join("") + "</div></div>" +
-        '</div><div class="sumlines">' + (sm.lines || []).map(function(l){ return "<p>" + esc(l) + "</p>"; }).join("") + "</div></div>";
+        '</div><div class="sumlines">' + (sm.lines || []).map(function(l){ return "<p>" + esc(l) + "</p>"; }).join("") + "</div>" +
+        (sm.motto ? '<div class="motto">' + esc(sm.motto) + "</div>" : "") + "</div>";
     }
     var L = propLabels();
     var propBlock = "";
@@ -1228,11 +1461,26 @@ function renderVoice(el, idx, reroll){
   });
 }
 
+/* 一条玩法可以写成「文案 | 20」，后面的数字是它自带的目标分钟数 */
+function splitScene(s){
+  var t = String(s == null ? "" : s), i = t.lastIndexOf("|");
+  if(i >= 0){
+    var m = Math.round(Number(t.slice(i + 1).trim()));
+    if(isFinite(m) && m > 0) return { t: t.slice(0, i).trim(), min: Math.min(525600, m) };
+  }
+  return { t: t.trim(), min: 0 };
+}
 function drawCard(){
   var sc = CFG.scenes || [], ru = CFG.rules || [], du = CFG.durations || [15];
   if(!sc.length && !ru.length){ toast("玩法池还是空的，去「设置」里加几条"); return; }
-  CARD = { scene: sc.length ? pickOne(sc) : "", rule: ru.length ? pickOne(ru) : "", min: pickOne(du) };
+  var pick = sc.length ? splitScene(pickOne(sc)) : { t:"", min:0 };
+  CARD = {
+    scene: pick.t, rule: ru.length ? pickOne(ru) : "",
+    min: pick.min || pickOne(du), fromScene: !!pick.min
+  };
   renderCard();
+  if(T.run) return;
+  if(CARD.scene) floatVoice(CARD.scene, "gold");
 }
 function renderCard(){
   var box = $("cardBox"); if(!box) return;
@@ -1243,7 +1491,8 @@ function renderCard(){
   box.innerHTML = '<div class="playCard">' +
     (CARD.scene ? '<div class="pcScene serif">' + esc(CARD.scene) + "</div>" : "") +
     (CARD.rule ? '<div class="pcRule">' + esc(CARD.rule) + "</div>" : "") +
-    '<div class="pcFoot"><span class="chip gold">' + CARD.min + ' 分钟</span><span class="sp"></span>' +
+    '<div class="pcFoot"><span class="chip gold">' + esc(chipLbl(CARD.min)) +
+      (CARD.fromScene ? " · 这条自带" : "") + "</span><span class=\"sp\"></span>" +
     '<button class="mini" id="pcAgain">再抽</button>' +
     '<button class="mini" id="pcUse">照这个计时</button>' +
     '<button class="mini gold" id="pcNew">用它开场</button></div></div>';
@@ -1251,7 +1500,7 @@ function renderCard(){
   $("pcUse").addEventListener("click", function(){
     T.goal = CARD.min * 60; T.blown = false;
     resetTimer(); startTimer();
-    toast("开始 · 目标 " + CARD.min + " 分钟");
+    toast("开始 · 目标 " + chipLbl(CARD.min));
   });
   $("pcNew").addEventListener("click", function(){
     openNew(null);
@@ -1259,12 +1508,25 @@ function renderCard(){
     toast(CARD.rule ? "规则：" + CARD.rule : "已填好名字");
   });
 }
+/* 分钟数 → 人话 */
+function chipLbl(min){
+  min = Math.round(Number(min) || 0);
+  if(!min) return "—";
+  if(min < 60) return min + " 分";
+  if(min % 1440 === 0) return (min / 1440) + " 天";
+  if(min % 60 === 0) return (min / 60) + " 小时";
+  var h = Math.floor(min / 60), m = min % 60;
+  return h + " 小时" + (m ? " " + m + " 分" : "");
+}
 
+function two(n){ return (n < 10 ? "0" : "") + n; }
 function fmt(s){
   s = Math.max(0, Math.round(s));
-  var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
-  if(h > 0) return h + ":" + (m < 10 ? "0" : "") + m + ":" + (x < 10 ? "0" : "") + x;
-  return (m < 10 ? "0" : "") + m + ":" + (x < 10 ? "0" : "") + x;
+  var d = Math.floor(s / 86400);
+  var h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  if(d > 0) return d + "天 " + two(h) + ":" + two(m) + ":" + two(x);
+  if(h > 0) return h + ":" + two(m) + ":" + two(x);
+  return two(m) + ":" + two(x);
 }
 function dur(s){
   s = Math.round(s || 0);
@@ -1277,31 +1539,36 @@ function elapsedNow(){ return T.run ? (T.base + (Date.now() - T.startAt) / 1000)
 function renderTimer(){
   var el = $("timer"); if(!el) return;
   var e = elapsedNow();
-  $("tNum").textContent = fmt(e);
+  var txt = fmt(e);
+  var num = $("tNum");
+  num.textContent = txt;
+  num.className = "tNum" + (txt.length > 8 ? " sm" : "");
   $("tStart").textContent = T.run ? "暂停" : (e > 0.5 ? "继续" : "开始");
   $("tEnd").disabled = e < 5;
   el.className = "timer" + (T.run ? " run" : "") + (!T.run && e >= 5 ? " paused" : "");
   if(T.goal){
     var left = Math.max(0, T.goal - e);
-    $("tGoal").textContent = left > 0
-      ? ("目标 " + Math.round(T.goal / 60) + " 分钟 · 还剩 " + fmt(left))
-      : ("目标 " + Math.round(T.goal / 60) + " 分钟 · 已过");
+    $("tGoal").textContent = "目标 " + chipLbl(Math.round(T.goal / 60)) +
+      (left > 0 ? " · 还剩 " + fmt(left) : " · 已过");
   } else {
-    $("tGoal").textContent = "";
+    $("tGoal").textContent = "还没设目标 · 走多久都行";
   }
   $("tPresets").querySelectorAll(".tChip").forEach(function(c){
-    c.classList.toggle("on", T.goal === Number(c.getAttribute("data-m")) * 60);
+    c.classList.toggle("on", !!c.getAttribute("data-m") && T.goal === Number(c.getAttribute("data-m")) * 60);
   });
+  renderLock();
 }
 function renderPresets(){
   var d = (CFG && CFG.durations) || [15];
   $("tPresets").innerHTML = '<span class="cap" style="margin:2px 4px 0 0">目标</span>' + d.map(function(m){
-    return '<button class="tChip" data-m="' + m + '">' + m + " 分</button>";
-  }).join("");
+    return '<button class="tChip" data-m="' + m + '">' + esc(chipLbl(m)) + "</button>";
+  }).join("") + '<button class="tChip inf" data-inf="1">∞ 无上限</button>';
   $("tPresets").querySelectorAll(".tChip").forEach(function(c){
     c.addEventListener("click", function(){
-      var m = Number(c.getAttribute("data-m")) * 60;
-      T.goal = (T.goal === m) ? 0 : m;
+      if(c.getAttribute("data-inf")){ openVow(); return; }
+      var m = Number(c.getAttribute("data-m"));
+      if(T.run){ askChange(m); return; }
+      T.goal = (T.goal === m * 60) ? 0 : m * 60;
       T.blown = false;
       renderTimer(); saveT();
     });
@@ -1325,6 +1592,169 @@ function tRoleIdx(){
   var on = $("tRole").querySelector("button.on");
   return on ? Number(on.getAttribute("data-r")) : 1;
 }
+/* 档位的写法：5m / 2h / 3d，最远一年 */
+function parseDurList(str){
+  return String(str || "").split(/[\/,，\s]+/).map(function(tok){
+    var m = /^([0-9]+(?:\.[0-9]+)?)\s*(d|h|m|天|小时|分)?$/i.exec(String(tok).trim());
+    if(!m) return NaN;
+    var v = Number(m[1]); if(!isFinite(v) || v <= 0) return NaN;
+    var u = (m[2] || "m").toLowerCase();
+    if(u === "d" || u === "天") v *= 1440;
+    else if(u === "h" || u === "小时") v *= 60;
+    return Math.round(v);
+  }).filter(function(n){ return isFinite(n) && n >= 1 && n <= 525600; }).slice(0, 24);
+}
+function durToken(min){
+  min = Math.round(Number(min) || 0);
+  if(min % 1440 === 0) return (min / 1440) + "d";
+  if(min % 60 === 0) return (min / 60) + "h";
+  return min + "m";
+}
+function durListText(arr){ return (arr || []).map(durToken).join(" / "); }
+
+/* ================= 锁定 / 浮动的话 / 商量 ================= */
+function locked(){ return !!T.run; }
+function sessionId(){ return (SESSIONS[0] && SESSIONS[0].id) || null; }
+function pushLock(){
+  api("/api/vault/lock", { method:"POST", body: JSON.stringify({
+    sid: sessionId(), role: tRoleIdx(), target: Math.round((T.goal || 0) / 60)
+  }) }).catch(function(){});
+}
+function dropLock(){ api("/api/vault/lock", { method:"DELETE" }).catch(function(){}); }
+function renderLock(){
+  document.body.classList.toggle("locked", locked());
+  var bar = $("lockBar"); if(!bar) return;
+  var lb = LOCKS && LOCKS[WHO === "a" ? "b" : "a"];
+  var taOn = lb && lb.since && (Date.now() - lb.since < 6 * 3600 * 1000);
+  bar.innerHTML = "这一场锁上了。现在只剩两条路：<b>点「停一下」去商量</b>，或者说出暗号「" +
+    esc((CFG && CFG.safeword) || "未设置") + "」——暗号永远立刻生效，不用任何人点头。" +
+    (taOn ? '<br><span style="color:var(--dim2)">' + esc(taName()) + " 此刻也锁在 TA 的那一场里。</span>" : "");
+}
+function floatVoice(text, kind){
+  var box = $("floatLayer"); if(!box || !text) return;
+  if(box.children.length >= 4) box.removeChild(box.firstChild);
+  var el = document.createElement("div");
+  el.className = "float" + (kind ? " " + kind : "");
+  el.textContent = text;
+  el.style.left = (5 + Math.random() * 44) + "%";
+  el.style.top = (11 + Math.random() * 60) + "%";
+  el.style.setProperty("--dx", Math.round(Math.random() * 90 - 45) + "px");
+  box.appendChild(el);
+  setTimeout(function(){ el.classList.add("out"); }, 4600);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 6500);
+}
+function clearFloats(){ var b = $("floatLayer"); if(b) b.innerHTML = ""; }
+function floatLine(){
+  var p = poolFor(tRoleIdx());
+  if(p.length) floatVoice(pickOne(p), tRoleIdx() === 1 ? "gold" : "rose");
+}
+function startFloatLoop(){
+  clearInterval(FT);
+  FT = setInterval(function(){ if(T.run && !document.hidden) floatLine(); }, 32000);
+}
+function stopFloatLoop(){ clearInterval(FT); FT = null; }
+
+/* ---- 二次确认 ---- */
+var ACK_CB = null;
+function askAck(title, body, okText, cb){
+  $("ackTitle").textContent = title || "确认一下";
+  $("ackBody").textContent = body || "";
+  $("ackYes").textContent = okText || "确认";
+  ACK_CB = cb || null;
+  $("maskAck").classList.add("show");
+}
+$("ackNo").addEventListener("click", function(){ ACK_CB = null; $("maskAck").classList.remove("show"); });
+$("ackYes").addEventListener("click", function(){
+  $("maskAck").classList.remove("show");
+  var f = ACK_CB; ACK_CB = null; if(f) f();
+});
+
+/* ---- 停一下：求 TA 同意 / 领一个无法拒绝的玩法 ---- */
+function myHold(){ return (HOLDS.outgoing || [])[0] || null; }
+function openHold(){ renderHold(); $("maskHold").classList.add("show"); }
+function renderHold(){
+  var body = $("holdBody"); if(!body) return;
+  var sw = (CFG && CFG.safeword) || "未设置";
+  var h = myHold();
+  var html = '<div class="opt rose"><div class="oh">说出来，立刻停</div>' +
+    '<div class="ob">暗号是「<b>' + esc(sw) + '</b>」。任何一方说出来，这一场立刻结束，不需要谁同意。</div>' +
+    '<div class="orow"><button class="mini gold" id="holdSafe">说出暗号</button></div></div>';
+  if(h){
+    var kn = h.kind === "task" ? "领到的玩法" : (h.kind === "change" ? "想改的目标" : "求 TA 允许");
+    html += '<div class="opt ' + (h.status === "approved" ? "gold" : "dim") + '"><div class="oh">' + esc(kn) + "</div>" +
+      '<div class="ob">' + (h.status === "approved" ? "TA 已经点头了，你再确认一次就生效。" : "已经在等 TA 的答复。") + "</div>" +
+      (h.payload && h.payload.text ? '<div class="task">' + esc(h.payload.text) + "</div>" : "") +
+      (h.payload && h.payload.target ? '<div class="task">改成 ' + esc(chipLbl(h.payload.target)) + "</div>" : "") +
+      '<div class="orow"><button class="mini" id="holdCancelReq">先撤回来</button></div></div>';
+  } else {
+    html += '<div class="opt"><div class="oh">求 TA 允许</div>' +
+      '<div class="ob">发一个申请过去。TA 点头之后，你再确认一次，这一场才放人。</div>' +
+      '<div class="orow"><button class="mini gold" id="holdAsk">求 TA 允许</button></div></div>' +
+      '<div class="opt"><div class="oh">领一个无法拒绝的玩法</div>' +
+      '<div class="ob">从池子里抽一个交给你。做到了，TA 确认，就能停。</div>' +
+      '<div class="orow"><button class="mini gold" id="holdTask">让 TA 给一个</button></div></div>';
+  }
+  body.innerHTML = html;
+  var bs = $("holdSafe"); if(bs) bs.addEventListener("click", safewordStop);
+  var b1 = $("holdAsk"); if(b1) b1.addEventListener("click", function(){ makeHold("release"); });
+  var b2 = $("holdTask"); if(b2) b2.addEventListener("click", function(){ makeHold("task"); });
+  var b3 = $("holdCancelReq"); if(b3) b3.addEventListener("click", cancelHold);
+}
+function makeHold(kind, target){
+  api("/api/vault/hold", { method:"POST", body: JSON.stringify({ kind: kind, sid: sessionId(), target: target }) })
+    .then(function(r){
+      if(r.status === 401) return lock("需要重新解锁");
+      return r.json().then(function(j){
+        if(j && j.ok){
+          toast(kind === "task" ? "领到了，去做吧" : (kind === "change" ? "申请发出去了" : "已经问过 TA 了"));
+          load(true).then(function(){ renderHold(); });
+        } else toast("没成功");
+      });
+    }).catch(function(){ toast("网络不太顺"); });
+}
+function cancelHold(){
+  var h = myHold(); if(!h) return;
+  api("/api/vault/hold/" + h.id, { method:"DELETE" }).then(function(r){
+    if(r.status === 401) return lock("需要重新解锁");
+    return r.json().then(function(j){ if(j && j.ok){ toast("撤回来了"); load(true).then(function(){ renderHold(); }); } });
+  });
+}
+function safewordStop(){
+  $("maskHold").classList.remove("show");
+  releaseTimer("暗号收到，这一场停在这里。停下来从来不算失败。");
+  toast("停了");
+}
+function askChange(min){
+  askAck("改目标要两个人都点头", "现在是锁定中。把目标改成「" + chipLbl(min) + "」，需要 TA 同意——现在发申请吗？", "发申请", function(){
+    makeHold("change", min);
+  });
+}
+function checkHolds(){
+  var h = (HOLDS.outgoing || []).filter(function(x){ return x.status === "approved"; })[0];
+  if(!h || ACKED[h.id]) return;
+  ACKED[h.id] = 1;
+  var what = h.kind === "task" ? "TA 确认你做到了" : (h.kind === "change" ? "TA 同意改目标了" : "TA 同意你停下来");
+  askAck(what, "这是最后一步。确认之后立刻生效。", "确认", function(){ confirmHold(h.id); });
+}
+function confirmHold(id){
+  api("/api/vault/hold/confirm", { method:"POST", body: JSON.stringify({ id: id }) }).then(function(r){
+    if(r.status === 401) return lock("需要重新解锁");
+    return r.json().then(function(j){
+      if(j && j.ok){
+        var pk = j.payload || {};
+        if(j.kind === "change" && pk.target){
+          T.goal = pk.target * 60; T.blown = false; pushLock(); saveT(); renderTimer();
+          toast("目标改成了 " + chipLbl(pk.target));
+        } else {
+          releaseTimer("TA 点头了，这一场停在这里。");
+          toast("放人了");
+        }
+        load(true);
+      } else toast("还没到时候");
+    });
+  });
+}
+
 function startTimer(){
   if(T.run) return;
   T.base = elapsedNow(); T.startAt = Date.now(); T.run = true; T.blown = false;
@@ -1333,22 +1763,34 @@ function startTimer(){
     var e = elapsedNow();
     if(T.goal && !T.blown && e >= T.goal){
       T.blown = true;
-      var p = poolFor(1).concat(poolFor(0));
-      $("tHint").textContent = p.length ? pickOne(p) : "时间到了。";
+      $("tHint").textContent = "到点了。要不要继续，你们自己说了算。";
       $("tHint").className = "tHint warn";
       toast("到点了");
     }
     renderTimer(); saveT();
   }, 500);
+  pushLock();
   renderTimer(); saveT();
+  floatLine();
+  startFloatLoop();
+  toast(T.goal ? "锁上了 · 目标 " + chipLbl(Math.round(T.goal / 60)) : "锁上了");
 }
 function pauseTimer(){
   T.elapsed = elapsedNow(); T.run = false; clearInterval(T.int);
   renderTimer(); saveT();
 }
+function releaseTimer(msg){
+  T.elapsed = elapsedNow(); T.run = false; clearInterval(T.int);
+  stopFloatLoop(); clearFloats(); dropLock();
+  $("tHint").textContent = msg || "";
+  $("tHint").className = "tHint warn";
+  renderTimer(); saveT();
+}
 function resetTimer(){
   clearInterval(T.int);
   T.run = false; T.elapsed = 0; T.base = 0; T.startAt = 0; T.blown = false;
+  stopFloatLoop(); clearFloats(); dropLock();
+  $("tHint").textContent = ""; $("tHint").className = "tHint";
   renderTimer(); saveT();
 }
 function endTimer(){
@@ -1356,7 +1798,7 @@ function endTimer(){
   if(e < 5){ toast("太短了，不算"); return; }
   var role = tRoleIdx();
   var b = $("tEnd"); b.disabled = true;
-  api("/api/vault/time", { method: "POST", body: JSON.stringify({ role: role, sec: e }) })
+  api("/api/vault/time", { method: "POST", body: JSON.stringify({ role: role, sec: e, sid: sessionId() }) })
     .then(function(r){
       if(r.status === 401) return lock("需要重新解锁");
       return r.json().then(function(j){
@@ -1393,9 +1835,49 @@ function loadT(){
   }catch(e){}
   renderTimer();
 }
+
+/* ================= 统计页 ================= */
+function openStats(){
+  $("maskStats").classList.add("show");
+  $("propBoardTitle").textContent = (CFG && CFG.propsBoardTitle) || "用过的";
+  $("propBoardNote").textContent = (CFG && CFG.propsBoardNote) || "";
+  ST = null;
+  $("ledger").innerHTML = '<div class="lgSum">正在算…</div>';
+  $("propBoard").innerHTML = '<span class="statNote">正在算…</span>';
+  api("/api/vault/stats").then(function(r){
+    if(r.status === 401){ lock("需要重新解锁"); return null; }
+    return r.ok ? r.json() : null;
+  }).then(function(j){
+    if(!j || !j.ok) return;
+    ST = j;
+    renderLedger(); renderPropBoard();
+    requestAnimationFrame(function(){ renderTrend(); });
+  }).catch(function(){});
+}
+function renderPropBoard(){
+  var box = $("propBoard"); if(!box) return;
+  var list = (ST && ST.props) || [];
+  if(!list.length){
+    box.innerHTML = '<span class="statNote">还没记下过什么。写完一场，把用过的东西写进去，这里就会长出来。</span>';
+    return;
+  }
+  var mx = 1;
+  list.forEach(function(p){ if(p.w > mx) mx = p.w; });
+  box.innerHTML = list.map(function(p){
+    var r = p.w / mx;
+    var size = (12 + 15 * r).toFixed(1);
+    var op = (0.55 + 0.45 * r).toFixed(2);
+    var n = (p.like || 0) + (p.meh || 0);
+    var cls = (p.like >= p.meh) ? "like" : "meh";
+    var tip = p.n + " · 用了 " + n + " 次（最喜欢 " + (p.like || 0) + " / 一般 " + (p.meh || 0) + "）";
+    return '<span class="pchip ' + cls + '" style="font-size:' + size + 'px;opacity:' + op +
+      '" title="' + esc(tip) + '">' + esc(p.n) + (n > 1 ? "<i>×" + n + "</i>" : "") + "</span>";
+  }).join("");
+}
 function renderLedger(){
   var box = $("ledger"); if(!box) return;
-  var t = (STATS && STATS.times) || { a: [0, 0], b: [0, 0] };
+  if(!ST){ box.innerHTML = '<div class="lgSum">正在算…</div>'; return; }
+  var t = ST.times || { a: [0, 0], b: [0, 0] };
   var mine = t[WHO] || [0, 0], theirs = t[WHO === "a" ? "b" : "a"] || [0, 0];
   var mx = Math.max(mine[0], mine[1], theirs[0], theirs[1], 1);
   function rows(arr){
@@ -1423,7 +1905,7 @@ function renderLedger(){
         ? "更常当「" + esc(roleLbl(1)) + "」" : "更常当「" + esc(roleLbl(0)) + "」") + "，差 " + dur(dm) + "。";
     }
   }
-  var rec = ((STATS && STATS.recentTime) || []).filter(function(r){ return r.who === WHO; }).slice(0, 5);
+  var rec = ((ST.recentTime) || []).filter(function(r){ return r.who === WHO; }).slice(0, 6);
   var list = rec.length ? '<div class="lgList">' + rec.map(function(r){
     return '<div class="lgItem"><span>' + esc(r.d || "") + " · 我当「" + esc(roleLbl(r.role ? 1 : 0)) + "」 " + dur(r.sec) + "</span>" +
       '<span class="sp"></span><button class="x" data-tdel="' + r.id + '">抹掉</button></div>';
@@ -1439,9 +1921,69 @@ $("ledger").addEventListener("click", function(ev){
   var id = Number(b.getAttribute("data-tdel"));
   api("/api/vault/time/" + id, { method: "DELETE" }).then(function(r){
     if(r.status === 401) return lock("需要重新解锁");
-    return r.json().then(function(j){ if(j && j.ok){ toast("抹掉了"); load(true); } });
+    return r.json().then(function(j){ if(j && j.ok){ toast("抹掉了"); openStats(); } });
   });
 });
+$("btnStats").addEventListener("click", openStats);
+$("btnStats2").addEventListener("click", openStats);
+$("statsClose").addEventListener("click", function(){ $("maskStats").classList.remove("show"); });
+$("maskStats").addEventListener("pointerdown", function(e){ if(e.target === $("maskStats")) $("maskStats").classList.remove("show"); });
+
+/* ================= 那个点不下去的选项 ================= */
+function openVow(){
+  var pool = (CFG.vowPool || []).slice(), lines = [];
+  while(lines.length < VOW_MAX && pool.length) lines.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  VOW = { step: 0, lines: lines };
+  $("maskVow").classList.add("show");
+  renderVow();
+}
+function vowAskText(){
+  return String((CFG && CFG.vowAsk) || "「{role}」，确定要走这一档吗？").replace("{role}", roleLbl(tRoleIdx()));
+}
+function renderVow(){
+  if(!VOW) return;
+  if(VOW.step < VOW.lines.length){
+    $("vowLine").textContent = VOW.lines[VOW.step];
+    $("vowAsk").textContent = vowAskText();
+    $("vowRow").innerHTML = '<button class="pill" id="vowNo2">再想想</button>' +
+      '<button class="pill primary" id="vowYes">是</button>';
+    $("vowNo2").addEventListener("click", closeVow);
+    $("vowYes").addEventListener("click", function(){
+      floatVoice(vowAskText(), "vow");
+      VOW.step++;
+      renderVow();
+    });
+    floatVoice(vowAskText(), "vow");
+    return;
+  }
+  $("vowLine").textContent = "";
+  $("vowAsk").innerHTML = '<div class="vowNo">' + esc((CFG && CFG.vowNo) || "现在还不行哦~") + "</div>" +
+    (((CFG && CFG.vowNoSub) || "") ? '<div class="statNote" style="margin-top:12px;text-align:center">' +
+      esc(CFG.vowNoSub) + "</div>" : "");
+  $("vowRow").innerHTML = '<button class="pill primary" id="vowOk">好</button>';
+  $("vowOk").addEventListener("click", closeVow);
+  floatVoice((CFG && CFG.vowNo) || "现在还不行哦~", "vow");
+}
+function closeVow(){ $("maskVow").classList.remove("show"); VOW = null; }
+$("maskVow").addEventListener("pointerdown", function(e){ if(e.target === $("maskVow")) closeVow(); });
+$("holdClose").addEventListener("click", function(){ $("maskHold").classList.remove("show"); });
+$("maskHold").addEventListener("pointerdown", function(e){ if(e.target === $("maskHold")) $("maskHold").classList.remove("show"); });
+
+/* 锁定期间：除了「停一下」和商量用的弹层，其它点击一律拦下 */
+document.addEventListener("click", function(e){
+  if(!locked()) return;
+  var t = e.target;
+  if(t.closest("#tStop") || t.closest("#maskHold") || t.closest("#maskVow") ||
+     t.closest("#maskAck") || t.closest("#floatLayer")) return;
+  e.preventDefault(); e.stopPropagation();
+  var chip = t.closest("#tPresets .tChip");
+  if(chip){
+    if(chip.getAttribute("data-inf")){ openVow(); return; }
+    askChange(Number(chip.getAttribute("data-m")));
+    return;
+  }
+  toast("这一场还没走完，别的先动不了。想停，就点「停一下」。");
+}, true);
 var presetsSig = "";
 function renderTonight(){
   if(!CFG) return;
@@ -1449,18 +1991,26 @@ function renderTonight(){
   if(sig !== presetsSig){ presetsSig = sig; renderPresets(); }
   renderTRole();
   if(!$("cardBox").innerHTML) renderCard();
-  renderLedger();
 }
 
 $("btnDraw").addEventListener("click", drawCard);
 $("tStart").addEventListener("click", function(){ if(T.run) pauseTimer(); else startTimer(); });
 $("tEnd").addEventListener("click", endTimer);
-$("tStop").addEventListener("click", function(){
-  resetTimer();
-  $("tHint").textContent = "已经停下来了。停下来不是失败，是安全 · 暗号：" + ((CFG && CFG.safeword) || "未设置");
-  $("tHint").className = "tHint warn";
-  toast("停了");
-});
+$("tStop").addEventListener("click", openHold);
+function setManualGoal(){
+  var v = Number($("tManNum").value);
+  var u = Number($("tManUnit").value) || 1;
+  if(!isFinite(v) || v <= 0){ toast("先写一个数字"); return; }
+  var min = Math.round(v * u);
+  if(min < 1) min = 1;
+  if(min > 525600){ min = 525600; toast("最远就到一年。再往前那一步：" + ((CFG && CFG.vowNo) || "……")); }
+  if(T.run){ askChange(min); return; }
+  T.goal = min * 60; T.blown = false;
+  renderTimer(); saveT();
+  toast("目标 " + chipLbl(min));
+}
+$("tManSet").addEventListener("click", setManualGoal);
+$("tManNum").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); setManualGoal(); } });
 
 /* ---------------- 城市名检索 ---------------- */
 function geoBind(inputEl, listEl, onPick){
@@ -1587,12 +2137,19 @@ function openCfg(){
   $("cVoiceB").value = (CFG.voiceB || []).join("\n");
   $("cScenes").value = (CFG.scenes || []).join("\n");
   $("cRules").value = (CFG.rules || []).join("\n");
+  $("cRefuse").value = (CFG.refuse || []).join("\n");
   $("cSafeword").value = CFG.safeword || "";
-  $("cDurs").value = (CFG.durations || []).join(" / ");
+  $("cDurs").value = durListText(CFG.durations || []);
+  $("cVowAsk").value = CFG.vowAsk || "";
+  $("cVowPool").value = (CFG.vowPool || []).join("\n");
+  $("cVowNo").value = CFG.vowNo || "";
+  $("cVowNoSub").value = CFG.vowNoSub || "";
   $("cPropPrompt").value = CFG.propPrompt || "";
   $("cPropLike").value = CFG.propLike || "";
   $("cPropMeh").value = CFG.propMeh || "";
   $("cPropMatchTitle").value = CFG.propMatchTitle || "";
+  $("cPropBoardTitle").value = CFG.propsBoardTitle || "";
+  $("cPropBoardNote").value = CFG.propsBoardNote || "";
   $("cCityA").value = ""; $("cCityB").value = "";
   $("geoL_A").classList.remove("on"); $("geoL_B").classList.remove("on");
   renderGeoCur();
@@ -1613,14 +2170,19 @@ $("cfgSave").addEventListener("click", function(){
     roleA: $("cRoleA").value.trim(), roleB: $("cRoleB").value.trim(),
     startDate: $("cStart").value || "",
     voiceA: lines("cVoiceA"), voiceB: lines("cVoiceB"),
-    scenes: lines("cScenes"), rules: lines("cRules"),
+    scenes: lines("cScenes"), rules: lines("cRules"), refuse: lines("cRefuse"),
     safeword: $("cSafeword").value.trim(),
+    vowAsk: $("cVowAsk").value.trim(),
+    vowPool: lines("cVowPool"),
+    vowNo: $("cVowNo").value.trim(),
+    vowNoSub: $("cVowNoSub").value.trim(),
     propPrompt: $("cPropPrompt").value.trim(),
     propLike: $("cPropLike").value.trim(),
     propMeh: $("cPropMeh").value.trim(),
     propMatchTitle: $("cPropMatchTitle").value.trim(),
-    durations: $("cDurs").value.split("/").map(function(s){ return Math.round(Number(s.trim())); })
-      .filter(function(n){ return isFinite(n) && n >= 1 && n <= 180; }).slice(0, 10)
+    propsBoardTitle: $("cPropBoardTitle").value.trim(),
+    propsBoardNote: $("cPropBoardNote").value.trim(),
+    durations: parseDurList($("cDurs").value)
   };
   if(dd.length) cfg.dims = dd;
   if(PICKA) cfg.cityA = PICKA;
@@ -1672,10 +2234,12 @@ probe().then(function(base){
           if(j && j.ok){
             CFG = j.config || {}; SESSIONS = j.sessions || []; STATS = j.stats || {};
             PARTNER = j.partner || {}; INBOX = j.inbox || [];
+            HOLDS = j.holds || { incoming: [], outgoing: [] };
+            LOCKS = j.locks || {};
             $("vTitle").textContent = CFG.title || "两个人的房间";
             $("lockTitle").textContent = CFG.title || "两个人的房间";
             $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
-            render(); idleReset(); loadWeather(); loadT();
+            render(); checkHolds(); idleReset(); loadWeather(); loadT();
             clearInterval(POLL); POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
             clearInterval(TICK); TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
           }
