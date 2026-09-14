@@ -776,6 +776,8 @@ var SESSIONS = [], STATS = null, PARTNER = null, INBOX = [];
 var WEATHER = null, CUR = null, EDIT_MODE = null, IDLE = null, POLL = null, TICK = null, LAST_DATA = 0;
 var PICKA = null, PICKB = null, CARD = null;
 var T = { goal: 0, elapsed: 0, base: 0, startAt: 0, run: false, blown: false, int: null };
+/* 计时以服务端为准：SKEW = 服务端时间 − 本机时间，两个设备时钟不一致时按服务端算 */
+var SKEW = 0;
 var PROPS = [], PROP_V = "like";
 var HOLDS = { incoming: [], outgoing: [] }, LOCKS = {}, ST = null;
 var ACKED = {}, VOW = null, FT = null, VOW_MAX = 3;
@@ -897,6 +899,8 @@ function load(silent){
     PARTNER = j.partner || {}; INBOX = j.inbox || [];
     HOLDS = j.holds || { incoming: [], outgoing: [] };
     LOCKS = j.locks || {};
+    if(typeof j.serverNow === "number" && j.serverNow > 0) SKEW = j.serverNow - Date.now();
+    syncTimerFromServer();
     LAST_DATA = Date.now();
     $("vTitle").textContent = CFG.title || "两个人的房间";
     $("lockTitle").textContent = CFG.title || "两个人的房间";
@@ -1536,7 +1540,34 @@ function dur(s){
   if(h) return h + " 小时" + (m ? " " + m + " 分" : "");
   return m + " 分钟";
 }
-function elapsedNow(){ return T.run ? (T.base + (Date.now() - T.startAt) / 1000) : T.elapsed; }
+function srvNow(){ return Date.now() + SKEW; }
+function elapsedNow(){ return T.run ? (T.base + (srvNow() - T.startAt) / 1000) : T.elapsed; }
+/* 服务端存着「本轮起点 since + 之前累加的 elapsed」，这里套回本地：
+ * 刷新页面、新开标签页、换台设备，读到的都是同一个时刻。 */
+function syncTimerFromServer(){
+  var my = LOCKS && LOCKS[WHO];
+  if(!my) return false;
+  T.goal = (my.target || 0) * 60;
+  T.blown = false;
+  if(my.since){
+    T.base = my.elapsed || 0; T.startAt = my.since; T.run = true;
+  } else {
+    T.elapsed = my.elapsed || 0; T.base = 0; T.startAt = 0; T.run = false;
+  }
+  return true;
+}
+function tickTimer(){
+  var e = elapsedNow();
+  if(T.goal && !T.blown && e >= T.goal){
+    T.blown = true;
+    $("tHint").textContent = "到点了。要不要继续，你们自己说了算。";
+    $("tHint").className = "tHint warn";
+    toast("到点了");
+  }
+  renderTimer(); saveT();
+}
+function startLocalTicker(){ clearInterval(T.int); T.int = setInterval(tickTimer, 500); }
+function stopLocalTicker(){ clearInterval(T.int); T.int = null; }
 function renderTimer(){
   var el = $("timer"); if(!el) return;
   var e = elapsedNow();
@@ -1616,20 +1647,45 @@ function durListText(arr){ return (arr || []).map(durToken).join(" / "); }
 /* ================= 锁定 / 浮动的话 / 商量 ================= */
 function locked(){ return !!T.run; }
 function sessionId(){ return (SESSIONS[0] && SESSIONS[0].id) || null; }
-function pushLock(){
-  api("/api/vault/lock", { method:"POST", body: JSON.stringify({
-    sid: sessionId(), role: tRoleIdx(), target: Math.round((T.goal || 0) / 60)
-  }) }).catch(function(){});
+function pushLock(action, targetMin, carriedSec){
+  var body = {
+    action: action || "start",
+    sid: sessionId(),
+    role: tRoleIdx(),
+    target: (targetMin === undefined) ? Math.round((T.goal || 0) / 60) : targetMin
+  };
+  if(carriedSec) body.elapsed = carriedSec;
+  return api("/api/vault/lock", { method:"POST", body: JSON.stringify(body) })
+    .then(function(r){
+      if(r.status === 401){ lock("需要重新解锁"); return null; }
+      return r.json();
+    }).then(function(j){
+      if(j && typeof j.serverNow === "number") SKEW = j.serverNow - Date.now();
+      /* 以服务端给的起点为准，剩下的误差只有一次网络往返 */
+      if(j && j.ok && !j.noop && j.since){
+        T.base = 0; T.startAt = j.since;
+        renderTimer();
+      }
+      return j;
+    }).catch(function(){});
 }
-function dropLock(){ api("/api/vault/lock", { method:"DELETE" }).catch(function(){}); }
+function dropLock(){ return api("/api/vault/lock", { method:"DELETE" }).catch(function(){}); }
 function renderLock(){
   document.body.classList.toggle("locked", locked());
   var bar = $("lockBar"); if(!bar) return;
   var lb = LOCKS && LOCKS[WHO === "a" ? "b" : "a"];
-  var taOn = lb && lb.since && (Date.now() - lb.since < 6 * 3600 * 1000);
+  var taOn = lb && lb.since && (srvNow() - lb.since < 6 * 3600 * 1000);
+  var taLine = "";
+  if(taOn){
+    /* 对方那一场也走服务端同一份时间，所以这边算出来的就是 TA 那边的读数 */
+    var taEl = Math.max(0, (srvNow() - lb.since) / 1000);
+    taLine = esc(taName()) + " 此刻也锁在 TA 的那一场里，已经 " + fmt(taEl);
+    if(lb.target) taLine += " · TA 的目标是 " + chipLbl(lb.target) +
+      (lb.target * 60 > taEl ? "，还剩 " + fmt(lb.target * 60 - taEl) : "，已经过了");
+  }
   bar.innerHTML = "这一场锁上了。现在只剩两条路：<b>点「停一下」去商量</b>，或者说出暗号「" +
     esc((CFG && CFG.safeword) || "未设置") + "」——暗号永远立刻生效，不用任何人点头。" +
-    (taOn ? '<br><span style="color:var(--dim2)">' + esc(taName()) + " 此刻也锁在 TA 的那一场里。</span>" : "");
+    (taLine ? '<br><span style="color:var(--dim2)">' + taLine + "</span>" : "");
 }
 function floatVoice(text, kind){
   var box = $("floatLayer"); if(!box || !text) return;
@@ -1744,7 +1800,9 @@ function confirmHold(id){
       if(j && j.ok){
         var pk = j.payload || {};
         if(j.kind === "change" && pk.target){
-          T.goal = pk.target * 60; T.blown = false; pushLock(); saveT(); renderTimer();
+          /* 只改目标，计时原样继续（action=goal 不会重置 since） */
+          T.goal = pk.target * 60; T.blown = false;
+          pushLock("goal", pk.target); saveT(); renderTimer();
           toast("目标改成了 " + chipLbl(pk.target));
         } else {
           releaseTimer("TA 点头了，这一场停在这里。");
@@ -1758,37 +1816,33 @@ function confirmHold(id){
 
 function startTimer(){
   if(T.run) return;
-  T.base = elapsedNow(); T.startAt = Date.now(); T.run = true; T.blown = false;
-  clearInterval(T.int);
-  T.int = setInterval(function(){
-    var e = elapsedNow();
-    if(T.goal && !T.blown && e >= T.goal){
-      T.blown = true;
-      $("tHint").textContent = "到点了。要不要继续，你们自己说了算。";
-      $("tHint").className = "tHint warn";
-      toast("到点了");
-    }
-    renderTimer(); saveT();
-  }, 500);
-  pushLock();
+  var resuming = T.elapsed > 0.5;      /* 停过一段再继续：把这段余量一起交给服务端 */
+  T.base = resuming ? T.elapsed : 0;
+  T.blown = false;
+  T.startAt = srvNow(); T.run = true;
+  startLocalTicker();
+  pushLock(resuming ? "resume" : "start");
   renderTimer(); saveT();
   floatLine();
   startFloatLoop();
   toast(T.goal ? "锁上了 · 目标 " + chipLbl(Math.round(T.goal / 60)) : "锁上了");
 }
 function pauseTimer(){
-  T.elapsed = elapsedNow(); T.run = false; clearInterval(T.int);
+  T.elapsed = elapsedNow(); T.run = false; T.base = 0; T.startAt = 0;
+  stopLocalTicker();
+  pushLock("pause");
   renderTimer(); saveT();
 }
 function releaseTimer(msg){
-  T.elapsed = elapsedNow(); T.run = false; clearInterval(T.int);
+  T.elapsed = elapsedNow(); T.run = false; T.base = 0; T.startAt = 0;
+  stopLocalTicker();
   stopFloatLoop(); clearFloats(); dropLock();
   $("tHint").textContent = msg || "";
   $("tHint").className = "tHint warn";
   renderTimer(); saveT();
 }
 function resetTimer(){
-  clearInterval(T.int);
+  stopLocalTicker();
   T.run = false; T.elapsed = 0; T.base = 0; T.startAt = 0; T.blown = false;
   stopFloatLoop(); clearFloats(); dropLock();
   $("tHint").textContent = ""; $("tHint").className = "tHint";
@@ -1813,27 +1867,22 @@ function endTimer(){
     }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
 }
 function saveT(){
+  /* 只存「目标」和一段停下来还没记账的余量；正在跑的时间以服务端为准，不在这里存 */
   try{
-    sessionStorage.setItem("vr-t", JSON.stringify({
-      goal: T.goal, elapsed: T.elapsed, base: T.base, startAt: T.run ? T.startAt : 0
-    }));
+    localStorage.setItem("vr-goal", String(T.goal || 0));
+    localStorage.setItem("vr-stop", String(T.run ? 0 : Math.round(T.elapsed || 0)));
   }catch(e){}
 }
 function loadT(){
   try{
-    var o = JSON.parse(sessionStorage.getItem("vr-t") || "null");
-    if(o){
-      T.goal = o.goal || 0;
-      if(o.startAt){
-        T.elapsed = (o.base || 0) + (Date.now() - o.startAt) / 1000;
-        T.run = false; startTimer();
-      } else {
-        T.elapsed = o.elapsed || 0;
-        renderTimer();
-      }
-      return;
+    var g = Number(localStorage.getItem("vr-goal") || 0);
+    var s = Number(localStorage.getItem("vr-stop") || 0);
+    if(!(LOCKS && LOCKS[WHO])){
+      if(g > 0) T.goal = g;
+      if(s > 0){ T.elapsed = s; T.base = 0; T.startAt = 0; T.run = false; }
     }
   }catch(e){}
+  if(T.run){ startLocalTicker(); if(!FT) startFloatLoop(); }
   renderTimer();
 }
 
