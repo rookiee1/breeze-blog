@@ -524,6 +524,7 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
     <div class="brand"><span class="dot"></span><span id="vTitle">两个人的房间</span></div>
     <div class="acts">
       <button class="pill primary" id="btnNew">＋ 新的一场</button>
+      <button class="pill" id="btnMsg">传话<span class="msgBadge hidden" id="msgBadge"></span></button>
       <button class="pill" id="btnStats">统计</button>
       <button class="pill" id="btnCfg">设置</button>
       <button class="pill" id="btnLock">锁上</button>
@@ -718,6 +719,10 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
       <div style="height:14px"></div>
       <label class="f" for="cRefuse">「无法拒绝的玩法」池（想中途停下来时，从这里面抽一个）</label>
       <textarea class="inp" id="cRefuse" style="min-height:100px"></textarea>
+      <div style="height:14px"></div>
+      <label class="f" for="cPlayPool">「传话」可以快发的玩法（一行一句，点一下就递给 TA）</label>
+      <div class="hintline" style="margin:0 0 9px">这些只存在服务端。公开的页面上一个字都不会出现。</div>
+      <textarea class="inp" id="cPlayPool" style="min-height:100px"></textarea>
       <div style="height:14px"></div>
       <label class="f" for="cSafeword">暂停暗号（任何一方说出它，立刻停下来）</label>
       <input class="inp" id="cSafeword" maxlength="12" placeholder="自己定一个词">
@@ -2294,6 +2299,7 @@ function renderTonight(){
   if(sig !== presetsSig){ presetsSig = sig; renderPresets(); }
   renderTRole();
   if(!$("cardBox").innerHTML) renderCard();
+  renderPlayOn();
 }
 
 $("btnDraw").addEventListener("click", drawCard);
@@ -2476,6 +2482,7 @@ $("cfgSave").addEventListener("click", function(){
     startDate: $("cStart").value || "",
     voiceA: lines("cVoiceA"), voiceB: lines("cVoiceB"),
     scenes: lines("cScenes"), rules: lines("cRules"), refuse: lines("cRefuse"),
+    playPool: lines("cPlayPool"),
     safeword: $("cSafeword").value.trim(),
     vowAsk: $("cVowAsk").value.trim(),
     vowPool: lines("cVowPool"),
