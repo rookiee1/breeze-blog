@@ -225,6 +225,19 @@ canvas.spark{width:100%; height:104px; display:block}
 .timer{margin-top:18px; padding-top:18px; border-top:1px solid rgba(241,236,228,.07)}
 .tWho{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap}
 .tWho .cap{margin:0}
+/* 本场（房间）：角色共享且互斥，两边看到同一份状态 */
+.roomBar{display:none}
+.roomBar.on{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 14px;
+  padding:11px 14px; border-radius:12px; border:1px solid rgba(216,183,140,.26);
+  background:rgba(216,183,140,.06)}
+.roomBar .rt{font-size:12.5px; color:#e8d3ae; letter-spacing:.04em}
+.roomBar .rt b{font-weight:400; color:#f6ead4}
+.roomBar .mini{margin-left:auto}
+.roomBar.wait{border-color:rgba(201,143,159,.34); background:rgba(201,143,159,.08)}
+.roomBar.wait .rt{color:#eec8d4}
+.roleLock{font-size:10.5px; color:var(--dim2); letter-spacing:.05em; margin-left:8px}
+.seg button.taken{opacity:.35; pointer-events:none; text-decoration:line-through}
+.seg button.locked{pointer-events:none}
 .tRow{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:16px}
 .tChip{font-size:12px; padding:6px 13px; border-radius:100px; border:1px solid var(--line); color:var(--dim);
   transition:.26s var(--ease); font-variant-numeric:tabular-nums; cursor:pointer}
@@ -613,6 +626,7 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
     <div id="playOn"></div>
     <div class="sidTotal" id="sidTotal"></div>
     <div class="timer" id="timer">
+      <div class="roomBar" id="roomBar"></div>
       <div class="tWho"><span class="cap">这一场我当</span><div class="seg" id="tRole"></div></div>
 
       <!-- 目标：收起时只占一行，点开才铺开 -->
@@ -953,6 +967,8 @@ var T = { goal: 0, elapsed: 0, base: 0, startAt: 0, run: false, blown: false, in
 var SKEW = 0;
 var PROPS = [], PROP_V = "like";
 var HOLDS = { incoming: [], outgoing: [] }, LOCKS = {}, ST = null;
+/* 本场（房间）：共享且互斥的角色。role_a 一位决定两边，claimed_by = 谁先定的 */
+var ROOM = null;
 /* 传话：说了就完的轻通道。MSGS 按 id 正序；MSGSEEN 是本机记住的「读到哪了」 */
 var MSGS = [], MSGSEEN = 0, MSGPOLL = null, msgSig = "", msgTick = 0;
 var SIDTIME = {};
@@ -1010,7 +1026,7 @@ function ago(ts){
 /* ---------------- 锁定 / 解锁 ---------------- */
 function lock(reason){
   TOKEN = null; WHO = null; CFG = null; SESSIONS = []; INBOX = [];
-  HOLDS = { incoming: [], outgoing: [] }; LOCKS = {}; MSGS = []; msgSig = ""; msgTick = 0;
+  HOLDS = { incoming: [], outgoing: [] }; LOCKS = {}; MSGS = []; msgSig = ""; msgTick = 0; ROOM = null;
   stopMsgPoll();
   try{ sessionStorage.removeItem("vr-tk"); }catch(e){}
   clearInterval(POLL); clearInterval(TICK);
@@ -1076,6 +1092,8 @@ function applyData(j){
   LOCKS = j.locks || {};
   MSGS = j.msgs || [];
   SIDTIME = j.sidTime || {};
+  var prevRoom = ROOM;
+  ROOM = j.room || null;
   if(typeof j.serverNow === "number" && j.serverNow > 0) SKEW = j.serverNow - Date.now();
   syncTimerFromServer();
   if(T.run){ startLocalTicker(); if(!FT) startFloatLoop(); }
@@ -1088,13 +1106,29 @@ function applyData(j){
   if($("maskMsg") && $("maskMsg").classList.contains("show")){ msgSig = JSON.stringify(MSGS); renderMsg(); markMsgSeen(); }
   else renderMsgBadge();
   checkHolds();
+  roomPullIn(prevRoom);
 }
 function startLoops(){
-  clearInterval(POLL);
-  POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
+  schedulePoll();
   clearInterval(TICK);
   TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
   startMsgPoll();
+}
+/* 主轮询的节奏跟着「房间活跃度」走：
+   正在选角色时对延迟最敏感（4 秒），计时中次之（10 秒），闲下来才 45 秒。
+   ——「总感觉有延迟」的根子就是这里原来不分青红皂白一律 45 秒。 */
+function pollGap(){
+  if(ROOM && roomOpen() && !roomRunning()) return 4000;
+  if((ROOM && roomRunning()) || locked()) return 10000;
+  if((HOLDS.incoming || []).length || (HOLDS.outgoing || []).length) return 12000;
+  return 45000;
+}
+function schedulePoll(){
+  clearInterval(POLL);
+  POLL = setInterval(function(){
+    if(document.hidden || !TOKEN) return;
+    load(true).then(schedulePoll, schedulePoll);
+  }, pollGap());
 }
 function load(silent){
   return api("/api/vault/data").then(function(r){
@@ -2031,22 +2065,106 @@ function closeGoal(){ $("tPop").classList.remove("open"); $("tGoalBtn").classLis
 function toggleGoal(){
   if($("tPop").classList.contains("open")) closeGoal(); else openGoal();
 }
+/* ---- 本场（房间）：角色共享且互斥 ----
+   role_a 一位决定两边：A 的角色 = role_a，B 就是反过来。谁先定谁说了算，
+   另一个人那位就抢不走了（点它会被告知「TA 已经当了」）。 */
+function roomRoleOf(who){
+  if(!ROOM || ROOM.role_a === null || ROOM.role_a === undefined) return null;
+  return who === "a" ? ROOM.role_a : (ROOM.role_a ? 0 : 1);
+}
+function myRoomRole(){ return roomRoleOf(WHO); }
+function taRoomRole(){ return roomRoleOf(WHO === "a" ? "b" : "a"); }
+function roomOpen(){ return !!(ROOM && ROOM.opened_at); }
+function roomRunning(){ return !!(ROOM && ROOM.running); }
+function roomByMe(){ return !!(ROOM && ROOM.opened_by === WHO); }
+function roomOtherHolds(){ return !!(ROOM && ROOM.role_a !== null && ROOM.role_a !== undefined &&
+  ROOM.claimed_by && ROOM.claimed_by !== WHO); }
+
 function renderTRole(){
-  if($("tRole").querySelector("button.on")) return;
-  var pick = SESSIONS.length ? SESSIONS[0].myRole : 1;
+  var mine = myRoomRole();
+  var pick = (mine === null) ? (SESSIONS.length ? SESSIONS[0].myRole : 1) : mine;
+  var takenBit = roomOtherHolds() ? taRoomRole() : null;
+  var lockedNow = roomRunning();
   $("tRole").innerHTML = [1, 0].map(function(i){
-    return '<button data-r="' + i + '" class="' + (i === pick ? "on" : "") + '">' + esc(roleLbl(i)) + "</button>";
+    var cls = (i === pick ? "on" : "");
+    if(i === takenBit) cls += " taken"; else if(lockedNow) cls += " locked";
+    return '<button data-r="' + i + '" class="' + cls + '">' + esc(roleLbl(i)) + "</button>";
   }).join("");
   $("tRole").querySelectorAll("button").forEach(function(b){
-    b.addEventListener("click", function(){
-      $("tRole").querySelectorAll("button").forEach(function(x){ x.classList.remove("on"); });
-      b.classList.add("on");
-    });
+    b.addEventListener("click", function(){ claimRole(Number(b.getAttribute("data-r"))); });
   });
+  renderRoom();
 }
 function tRoleIdx(){
+  var r = myRoomRole();
+  if(r !== null) return r;
   var on = $("tRole").querySelector("button.on");
   return on ? Number(on.getAttribute("data-r")) : 1;
+}
+/* 选角色 = 直接上报服务端（不再只是本机亮一下） */
+function claimRole(role){
+  if(!TOKEN || locked()) return;
+  api("/api/vault/room/claim", { method:"POST", body: JSON.stringify({
+      role: role, target: Math.round((T.goal || 0) / 60), sid: sessionId() }) })
+    .then(function(r){
+      if(r.status === 401){ lock("需要重新解锁"); return null; }
+      return r.json().then(function(j){ return { s: r.status, j: j }; });
+    })
+    .then(function(o){
+      if(!o) return;
+      if(o.s === 409 && o.j && o.j.error === "taken"){
+        var hr = o.j.holder === "a" ? (o.j.holder_role_a ? 1 : 0) : (o.j.holder_role_a ? 0 : 1);
+        toast("「" + roleLbl(hr) + "」已经被 TA 定下了，你当「" + roleLbl(hr === 1 ? 0 : 1) + "」");
+      }
+      return load(true);
+    }).catch(function(){});
+}
+/* 本场状态条：对方点了「开始」，这边就会被这东西拉到同一个房间里 */
+function renderRoom(){
+  var bar = $("roomBar"); if(!bar) return;
+  if(!roomOpen()){ bar.className = "roomBar"; bar.innerHTML = ""; return; }
+  var mine = myRoomRole(), ta = taRoomRole();
+  var who = (mine !== null) ? ("你当「" + esc(roleLbl(mine)) + "」 · " + esc(taName()) + " 当「" + esc(roleLbl(ta)) + "」") : "";
+  if(roomRunning()){
+    bar.className = "roomBar on";
+    bar.innerHTML = '<span class="rt">这一场 · ' + who + "</span>";
+    return;
+  }
+  if(roomByMe()){
+    bar.className = "roomBar on";
+    bar.innerHTML = '<span class="rt">这一场开着 · ' + (who || "等你定角色") +
+      " · <b>等 " + esc(taName()) + " 选角色</b></span><button class=\"mini\" id=\"roomForce\">不等了</button>";
+    $("roomForce").addEventListener("click", forceRoom);
+  } else {
+    bar.className = "roomBar on wait";
+    bar.innerHTML = '<span class="rt"><b>' + esc(taName()) + " 想开始这一场</b> · 你来选角色" +
+      (who ? "（" + who + "）" : "") + "</span>";
+  }
+}
+/* 对方迟迟不来，别把人卡住 */
+function forceRoom(){
+  api("/api/vault/room/open", { method:"POST", body: JSON.stringify({
+      role: tRoleIdx(), target: Math.round((T.goal || 0) / 60), sid: sessionId(), force: 1 }) })
+    .then(function(r){ return r.json(); }).then(function(j){
+      if(!j || !j.ok) return;
+      ROOM = j.room || ROOM;
+      return load(true).then(function(){ if(T.run){ startLocalTicker(); if(!FT) startFloatLoop(); } });
+    }).catch(function(){});
+}
+/* 记完账，房间归零，下一场重新来 */
+function dropRoom(){
+  return api("/api/vault/room", { method:"DELETE" }).then(function(){
+    ROOM = null; renderRoom(); renderTRole();
+  }).catch(function(){});
+}
+/* 房间从「没开」变成「TA 开了」→ 把人拉过去 */
+function roomPullIn(prev){
+  var o = ROOM && ROOM.opened_by;
+  if(!o || o === WHO || roomRunning()) return;
+  if(prev && prev.opened_by === ROOM.opened_by && prev.opened_at === ROOM.opened_at) return;
+  var t = $("timer");
+  if(t && t.scrollIntoView) t.scrollIntoView({ behavior:"smooth", block:"center" });
+  toast("TA 想开始这一场 · 你来选角色");
 }
 /* 档位的写法：5m / 2h / 3d，最远一年 */
 function parseDurList(str){
@@ -2240,18 +2358,45 @@ function confirmHold(id){
 
 function startTimer(){
   if(T.run) return;
-  var resuming = T.elapsed > 0.5;      /* 停过一段再继续：把这段余量一起交给服务端 */
-  T.base = resuming ? T.elapsed : 0;
-  T.blown = false;
-  T.startAt = srvNow(); T.run = true;
-  HG_SETTLE = Date.now() + 820;        /* 沙漏摆正那一下 */
-  closeGoal();
-  startLocalTicker();
-  pushLock(resuming ? "resume" : "start");
-  renderTimer(); saveT();
-  floatLine();
-  startFloatLoop();
-  toast(T.goal ? "锁上了 · 目标 " + chipLbl(Math.round(T.goal / 60)) : "锁上了");
+  if(T.elapsed > 0.5){                 /* 停过一段再继续：走原路，把余量交给服务端 */
+    T.base = T.elapsed; T.blown = false;
+    T.startAt = srvNow(); T.run = true;
+    HG_SETTLE = Date.now() + 820;      /* 沙漏摆正那一下 */
+    closeGoal();
+    startLocalTicker();
+    pushLock("resume");
+    renderTimer(); saveT();
+    floatLine(); startFloatLoop();
+    toast(T.goal ? "锁上了 · 目标 " + chipLbl(Math.round(T.goal / 60)) : "锁上了");
+    return;
+  }
+  /* 全新开始：先「开这一场」——角色互斥、两边共享；对方在的时候等 TA 也选好，
+     服务端说上钟了才真上钟。对方不在，就直接上，不把人卡住。 */
+  var b = $("tStart"); b.disabled = true;
+  api("/api/vault/room/open", { method:"POST", body: JSON.stringify({
+      role: tRoleIdx(), target: Math.round((T.goal || 0) / 60), sid: sessionId() }) })
+    .then(function(r){
+      b.disabled = false;
+      if(r.status === 401){ lock("需要重新解锁"); return null; }
+      return r.json().then(function(j){ return { s: r.status, j: j }; });
+    })
+    .then(function(o){
+      if(!o) return;
+      if(o.s === 409 && o.j && o.j.error === "taken"){
+        toast("「" + roleLbl(o.j.holder_role_a ? 1 : 0) + "」已经被 TA 定下了，换一个角色再开始");
+        return load(true);
+      }
+      if(!o.j || !o.j.ok){ toast("没开起来，再试一次"); return; }
+      ROOM = o.j.room || ROOM;
+      if(typeof o.j.serverNow === "number") SKEW = o.j.serverNow - Date.now();
+      closeGoal();
+      if(!o.j.started){ renderTRole(); toast("开了这一场 · 等 TA 选角色"); return; }
+      return load(true).then(function(){
+        if(T.run){ startLocalTicker(); if(!FT) startFloatLoop(); }
+        floatLine();
+        toast(T.goal ? "锁上了 · 目标 " + chipLbl(Math.round(T.goal / 60)) : "锁上了");
+      });
+    }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
 }
 function pauseTimer(){
   T.elapsed = elapsedNow(); T.run = false; T.base = 0; T.startAt = 0;
@@ -2288,7 +2433,7 @@ function endTimer(){
         if(j && j.ok){
           toast("记下了 · 你当「" + roleLbl(role) + "」" + dur(e) + "，也替 TA 记了一笔");
           resetTimer();
-          load(true);
+          dropRoom().then(function(){ load(true); });
         } else toast("没记上，再试一次");
       });
     }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
