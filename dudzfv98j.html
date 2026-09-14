@@ -1948,7 +1948,9 @@ function renderTimer(){
   var num = $("tNum");
   num.textContent = txt;
   num.className = "tNum" + (txt.length > 8 ? " sm" : "");
-  $("tStart").textContent = T.run ? "暂停" : (e > 0.5 ? "继续" : "开始");
+  /* 锁上之后这颗按钮是不可点的（body.locked 里 pointer-events:none），
+     所以这时候它不该还写着「暂停」——那是在骗人。改成状态，读作「正在计时」。 */
+  $("tStart").textContent = T.run ? "计时中" : (e > 0.5 ? "继续" : "开始");
   $("tEnd").disabled = e < 5;
   el.className = "timer" + (T.run ? " run" : "") + (!T.run && e >= 5 ? " paused" : "");
   if(T.goal){
