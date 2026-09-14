@@ -433,6 +433,8 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
 .mRow.me .mBub{background:linear-gradient(140deg,rgba(216,183,140,.2),rgba(201,143,159,.15));
   border-color:rgba(216,183,140,.3)}
 .mMeta{font-size:10.5px; color:var(--dim2); margin-top:5px; letter-spacing:.08em}
+.mUndo{font:inherit; color:var(--dim2); text-decoration:underline; text-underline-offset:2px; letter-spacing:.08em}
+.mUndo:hover{color:#e59a9a}
 .mPlay{padding:12px 14px; border-radius:14px; max-width:100%;
   background:linear-gradient(130deg,rgba(201,143,159,.14),rgba(255,255,255,.02));
   border:1px solid rgba(201,143,159,.34)}
@@ -835,7 +837,7 @@ var SKEW = 0;
 var PROPS = [], PROP_V = "like";
 var HOLDS = { incoming: [], outgoing: [] }, LOCKS = {}, ST = null;
 /* 传话：说了就完的轻通道。MSGS 按 id 正序；MSGSEEN 是本机记住的「读到哪了」 */
-var MSGS = [], MSGSEEN = 0, MSGPOLL = null, msgSig = "";
+var MSGS = [], MSGSEEN = 0, MSGPOLL = null, msgSig = "", msgTick = 0;
 var ACKED = {}, VOW = null, FT = null, VOW_MAX = 3;
 
 /* ---------------- 基础 ---------------- */
@@ -890,7 +892,8 @@ function ago(ts){
 /* ---------------- 锁定 / 解锁 ---------------- */
 function lock(reason){
   TOKEN = null; WHO = null; CFG = null; SESSIONS = []; INBOX = [];
-  HOLDS = { incoming: [], outgoing: [] }; LOCKS = {};
+  HOLDS = { incoming: [], outgoing: [] }; LOCKS = {}; MSGS = []; msgSig = ""; msgTick = 0;
+  stopMsgPoll();
   try{ sessionStorage.removeItem("vr-tk"); }catch(e){}
   clearInterval(POLL); clearInterval(TICK);
   stopFloatLoop(); clearFloats();
@@ -964,6 +967,7 @@ function applyData(j){
   render();
   /* 面板开着的时候，主轮询的结果也要落到面板上（不然要等下一次快轮询） */
   if($("maskMsg") && $("maskMsg").classList.contains("show")){ msgSig = JSON.stringify(MSGS); renderMsg(); markMsgSeen(); }
+  else renderMsgBadge();
   checkHolds();
 }
 function startLoops(){
@@ -971,6 +975,7 @@ function startLoops(){
   POLL = setInterval(function(){ if(!document.hidden && TOKEN) load(true); }, 45000);
   clearInterval(TICK);
   TICK = setInterval(function(){ tickClocks(); tickHeart(); }, 1000);
+  startMsgPoll();
 }
 function load(silent){
   return api("/api/vault/data").then(function(r){
@@ -1229,6 +1234,7 @@ function renderMsg(){
     box.innerHTML = MSGS.map(function(m){
       var mine = m.who === WHO;
       var who = mine ? "你" : esc(taName());
+      var undo = mine ? ' · <button class="mUndo" data-mx="' + m.id + '">撤回</button>' : "";
       if(m.kind === "play"){
         var cls = "mPlay" + (m.status === "accepted" ? " ok" : ((m.status === "declined" || m.status === "superseded") ? " no" : ""));
         var inner = '<span class="pTag">玩法</span><div class="pTxt">' + esc(m.text) + "</div>";
@@ -1243,10 +1249,10 @@ function renderMsg(){
           inner += '<div class="pStat">' + esc(st) + "</div>";
         }
         return '<div class="mRow' + (mine ? " me" : "") + '"><div class="' + cls + '">' + inner +
-          '</div><div class="mMeta">' + who + " · " + msgTime(m.created_at) + "</div></div>";
+          '</div><div class="mMeta">' + who + " · " + msgTime(m.created_at) + undo + "</div></div>";
       }
       return '<div class="mRow' + (mine ? " me" : "") + '"><div class="mBub">' + esc(m.text) +
-        '</div><div class="mMeta">' + who + " · " + msgTime(m.created_at) + "</div></div>";
+        '</div><div class="mMeta">' + who + " · " + msgTime(m.created_at) + undo + "</div></div>";
     }).join("");
   }
   var pb = $("msgPresets"); if(!pb) return;
@@ -1298,17 +1304,21 @@ function msgRefresh(force){
   }).catch(function(){});
 }
 function startMsgPoll(){
-  clearInterval(MSGPOLL);
-  MSGPOLL = setInterval(function(){ if(!document.hidden && TOKEN) msgRefresh(); }, 8000);
+  clearInterval(MSGPOLL); msgTick = 0;
+  MSGPOLL = setInterval(function(){
+    if(!TOKEN || document.hidden) return;
+    /* 面板开着：8 秒一次，聊天才跟得上；关着：约 24 秒一次，只为把角标点亮 */
+    if($("maskMsg").classList.contains("show")) msgRefresh();
+    else if(++msgTick % 3 === 0) msgRefresh();
+  }, 8000);
 }
 function stopMsgPoll(){ clearInterval(MSGPOLL); MSGPOLL = null; }
 function openMsg(){
   $("maskMsg").classList.add("show");
   renderMsg();
   msgRefresh(true);
-  startMsgPoll();
 }
-function closeMsg(){ $("maskMsg").classList.remove("show"); stopMsgPoll(); }
+function closeMsg(){ $("maskMsg").classList.remove("show"); }
 msgSeenLoad();
 $("btnMsg").addEventListener("click", openMsg);
 $("msgClose").addEventListener("click", closeMsg);
@@ -1328,6 +1338,22 @@ $("msgPresets").addEventListener("click", function(ev){
   if(p) msgSend("play", p);
 });
 $("msgList").addEventListener("click", function(ev){
+  var x = ev.target.closest("[data-mx]");
+  if(x){
+    var xid = Number(x.getAttribute("data-mx"));
+    x.disabled = true;
+    api("/api/vault/msg/" + xid, { method:"DELETE" }).then(function(r){
+      if(r.status === 401){ lock("需要重新解锁"); return null; }
+      return r.json();
+    }).then(function(j){
+      if(j && j.ok){
+        MSGS = MSGS.filter(function(m){ return m.id !== xid; });
+        msgSig = JSON.stringify(MSGS);
+        renderMsg(); renderPlayOn();
+      } else toast("收不回来了");
+    }).catch(function(){ toast("网络不太顺"); });
+    return;
+  }
   var b = ev.target.closest("[data-ma]"); if(!b) return;
   b.disabled = true;
   msgAnswer(Number(b.getAttribute("data-ma")), b.getAttribute("data-ok") === "1");
