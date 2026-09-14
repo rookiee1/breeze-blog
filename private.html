@@ -906,11 +906,11 @@ $("newSave").addEventListener("click", function(){
       if(j && j.ok){
         $("maskNew").classList.remove("show");
         toast(EDIT_MODE ? "改好了" : "这一场建好了");
-        load(true);
-        if(!EDIT_MODE){
+        var p = load(true);
+        if(!EDIT_MODE) p.then(function(){
           var s = sess(j.id);
-          if(s) setTimeout(function(){ openScore(s); }, 320);
-        }
+          if(s) openScore(s);
+        });
       } else toast("没成功");
     });
   }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
