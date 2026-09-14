@@ -441,7 +441,11 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:none; border
   border:1px solid rgba(216,183,140,.3); color:#f0e2cb; display:none}
 .timer.run .lockBar{display:block}
 .lockBar b{font-weight:500; color:#f7ecd8}
-body.locked .top .acts,body.locked .us,body.locked .inbox,body.locked #list,
+/* 锁上之后：只有「停一下」和商量用的弹层还活着。
+   注意 #inbox 不在拦下的名单里 —— 房间会同时锁住两个人，
+   对方发来的「停一下 / 任务 / 改目标 / 看分申请」那条「准了」必须点得动，
+   否则安全阀就成了摆设（自己那一侧照样动不了，锁还是有效的）。 */
+body.locked .top .acts,body.locked .us,body.locked #list,
 body.locked .sechead,body.locked .tonight .tnHead{opacity:.28; pointer-events:none; filter:saturate(.45)}
 body.locked #tStart,body.locked #tEnd{opacity:.28; pointer-events:none}
 body.locked .tGoalBar,body.locked .tPop{opacity:.5}
@@ -2592,12 +2596,13 @@ $("maskVow").addEventListener("pointerdown", function(e){ if(e.target === $("mas
 $("holdClose").addEventListener("click", function(){ $("maskHold").classList.remove("show"); });
 $("maskHold").addEventListener("pointerdown", function(e){ if(e.target === $("maskHold")) $("maskHold").classList.remove("show"); });
 
-/* 锁定期间：除了「停一下」和商量用的弹层，其它点击一律拦下 */
+/* 锁定期间：除了「停一下」、商量用的弹层、以及对方发来的请求（#inbox），其它点击一律拦下。
+   #inbox 必须放行：房间会同时锁住两个人，对方那条「准了 / 不许停」是唯一的安全阀。 */
 document.addEventListener("click", function(e){
   if(!locked()) return;
   var t = e.target;
   if(t.closest("#tStop") || t.closest("#maskHold") || t.closest("#maskVow") ||
-     t.closest("#maskAck") || t.closest("#floatLayer")) return;
+     t.closest("#maskAck") || t.closest("#inbox") || t.closest("#floatLayer")) return;
   e.preventDefault(); e.stopPropagation();
   if(t.closest("#tInf")){ openVow(); return; }
   if(t.closest("#tGoalBtn")){ toggleGoal(); return; }
