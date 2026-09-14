@@ -1238,7 +1238,9 @@ function renderMsg(){
   } else {
     box.innerHTML = MSGS.map(function(m){
       var mine = m.who === WHO;
-      var who = mine ? "你" : esc(taName());
+      /* 自己一律叫「我」：另一侧的名字有可能是「你」（房间里 nameA/nameB 是固定标签），
+         两边都用 taName() 的话，B 那侧就会「你」和「你」撞在一起。 */
+      var who = mine ? "我" : esc(taName());
       var undo = mine ? ' · <button class="mUndo" data-mx="' + m.id + '">撤回</button>' : "";
       if(m.kind === "play"){
         var cls = "mPlay" + (m.status === "accepted" ? " ok" : ((m.status === "declined" || m.status === "superseded") ? " no" : ""));
@@ -1247,8 +1249,9 @@ function renderMsg(){
           inner += '<div class="pAct"><button class="mini gold" data-ma="' + m.id + '" data-ok="1">接受</button>' +
             '<button class="mini" data-ma="' + m.id + '" data-ok="0">先不</button></div>';
         } else {
-          var st = m.status === "accepted" ? (mine ? "TA 接住了 · 这一场就玩这个" : "你接住了 · 这一场就玩这个")
-            : m.status === "declined" ? (mine ? "TA 这次先不" : "你说过这次先不")
+          /* 称呼跟着上面的「我」走，不再用第二人称，免得两边撞名 */
+          var st = m.status === "accepted" ? (mine ? "TA 接住了 · 这一场就玩这个" : "接住了 · 这一场就玩这个")
+            : m.status === "declined" ? (mine ? "TA 这次先不" : "这次先不")
             : m.status === "superseded" ? "已经被新的玩法替了下来"
             : "等 " + (mine ? "TA" : "你") + " 回话";
           inner += '<div class="pStat">' + esc(st) + "</div>";
