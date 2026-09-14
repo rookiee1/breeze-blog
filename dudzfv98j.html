@@ -418,6 +418,43 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
 .opt .task{font-family:var(--serif); font-size:14px; line-height:1.95; color:#f5e6d4; margin-top:8px;
   padding-left:14px; border-left:1px solid rgba(216,183,140,.4)}
 .opt.dim{opacity:.55}
+
+/* ---- 传话：房间里的轻通道。说了就完，不改变任何规则 ---- */
+.msgList{max-height:min(46vh,340px); overflow-y:auto; display:flex; flex-direction:column; gap:10px;
+  padding:15px 13px; border-radius:15px; background:rgba(0,0,0,.24); border:1px solid var(--line)}
+.msgList::-webkit-scrollbar{width:5px}
+.msgList::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14); border-radius:5px}
+.msgList::-webkit-scrollbar-track{background:transparent}
+.mEmpty{font-size:12.5px; color:var(--dim2); text-align:center; padding:30px 12px; line-height:2}
+.mRow{display:flex; flex-direction:column; align-items:flex-start; max-width:88%}
+.mRow.me{align-self:flex-end; align-items:flex-end}
+.mBub{padding:9px 13px; border-radius:14px; font-size:13px; line-height:1.7; color:var(--ink);
+  background:rgba(255,255,255,.06); border:1px solid var(--line); word-break:break-word}
+.mRow.me .mBub{background:linear-gradient(140deg,rgba(216,183,140,.2),rgba(201,143,159,.15));
+  border-color:rgba(216,183,140,.3)}
+.mMeta{font-size:10.5px; color:var(--dim2); margin-top:5px; letter-spacing:.08em}
+.mPlay{padding:12px 14px; border-radius:14px; max-width:100%;
+  background:linear-gradient(130deg,rgba(201,143,159,.14),rgba(255,255,255,.02));
+  border:1px solid rgba(201,143,159,.34)}
+.mPlay .pTag{font-size:10.5px; letter-spacing:.3em; color:rgba(233,194,206,.85); text-transform:uppercase; display:block; margin-bottom:8px}
+.mPlay .pTxt{font-family:var(--serif); font-size:14.5px; line-height:1.9; color:#f5e6d4}
+.mPlay .pAct{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+.mPlay .pStat{font-size:11.5px; color:var(--dim2); margin-top:10px; line-height:1.7}
+.mPlay.ok{border-color:rgba(216,183,140,.42); background:linear-gradient(130deg,rgba(216,183,140,.13),rgba(255,255,255,.02))}
+.mPlay.no{opacity:.48}
+.mPresets{display:flex; gap:7px; flex-wrap:wrap; margin:16px 0 11px}
+.mChip{font-size:11.5px; padding:7px 12px; border-radius:100px; line-height:1.5; text-align:left;
+  border:1px solid rgba(201,143,159,.3); color:#e9c2ce; transition:.25s var(--ease)}
+.mChip:hover{border-color:rgba(201,143,159,.72); background:rgba(201,143,159,.1); color:#f3d3dc}
+.mSend{display:flex; gap:9px; align-items:center}
+.mSend .inp{flex:1; width:auto}
+.msgBadge{display:inline-block; min-width:16px; height:16px; line-height:16px; padding:0 5px; margin-left:6px;
+  border-radius:100px; font-size:10px; vertical-align:middle; text-align:center;
+  background:linear-gradient(140deg,rgba(216,183,140,.95),rgba(201,143,159,.9)); color:#14100e}
+.playOn{margin-top:15px; padding:12px 14px; border-radius:14px;
+  background:linear-gradient(130deg,rgba(201,143,159,.13),rgba(255,255,255,.02));
+  border:1px solid rgba(201,143,159,.3)}
+.playOn .pt{font-family:var(--serif); font-size:14px; line-height:1.85; color:#f5e6d4}
 .vowLine{font-family:var(--serif); font-size:15.5px; line-height:2.05; color:#f4e3e8; min-height:62px;
   padding:15px 17px; border-radius:15px; background:linear-gradient(135deg,rgba(201,143,159,.13),rgba(216,183,140,.06));
   border:1px solid rgba(201,143,159,.26)}
@@ -507,6 +544,7 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
       <button class="mini" id="btnDraw">抽一张</button>
     </div>
     <div id="cardBox"></div>
+    <div id="playOn"></div>
     <div class="timer" id="timer">
       <div class="tWho"><span class="cap">这一场我当</span><div class="seg" id="tRole"></div></div>
       <div class="tRow" id="tPresets"></div>
@@ -597,6 +635,22 @@ body.locked .tChip:not(.inf){cursor:not-allowed}
       <button class="pill" id="newCancel">取消</button>
       <button class="pill primary" id="newSave">建好这一场</button>
     </div>
+  </div>
+</div>
+
+<!-- ================= 传话 ================= -->
+<div class="mask" id="maskMsg">
+  <div class="sheet glass" style="width:min(560px,96vw)">
+    <h3>传话</h3>
+    <div class="subt">说了就完。这里不改变任何规则，只是把话递过去。</div>
+    <div class="msgList" id="msgList"></div>
+    <div class="mPresets" id="msgPresets"></div>
+    <div class="mSend">
+      <input class="inp" id="msgInput" maxlength="140" placeholder="说一句…" autocomplete="off" spellcheck="false">
+      <button class="mini gold" id="msgSend">发过去</button>
+    </div>
+    <div class="hintline" id="msgHint"></div>
+    <div class="srow"><button class="pill" id="msgClose">关上</button></div>
   </div>
 </div>
 
@@ -780,6 +834,8 @@ var T = { goal: 0, elapsed: 0, base: 0, startAt: 0, run: false, blown: false, in
 var SKEW = 0;
 var PROPS = [], PROP_V = "like";
 var HOLDS = { incoming: [], outgoing: [] }, LOCKS = {}, ST = null;
+/* 传话：说了就完的轻通道。MSGS 按 id 正序；MSGSEEN 是本机记住的「读到哪了」 */
+var MSGS = [], MSGSEEN = 0, MSGPOLL = null, msgSig = "";
 var ACKED = {}, VOW = null, FT = null, VOW_MAX = 3;
 
 /* ---------------- 基础 ---------------- */
@@ -897,6 +953,7 @@ function applyData(j){
   PARTNER = j.partner || {}; INBOX = j.inbox || [];
   HOLDS = j.holds || { incoming: [], outgoing: [] };
   LOCKS = j.locks || {};
+  MSGS = j.msgs || [];
   if(typeof j.serverNow === "number" && j.serverNow > 0) SKEW = j.serverNow - Date.now();
   syncTimerFromServer();
   if(T.run){ startLocalTicker(); if(!FT) startFloatLoop(); }
@@ -905,6 +962,8 @@ function applyData(j){
   $("lockTitle").textContent = CFG.title || "两个人的房间";
   $("lockSub").textContent = CFG.sub || "输入属于你的那句暗语";
   render();
+  /* 面板开着的时候，主轮询的结果也要落到面板上（不然要等下一次快轮询） */
+  if($("maskMsg") && $("maskMsg").classList.contains("show")){ msgSig = JSON.stringify(MSGS); renderMsg(); markMsgSeen(); }
   checkHolds();
 }
 function startLoops(){
@@ -1115,6 +1174,164 @@ $("inbox").addEventListener("click", function(ev){
   }).catch(function(){ b.disabled = false; toast("网络不太顺"); });
 });
 function sess(id){ return SESSIONS.filter(function(s){ return s.id === id; })[0]; }
+
+/* ---------------- 传话：房间里的轻通道 ----------------
+ * 和「协商」最大的区别：协商要 TA 点头 + 自己二次确认才生效；
+ * 传话只是把话递过去。玩法卡被接住，也只是「这一场玩这个」——不动计时、不动目标、不写进账本。 */
+function msgSeenLoad(){ try{ MSGSEEN = Number(localStorage.getItem("vr-msgseen") || 0) || 0; }catch(e){ MSGSEEN = 0; } }
+function msgSeenSave(){ try{ localStorage.setItem("vr-msgseen", String(MSGSEEN)); }catch(e){} }
+function msgTime(ts){
+  var d = new Date(ts);
+  var H = d.getHours(), M = d.getMinutes();
+  return (H < 10 ? "0" : "") + H + ":" + (M < 10 ? "0" : "") + M;
+}
+function unreadCount(){
+  var n = 0;
+  MSGS.forEach(function(m){ if(m.who !== WHO && m.id > MSGSEEN) n++; });
+  return n;
+}
+function markMsgSeen(){
+  var top = 0;
+  MSGS.forEach(function(m){ if(m.who !== WHO && m.id > top) top = m.id; });
+  if(top > MSGSEEN){ MSGSEEN = top; msgSeenSave(); }
+  renderMsgBadge();
+}
+/* 这一场正在玩的玩法：优先取绑在这一场上的那张，其次取还没绑场次的 */
+function currentPlay(){
+  var sid = sessionId(), hit = null;
+  MSGS.forEach(function(m){
+    if(m.kind !== "play" || m.status !== "accepted") return;
+    if(sid !== null && m.sid === sid) hit = m;
+    else if(m.sid === null && !hit) hit = m;
+  });
+  return hit;
+}
+function renderMsgBadge(){
+  var b = $("msgBadge"); if(!b) return;
+  var n = unreadCount();
+  b.textContent = n > 99 ? "99+" : String(n);
+  b.classList.toggle("hidden", n === 0);
+}
+function renderPlayOn(){
+  var box = $("playOn"); if(!box) return;
+  var p = currentPlay();
+  if(!p){ box.className = ""; box.innerHTML = ""; return; }
+  box.className = "playOn";
+  box.innerHTML = '<span class="cap" style="display:block;margin-bottom:7px">这一场玩这个</span>' +
+    '<div class="pt">' + esc(p.text) + "</div>";
+}
+function renderMsg(){
+  renderMsgBadge();
+  var box = $("msgList"); if(!box) return;
+  if(!MSGS.length){
+    box.innerHTML = '<div class="mEmpty">这里还什么都没有。<br>先递一句话，或者挑一张玩法卡发过去。</div>';
+  } else {
+    box.innerHTML = MSGS.map(function(m){
+      var mine = m.who === WHO;
+      var who = mine ? "你" : esc(taName());
+      if(m.kind === "play"){
+        var cls = "mPlay" + (m.status === "accepted" ? " ok" : ((m.status === "declined" || m.status === "superseded") ? " no" : ""));
+        var inner = '<span class="pTag">玩法</span><div class="pTxt">' + esc(m.text) + "</div>";
+        if(!mine && m.status === "pending"){
+          inner += '<div class="pAct"><button class="mini gold" data-ma="' + m.id + '" data-ok="1">接受</button>' +
+            '<button class="mini" data-ma="' + m.id + '" data-ok="0">先不</button></div>';
+        } else {
+          var st = m.status === "accepted" ? (mine ? "TA 接住了 · 这一场就玩这个" : "你接住了 · 这一场就玩这个")
+            : m.status === "declined" ? (mine ? "TA 这次先不" : "你说过这次先不")
+            : m.status === "superseded" ? "已经被新的玩法替了下来"
+            : "等 " + (mine ? "TA" : "你") + " 回话";
+          inner += '<div class="pStat">' + esc(st) + "</div>";
+        }
+        return '<div class="mRow' + (mine ? " me" : "") + '"><div class="' + cls + '">' + inner +
+          '</div><div class="mMeta">' + who + " · " + msgTime(m.created_at) + "</div></div>";
+      }
+      return '<div class="mRow' + (mine ? " me" : "") + '"><div class="mBub">' + esc(m.text) +
+        '</div><div class="mMeta">' + who + " · " + msgTime(m.created_at) + "</div></div>";
+    }).join("");
+  }
+  var pb = $("msgPresets"); if(!pb) return;
+  var pool = (CFG && CFG.playPool) || [];
+  pb.innerHTML = pool.length
+    ? '<span class="cap" style="display:block;width:100%">送一张玩法过去</span>' +
+      pool.map(function(p, i){ return '<button class="mChip" data-mp="' + i + '">' + esc(p) + "</button>"; }).join("")
+    : '<span class="hintline">还没有玩法预设。到「设置」里一行一条加几张进来。</span>';
+  box.scrollTop = box.scrollHeight;
+}
+function msgSend(kind, text){
+  if(!text) return;
+  api("/api/vault/msg", { method:"POST", body: JSON.stringify({ kind: kind, text: text, sid: sessionId() }) })
+    .then(function(r){
+      if(r.status === 401){ lock("需要重新解锁"); return null; }
+      return r.json();
+    }).then(function(j){
+      if(j && j.ok) msgRefresh(true);
+      else if(j && j.error === "slow down") toast("说得太快了，缓一下");
+      else toast("没发出去，再试一次");
+    }).catch(function(){ toast("网络不太顺"); });
+}
+function msgAnswer(id, ok){
+  api("/api/vault/msg/" + (ok ? "accept" : "decline"), { method:"POST", body: JSON.stringify({ id: id }) })
+    .then(function(r){
+      if(r.status === 401){ lock("需要重新解锁"); return null; }
+      return r.json();
+    }).then(function(j){
+      if(j && j.ok){
+        toast(ok ? "接住了 · 这一场就玩这个" : "这次先不");
+        msgRefresh(true);
+        load(true);
+      } else toast("没成功，再试一次");
+    }).catch(function(){ toast("网络不太顺"); });
+}
+/* 面板开着时走这条更快的通道：8 秒一次，只拉最近 60 条 */
+function msgRefresh(force){
+  return api("/api/vault/msg").then(function(r){
+    if(r.status === 401) return null;
+    return r.ok ? r.json() : null;
+  }).then(function(j){
+    if(j && j.ok){
+      if(typeof j.serverNow === "number" && j.serverNow > 0) SKEW = j.serverNow - Date.now();
+      var sig = JSON.stringify(j.msgs || []);
+      if(sig !== msgSig || force){ msgSig = sig; MSGS = j.msgs || []; renderMsg(); renderPlayOn(); }
+      if(force) markMsgSeen();
+    }
+    return j;
+  }).catch(function(){});
+}
+function startMsgPoll(){
+  clearInterval(MSGPOLL);
+  MSGPOLL = setInterval(function(){ if(!document.hidden && TOKEN) msgRefresh(); }, 8000);
+}
+function stopMsgPoll(){ clearInterval(MSGPOLL); MSGPOLL = null; }
+function openMsg(){
+  $("maskMsg").classList.add("show");
+  renderMsg();
+  msgRefresh(true);
+  startMsgPoll();
+}
+function closeMsg(){ $("maskMsg").classList.remove("show"); stopMsgPoll(); }
+msgSeenLoad();
+$("btnMsg").addEventListener("click", openMsg);
+$("msgClose").addEventListener("click", closeMsg);
+$("maskMsg").addEventListener("pointerdown", function(e){ if(e.target === $("maskMsg")) closeMsg(); });
+$("msgSend").addEventListener("click", function(){
+  var v = $("msgInput").value.trim();
+  if(!v){ toast("写点什么"); return; }
+  $("msgInput").value = "";
+  msgSend("text", v);
+});
+$("msgInput").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); $("msgSend").click(); }
+});
+$("msgPresets").addEventListener("click", function(ev){
+  var c = ev.target.closest("[data-mp]"); if(!c) return;
+  var p = ((CFG && CFG.playPool) || [])[Number(c.getAttribute("data-mp"))];
+  if(p) msgSend("play", p);
+});
+$("msgList").addEventListener("click", function(ev){
+  var b = ev.target.closest("[data-ma]"); if(!b) return;
+  b.disabled = true;
+  msgAnswer(Number(b.getAttribute("data-ma")), b.getAttribute("data-ok") === "1");
+});
 
 /* ---------------- 渲染：场次 ---------------- */
 function renderList(){
@@ -2199,6 +2416,7 @@ function openCfg(){
   $("cScenes").value = (CFG.scenes || []).join("\n");
   $("cRules").value = (CFG.rules || []).join("\n");
   $("cRefuse").value = (CFG.refuse || []).join("\n");
+  $("cPlayPool").value = (CFG.playPool || []).join("\n");
   $("cSafeword").value = CFG.safeword || "";
   $("cDurs").value = durListText(CFG.durations || []);
   $("cVowAsk").value = CFG.vowAsk || "";
@@ -2278,6 +2496,7 @@ document.addEventListener("keydown", function(e){
   ["maskScore","maskNew","maskCfg"].forEach(function(id){
     if($(id).classList.contains("show")) $(id).classList.remove("show");
   });
+  if($("maskMsg").classList.contains("show")) closeMsg();
 });
 
 /* ---------------- 启动 ---------------- */
