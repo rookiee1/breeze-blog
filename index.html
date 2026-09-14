@@ -1605,10 +1605,10 @@ function loadCloudMoments(){
   fetch(API_BASE + "/api/moments").then(function(r){ return r.json(); }).then(function(j){
     if(!(j && j.ok)) return;
     var items = (j.items || []).slice().reverse(); /* 旧→新，新卡片排在后面 */
-    saveMoments(items.map(function(it){ return { img: API_BASE + "/img/" + it.img, tag: it.tag, title: it.title }; }));
+    saveMoments(items.map(function(it){ return { img: API_BASE + "/img/" + it.id, tag: it.tag, title: it.title }; }));
     gTrack.querySelectorAll(".g-card.custom").forEach(function(c){ c.remove(); });
     items.forEach(function(it){
-      gTrack.insertBefore(makeMomentCard({ img: API_BASE + "/img/" + it.img, tag: it.tag, title: it.title, _id: it.id, _cloud: true }), moreCard);
+      gTrack.insertBefore(makeMomentCard({ img: API_BASE + "/img/" + it.id, tag: it.tag, title: it.title, _id: it.id, _cloud: true }), moreCard);
     });
     renumberMoments(); refreshGCount();
   }).catch(function(){});
@@ -1624,7 +1624,7 @@ document.getElementById("momentOk").addEventListener("click", function(){
     .then(function(j){
       if(j && j.ok){
         var it = j.item;
-        gTrack.insertBefore(makeMomentCard({ img: API_BASE + "/img/" + it.img, tag: it.tag, title: it.title, _id: it.id, _cloud: true }), moreCard);
+        gTrack.insertBefore(makeMomentCard({ img: API_BASE + "/img/" + it.id, tag: it.tag, title: it.title, _id: it.id, _cloud: true }), moreCard);
         renumberMoments(); refreshGCount();
         toast("已收进生活切片（云端同步）🌿");
       } else {
