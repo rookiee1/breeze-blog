@@ -246,11 +246,12 @@ canvas.spark{width:100%; height:104px; display:block}
 .tPop{overflow:hidden; max-height:0; opacity:0; margin:0;
   transition:max-height .44s var(--ease), opacity .3s var(--ease), margin .34s var(--ease)}
 .tPop.open{max-height:360px; opacity:1; margin:13px 0 8px}
-.tGrid{display:grid; gap:7px}
+.tGrid{display:grid; gap:7px; max-width:470px}
 .tGridRow{display:grid; grid-template-columns:20px 1fr; align-items:center; gap:9px}
 .tGridRow .u{font-size:10.5px; letter-spacing:.1em; color:var(--dim2); text-align:right}
-.tGridRow .cs{display:grid; grid-template-columns:repeat(auto-fit,minmax(46px,1fr)); gap:5px}
-.tGridRow .cs .tChip{padding:7px 4px; text-align:center; font-size:12.5px}
+/* 7 条列轨道固定下来：分/时/天三行的格子对齐，宽窄一致，不会一格里空一大片 */
+.tGridRow .cs{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px}
+.tGridRow .cs .tChip{padding:7px 4px; text-align:center; font-size:12.5px; overflow:hidden}
 .tPopSep{height:1px; background:rgba(241,236,228,.07); margin:14px 0 13px}
 .tPopNote{font-size:11px; color:var(--dim2); letter-spacing:.04em; margin-top:10px}
 
